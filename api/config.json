@@ -1,0 +1,15 @@
+{
+  "ncbi": {
+    "email": "monojoycodes@gmail.com",
+    "api_key": "2e92c37a9ad293b99ca3b8a94fef3073fb09",
+    "rate_limit_req_per_sec": 10,
+    "default_gene_query": "(oral[All Fields] AND carcinoma[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+    "batch_size": 100
+  },
+  "ena_sra": {
+    "api_endpoint": "https://www.ebi.ac.uk/ena/portal/api/search",
+    "default_study_query": "tax_eq(9606) AND study_title=\"oral squamous cell carcinoma\"",
+    "fields": "run_accession,fastq_ftp,fastq_bytes,read_count",
+    "format": "json"
+  }
+}
