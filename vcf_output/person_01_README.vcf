@@ -1,0 +1,13 @@
+##fileformat=VCFv4.2
+##fileDate=20260920
+##source=AntigravityVariantCaller_v1.0
+##reference=combined_reference_genes.fna
+##contig=<ID=EGFR_GeneID1956_NC_000007.14,length=55211628>
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=RO,Number=1,Type=Integer,Description="Reference allele observation count">
+##INFO=<ID=AO,Number=A,Type=Integer,Description="Alternate allele observation count">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic Depths for Reference and Alternate alleles">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
