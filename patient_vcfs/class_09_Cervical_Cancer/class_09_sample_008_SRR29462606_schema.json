@@ -1,0 +1,36 @@
+{
+  "num_samples": 7297,
+  "num_features": 187,
+  "target_columns": [
+    "label_high_qual",
+    "label_somatic_candidate"
+  ],
+  "categorical_features": [
+    "chrom",
+    "ref",
+    "alt",
+    "mutation_type",
+    "trinucleotide_context"
+  ],
+  "numerical_features": [
+    "pos",
+    "gc_content_21bp",
+    "dp",
+    "af",
+    "ro",
+    "ao",
+    "qual",
+    "gt_code"
+  ],
+  "tensor_features": {
+    "one_hot_ref_shape": [
+      21,
+      4
+    ],
+    "one_hot_alt_shape": [
+      21,
+      4
+    ],
+    "total_tensor_dim": 168
+  }
+}
