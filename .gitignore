@@ -1,0 +1,37 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.ipynb_checkpoints/
+
+# Raw Genomic & Large Sequence Files (>50MB)
+*.fasta
+*.fastq
+*.fastq.gz
+*.bam
+*.sam
+*.fna
+*.vcf
+*.vcf.gz
+temp_*
+test_real_*
+raw_data/
+one_sample/raw_data/
+oral-carcinoma/vcf_output/
+vcf_output_multiclass/
+vcf_output_real/
+
+# Exceeds GitHub 100MB Limit (100.69 MB) & Large Per-Patient Encoded Intermediate CSVs
+multiclass_cancer_dataset/master_dataset/multiclass_cancer_master_dataset.csv
+multiclass_cancer_master_dataset.csv
+multiclass_cancer_dataset/patient_vcfs/
+
+# System & log files
+.DS_Store
+Thumbs.db
+*.log

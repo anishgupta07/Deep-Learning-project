@@ -1,0 +1,87 @@
+{
+  "model_architecture": "DualBranchGermlineNet (1D-CNN + Tabular Dense Fusion)",
+  "dataset": "Pure Mendelian Germline Cancer Susceptibility Dataset",
+  "total_samples": 24778,
+  "train_samples": 17344,
+  "val_samples": 3717,
+  "test_samples": 3717,
+  "top1_test_accuracy": 9.550712940543448,
+  "top3_test_accuracy": 46.94646220069949,
+  "best_validation_loss": 2.035232718606004,
+  "training_time_seconds": 62.836610078811646,
+  "classification_report": {
+    "Oral Cavity Carcinoma": {
+      "precision": 0.3793103448275862,
+      "recall": 0.025374855824682813,
+      "f1-score": 0.04756756756756757,
+      "support": 867.0
+    },
+    "Lung Cancer": {
+      "precision": 0.35454545454545455,
+      "recall": 0.041357370095440084,
+      "f1-score": 0.07407407407407407,
+      "support": 943.0
+    },
+    "Female Breast Cancer": {
+      "precision": 0.12714776632302405,
+      "recall": 0.11280487804878049,
+      "f1-score": 0.11954765751211632,
+      "support": 328.0
+    },
+    "Colorectal Cancer": {
+      "precision": 0.0502283105022831,
+      "recall": 0.22448979591836735,
+      "f1-score": 0.08208955223880597,
+      "support": 49.0
+    },
+    "Stomach Cancer": {
+      "precision": 0.04938271604938271,
+      "recall": 1.0,
+      "f1-score": 0.09411764705882353,
+      "support": 4.0
+    },
+    "Thyroid Cancer": {
+      "precision": 0.012369172216936251,
+      "recall": 0.52,
+      "f1-score": 0.024163568773234202,
+      "support": 25.0
+    },
+    "Liver Cancer": {
+      "precision": 0.036511156186612576,
+      "recall": 0.75,
+      "f1-score": 0.06963249516441006,
+      "support": 24.0
+    },
+    "Bladder Cancer": {
+      "precision": 0.18503937007874016,
+      "recall": 0.2422680412371134,
+      "f1-score": 0.20982142857142858,
+      "support": 582.0
+    },
+    "Cervical Cancer": {
+      "precision": 0.0835030549898167,
+      "recall": 0.18981481481481483,
+      "f1-score": 0.11598302687411598,
+      "support": 216.0
+    },
+    "Non-Hodgkin Lymphoma": {
+      "precision": 0.18012422360248448,
+      "recall": 0.042709867452135494,
+      "f1-score": 0.06904761904761905,
+      "support": 679.0
+    },
+    "accuracy": 0.09550712940543449,
+    "macro avg": {
+      "precision": 0.14581615693223207,
+      "recall": 0.31488196233913346,
+      "f1-score": 0.09060446368821953,
+      "support": 3717.0
+    },
+    "weighted avg": {
+      "precision": 0.2574067893942045,
+      "recall": 0.09550712940543449,
+      "f1-score": 0.09443917969191132,
+      "support": 3717.0
+    }
+  }
+}

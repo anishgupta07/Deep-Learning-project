@@ -1,0 +1,81 @@
+{
+  "cancers": [
+    {
+      "class_id": 0,
+      "name": "Oral Cavity Carcinoma",
+      "subtype": "Oral Squamous Cell Carcinoma",
+      "gene_query": "(oral[All Fields] AND carcinoma[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"oral squamous cell carcinoma\""
+    },
+    {
+      "class_id": 1,
+      "name": "Lung Cancer",
+      "subtype": "Bronchogenic Carcinoma",
+      "gene_query": "(lung[All Fields] AND (carcinoma[All Fields] OR bronchogenic[All Fields])) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"lung adenocarcinoma\""
+    },
+    {
+      "class_id": 2,
+      "name": "Female Breast Cancer",
+      "subtype": "Breast Carcinoma",
+      "gene_query": "(breast[All Fields] AND (carcinoma[All Fields] OR cancer[All Fields])) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"breast cancer\""
+    },
+    {
+      "class_id": 3,
+      "name": "Colorectal Cancer",
+      "subtype": "Colorectal Adenocarcinoma",
+      "gene_query": "(colorectal[All Fields] AND (adenocarcinoma[All Fields] OR cancer[All Fields])) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"colorectal cancer\""
+    },
+    {
+      "class_id": 4,
+      "name": "Prostate Cancer",
+      "subtype": "Prostate Adenocarcinoma",
+      "gene_query": "(prostate[All Fields] AND (adenocarcinoma[All Fields] OR cancer[All Fields])) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"prostate cancer\""
+    },
+    {
+      "class_id": 5,
+      "name": "Stomach Cancer",
+      "subtype": "Gastric Adenocarcinoma",
+      "gene_query": "(gastric[All Fields] OR stomach[All Fields]) AND (adenocarcinoma[All Fields] OR cancer[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"gastric cancer\""
+    },
+    {
+      "class_id": 6,
+      "name": "Thyroid Cancer",
+      "subtype": "Thyroid Carcinoma",
+      "gene_query": "(thyroid[All Fields] AND (carcinoma[All Fields] OR cancer[All Fields])) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"thyroid cancer\""
+    },
+    {
+      "class_id": 7,
+      "name": "Liver Cancer",
+      "subtype": "Hepatocellular Carcinoma",
+      "gene_query": "(hepatocellular[All Fields] OR liver[All Fields]) AND (carcinoma[All Fields] OR cancer[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"hepatocellular carcinoma\""
+    },
+    {
+      "class_id": 8,
+      "name": "Bladder Cancer",
+      "subtype": "Urothelial Carcinoma",
+      "gene_query": "(bladder[All Fields] OR urothelial[All Fields]) AND (carcinoma[All Fields] OR cancer[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"bladder cancer\""
+    },
+    {
+      "class_id": 9,
+      "name": "Cervical Cancer",
+      "subtype": "Cervix Uteri Carcinoma",
+      "gene_query": "(cervix[All Fields] OR cervical[All Fields]) AND (carcinoma[All Fields] OR cancer[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"cervical cancer\""
+    },
+    {
+      "class_id": 10,
+      "name": "Non-Hodgkin Lymphoma",
+      "subtype": "Lymphoid Malignancy",
+      "gene_query": "(lymphoma[All Fields] OR lymphoid[All Fields]) AND \"Homo sapiens\"[Organism] AND alive[prop]",
+      "sra_query": "tax_eq(9606) AND study_title=\"diffuse large b-cell lymphoma\""
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "dataset_type": "Pure Mendelian Germline Cancer Risk Matrix",
+  "num_samples": 24778,
+  "num_features": 191,
+  "num_classes": 11,
+  "germline_filtering_criteria": {
+    "depth_filter": "dp >= 4x",
+    "heterozygous_allele_frequency": "0.35 <= af <= 0.65",
+    "homozygous_allele_frequency": "af >= 0.85"
+  },
+  "tensor_features": {
+    "one_hot_ref_dim": 84,
+    "one_hot_alt_dim": 84,
+    "quality_and_bio_dim": 8,
+    "total_ml_input_dim": 176
+  },
+  "class_distribution": {
+    "Lung Cancer": 6287,
+    "Oral Cavity Carcinoma": 5778,
+    "Non-Hodgkin Lymphoma": 4530,
+    "Bladder Cancer": 3880,
+    "Female Breast Cancer": 2185,
+    "Cervical Cancer": 1437,
+    "Colorectal Cancer": 327,
+    "Thyroid Cancer": 168,
+    "Liver Cancer": 160,
+    "Stomach Cancer": 26
+  },
+  "zygosity_distribution": {
+    "Heterozygous (0/1)": 15394,
+    "Homozygous (1/1)": 9384
+  }
+}

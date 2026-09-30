@@ -1,0 +1,38 @@
+{
+  "num_samples": 176004,
+  "num_features": 190,
+  "num_classes": 11,
+  "classes": {
+    "0": "Oral Cavity Carcinoma",
+    "1": "Lung Cancer",
+    "2": "Female Breast Cancer",
+    "3": "Colorectal Cancer",
+    "4": "Prostate Cancer",
+    "5": "Stomach Cancer",
+    "6": "Thyroid Cancer",
+    "7": "Liver Cancer",
+    "8": "Bladder Cancer",
+    "9": "Cervical Cancer",
+    "10": "Non-Hodgkin Lymphoma"
+  },
+  "target_column": "cancer_class_id",
+  "target_name_column": "cancer_class_name",
+  "tensor_features": {
+    "one_hot_ref_dim": 84,
+    "one_hot_alt_dim": 84,
+    "total_sequence_tensor_dim": 168
+  },
+  "class_distribution": {
+    "Bladder Cancer": 44608,
+    "Non-Hodgkin Lymphoma": 37413,
+    "Oral Cavity Carcinoma": 27886,
+    "Lung Cancer": 26748,
+    "Female Breast Cancer": 23280,
+    "Cervical Cancer": 7297,
+    "Thyroid Cancer": 4292,
+    "Colorectal Cancer": 3786,
+    "Liver Cancer": 434,
+    "Stomach Cancer": 253,
+    "Prostate Cancer": 7
+  }
+}
