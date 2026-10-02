@@ -1,0 +1,18 @@
+{
+  "class_id": 10,
+  "folder_name": "class_10_non_hodgkin_lymphoma",
+  "cancer_name": "Non-Hodgkin Lymphoma",
+  "sra_query": "tax_eq(9606) AND study_title=\"*diffuse large b-cell lymphoma*\"",
+  "target_patients": 100,
+  "key_genes": [
+    "WAS",
+    "SH2D1A",
+    "CARD11",
+    "PIK3CD",
+    "PRF1",
+    "AICDA",
+    "FAS",
+    "FASLG",
+    "CASP10"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "class_id": 4,
+  "folder_name": "class_04_prostate_cancer",
+  "cancer_name": "Prostate Cancer",
+  "sra_query": "tax_eq(9606) AND study_title=\"*prostate adenocarcinoma*\"",
+  "target_patients": 100,
+  "key_genes": [
+    "HOXB13",
+    "BRCA2",
+    "BRCA1",
+    "ATM",
+    "CHEK2",
+    "AR"
+  ]
+}

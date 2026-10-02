@@ -1,0 +1,16 @@
+{
+  "class_id": 8,
+  "folder_name": "class_08_bladder_cancer",
+  "cancer_name": "Bladder Cancer",
+  "sra_query": "tax_eq(9606) AND study_title=\"*bladder urothelial*\"",
+  "target_patients": 100,
+  "key_genes": [
+    "NAT2",
+    "GSTM1",
+    "GSTT1",
+    "TP53",
+    "RB1",
+    "HRAS",
+    "NTHL1"
+  ]
+}

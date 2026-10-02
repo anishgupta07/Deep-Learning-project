@@ -1,0 +1,16 @@
+{
+  "class_id": 1,
+  "folder_name": "class_01_lung_cancer",
+  "cancer_name": "Lung Cancer",
+  "sra_query": "tax_eq(9606) AND study_title=\"lung adenocarcinoma\"",
+  "target_patients": 100,
+  "key_genes": [
+    "EGFR",
+    "ERBB2",
+    "KRAS",
+    "TP53",
+    "CYP1A1",
+    "GSTM1",
+    "TERT"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "SRR26796768": {
+    "patient_index": 1,
+    "status": "COMPLETED",
+    "timestamp": "2026-10-02 21:42:48"
+  },
+  "SRR26796769": {
+    "patient_index": 2,
+    "status": "COMPLETED",
+    "timestamp": "2026-10-02 22:07:39"
+  }
+}

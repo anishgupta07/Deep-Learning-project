@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large intermediate genomics sequencing data and alignments
+*.bam
+*.bai
+*.sam
+*.mmi.tmp
+
+# Raw SRA FASTA/FASTQ downloads (pipeline streams and deletes these)
+SRR*.fasta
+SRR*.fastq
+SRR*.fastq.gz
+class_*/*.fasta
+class_*/*.fastq
+class_*/*.fastq.gz
+
+# VCF files: ignore all VCF files, leave reference VCF for reference
+*.vcf
+*.vcf.gz
+!reference.vcf
+!*reference*.vcf
