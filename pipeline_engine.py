@@ -1,25 +1,34 @@
-import bio_chemistry_engine as bce
-# ==============================================================================
-# Pan-Cancer SRA-to-VCF Streaming Pipeline Engine
-# Multi-Class Germline Pan-Cancer Risk Engine (11 Cancer Classes, 130 Genes)
-# Output CSV matches exact user specification:
-# Columns (201 total = 10 details + 9 metrics/labels + 14 RDKit/Evolution/MI + 168 one-hot = 10 details + 9 metrics/labels + 84 ref one-hot + 84 alt one-hot):
-#   variant_id, chrom, pos, ref, alt, mutation, is_transition, trinucleotide,
-#   ref_seq_21, alt_seq_21, gc_content, dp, af, ro, ao, qual, gt_code,
-#   label_high, label_som,
-#   one_hot_ref_0_A, one_hot_ref_0_C, one_hot_ref_0_G, one_hot_ref_0_T, ...
-#   ... up to one_hot_ref_20_T (84 one-hot columns across 21 positions)
-# ==============================================================================
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(line_buffering=True)
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(line_buffering=True)
 
 import os
-import sys
 import time
 import json
+import gzip
+import shutil
 import argparse
 import subprocess
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
+import bio_chemistry_engine as bce
+
+# ==============================================================================
+# Pan-Cancer SRA-to-VCF Streaming Pipeline Engine
+# Multi-Class Germline Pan-Cancer Risk Engine (11 Cancer Classes, 130 Genes)
+# Output CSV matches exact user specification:
+# Columns (201 total = 10 details + 9 metrics/labels + 14 RDKit/Evolution/MI + 168 one-hot):
+#   variant_id, chrom, pos, ref, alt, mutation, is_transition, trinucleotide,
+#   ref_seq_21, alt_seq_21, gc_content, dp, af, ro, ao, qual, gt_code,
+#   label_high, label_som,
+#   ref_aa, alt_aa, is_synonymous, delta_logp, delta_tpsa, delta_mw, delta_charge,
+#   tanimoto_chem_dist, grantham_score, dn, ds, dn_ds_ratio, mi_window_score, mi_cancer_class_score,
+#   one_hot_ref_0_A ... one_hot_ref_20_T (84 ref one-hot),
+#   one_hot_alt_0_A ... one_hot_alt_20_T (84 alt one-hot)
+# ==============================================================================
 
 BASE_DIR = r"D:\DL"
 REF_PANEL_WIN = os.path.join(BASE_DIR, "unified_128_gene_reference_panel.fna")
@@ -48,32 +57,70 @@ def win_to_wsl(win_path):
     return f"/mnt/{drive}{rest}"
 
 def download_sra_fasta(accession, dest_path):
-    if os.path.exists(dest_path) and os.path.getsize(dest_path) > 10000:
-        print(f"[*] [1/5] FASTA already present for {accession} ({os.path.getsize(dest_path)/(1024*1024):.2f} MB). Skipping download.")
-        return os.path.getsize(dest_path)
+    if False and os.path.exists(dest_path):
+        with open(dest_path, "rb") as f:
+            magic = f.read(2)
+        if magic != b"\x1f\x8b":
+            print(f"[*] [1/5] FASTA already present for {accession} ({os.path.getsize(dest_path)/(1024*1024):.2f} MB). Skipping download.")
+            return os.path.getsize(dest_path)
+            
     url = f"https://trace.ncbi.nlm.nih.gov/Traces/sra-reads-be/fasta?acc={accession}"
     print(f"[*] [1/5] Downloading filtered FASTA for {accession} via curl.exe...")
-    t0 = time.time()
     
-    cmd = [
-        "curl.exe", "-L",
-        "--retry", "5",
-        "--retry-delay", "2",
-        "-s",
-        "-w", "%{size_download}",
-        "-o", dest_path,
-        url
-    ]
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    if res.returncode != 0 or not os.path.exists(dest_path) or os.path.getsize(dest_path) == 0:
-        print(f"[-] Download failed for {accession}: {res.stderr}")
+    # 3 attempts with 10s backoff for NCBI rate-limits
+    download_ok = False
+    total_bytes = 0
+    
+    for attempt in range(1, 6):
+        t0 = time.time()
+        cmd = [
+            "curl.exe", "-k", "-L",
+            "--compressed",
+            "--retry", "5",
+            "--retry-delay", "3",
+            "--retry-all-errors",
+            "-sS",
+            "-w", "%{size_download}",
+            "-o", dest_path,
+            url
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode == 0 and os.path.exists(dest_path) and os.path.getsize(dest_path) > 10000:
+            elapsed = time.time() - t0
+            total_bytes = os.path.getsize(dest_path)
+            mb = total_bytes / (1024 * 1024)
+            speed = mb / elapsed if elapsed > 0 else 0
+            print(f"[+] [1/5] Download Complete: {mb:.2f} MB in {elapsed:.1f}s ({speed:.2f} MB/s)")
+            download_ok = True
+            break
+        else:
+            err_msg = res.stderr.strip() if res.stderr else f"exit code {res.returncode}"; print(f"[!] Download attempt {attempt} failed for {accession} ({err_msg}). Retrying in 15s...")
+            time.sleep(15)
+            
+    if not download_ok or not os.path.exists(dest_path) or os.path.getsize(dest_path) == 0:
+        print(f"[-] All download attempts failed for {accession}.")
+        if os.path.exists(dest_path):
+            try:
+                os.remove(dest_path)
+            except:
+                pass
         return 0
+    
+    # Auto-detect if stream is gzipped and decompress to ensure plain text FASTA for minimap2
+    try:
+        with open(dest_path, "rb") as f:
+            magic = f.read(2)
+        if magic == b"\x1f\x8b":
+            print(f"[*] [1/5] Decompressing gzipped FASTA stream for {accession}...")
+            tmp_decomp = dest_path + ".tmp_decomp"
+            with gzip.open(dest_path, "rb") as f_in, open(tmp_decomp, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out, length=64*1024*1024)
+            os.replace(tmp_decomp, dest_path)
+            total_bytes = os.path.getsize(dest_path)
+            print(f"[+] [1/5] Decompressed to plain FASTA: {total_bytes/(1024*1024):.2f} MB")
+    except Exception as e:
+        print(f"[!] Warning checking/decompressing gzip: {e}")
         
-    elapsed = time.time() - t0
-    total_bytes = os.path.getsize(dest_path)
-    mb = total_bytes / (1024 * 1024)
-    speed = mb / elapsed if elapsed > 0 else 0
-    print(f"[+] [1/5] Download Complete: {mb:.2f} MB in {elapsed:.1f}s ({speed:.2f} MB/s)")
     return total_bytes
 
 def align_and_call_variants(accession, fasta_path, class_dir):
@@ -112,7 +159,7 @@ def align_and_call_variants(accession, fasta_path, class_dir):
     return vcf_path, None
 
 def generate_exact_schema_csv_and_tensors(accession, vcf_path, ref_path, class_dir):
-    print(f"[*] [3/5] Extracting exact 103-column CSV schema (trinucleotide, 21bp windows, metrics, one-hot)...")
+    print(f"[*] [3/5] Extracting exact 201-column CSV schema (trinucleotide, 21bp windows, metrics, one-hot)...")
     ref_dict = SeqIO.to_dict(SeqIO.parse(ref_path, "fasta"))
     
     rows = []
@@ -222,10 +269,6 @@ def generate_exact_schema_csv_and_tensors(accession, vcf_path, ref_path, class_d
         df.to_csv(csv_path, index=False)
         
     print(f"[+] [3/5] Saved Exact Schema CSV: {csv_path} ({len(df):,} rows x {len(df.columns)} columns).")
-    
-    # Only saving exact schema CSV per user requirement (skipping .npy tensor files)
-    pass
-        
     return len(rows)
 
 def process_single_sra(accession, class_id, keep_fasta=False):
@@ -260,7 +303,7 @@ def process_single_sra(accession, class_id, keep_fasta=False):
         print(f"[-] VCF generation failed for {accession}")
         return False
         
-    # 3. Exact Schema CSV & Tensors
+    # 3. Exact Schema CSV
     variants = generate_exact_schema_csv_and_tensors(accession, vcf_path, REF_PANEL_WIN, class_dir)
     
     # 4. Delete SRA FASTA and intermediate VCF
@@ -280,7 +323,7 @@ def process_single_sra(accession, class_id, keep_fasta=False):
     print("=" * 75)
     return True
 
-def run_cohort(class_id, limit=100):
+def run_cohort(class_id, limit=20):
     class_folder = CLASS_DIRS.get(class_id)
     class_dir = os.path.join(BASE_DIR, class_folder)
     os.makedirs(class_dir, exist_ok=True)
@@ -299,7 +342,7 @@ def run_cohort(class_id, limit=100):
         return
         
     sub = df.head(limit)
-    print(f"[*] Processing {len(sub)} samples for Class {class_id} ({class_folder})...")
+    print(f"[*] Target Cohort: {len(sub)} samples for Class {class_id} ({class_folder})...")
     
     progress_file = os.path.join(class_dir, "cohort_progress.json")
     progress = {}
@@ -310,38 +353,56 @@ def run_cohort(class_id, limit=100):
         except:
             progress = {}
             
-    success_count = 0
     t_start = time.time()
+    sweep_num = 1
     
-    for idx, row in sub.iterrows():
-        acc = row["SRA_Run_Accession"]
-        p_idx = row.get("Patient_Index", idx + 1)
-        print(f"\n===========================================================================")
-        print(f">>> Cohort Progress: Patient {p_idx}/{len(sub)} [Accession: {acc}]")
-        print(f"===========================================================================")
-        
-        ok = process_single_sra(acc, class_id)
-        if ok:
-            success_count += 1
-            progress[acc] = {
-                "patient_index": int(p_idx),
-                "status": "COMPLETED",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            with open(progress_file, "w") as f:
-                json.dump(progress, f, indent=2)
+    # Self-healing multi-sweep loop until all patients in cohort have verified CSVs
+    while True:
+        missing = []
+        for idx, row in sub.iterrows():
+            acc = row["SRA_Run_Accession"]
+            csv_path = os.path.join(class_dir, f"{acc}_mutations_21bp.csv")
+            if not os.path.exists(csv_path) or os.path.getsize(csv_path) <= 1000:
+                p_idx = row.get("Patient_Index", idx + 1)
+                missing.append((int(p_idx), acc))
                 
-    elapsed_total = time.time() - t_start
-    print("\n" + "#" * 75)
-    print(f"[COHORT COMPLETE] Class {class_id} finished: {success_count}/{len(sub)} in {elapsed_total/60:.1f} min!")
-    print("#" * 75)
+        completed_count = len(sub) - len(missing)
+        if len(missing) == 0:
+            print("\n" + "#" * 75)
+            print(f"[COHORT 100% COMPLETE] All {len(sub)} patients in Class {class_id} verified!")
+            print(f"Total time elapsed: {(time.time() - t_start)/60:.1f} min")
+            print("#" * 75)
+            break
+            
+        print(f"\n[*] Sweep {sweep_num}: {completed_count}/{len(sub)} completed. {len(missing)} remaining to process.")
+        
+        for p_idx, acc in missing:
+            print(f"\n===========================================================================")
+            print(f">>> Cohort Progress: Patient {p_idx}/{len(sub)} [Accession: {acc}]")
+            print(f"===========================================================================")
+            
+            ok = process_single_sra(acc, class_id)
+            if ok:
+                progress[acc] = {
+                    "patient_index": int(p_idx),
+                    "status": "COMPLETED",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                with open(progress_file, "w") as f:
+                    json.dump(progress, f, indent=2)
+            # Short respectful pause between patients to avoid NCBI rate limits
+            time.sleep(5)
+            
+        sweep_num += 1
+        # If any are still missing, brief backoff before next sweep
+        time.sleep(15)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pan-Cancer SRA to VCF Pipeline Engine")
     parser.add_argument("--accession", help="Single SRA Run Accession (e.g. SRR40755076)")
     parser.add_argument("--class-id", type=int, required=True, help="Cancer Class ID (0-10)")
     parser.add_argument("--cohort", action="store_true", help="Process full cohort for class")
-    parser.add_argument("--limit", type=int, default=100, help="Max patients to process in cohort mode")
+    parser.add_argument("--limit", type=int, default=20, help="Max patients to process in cohort mode")
     parser.add_argument("--keep-fasta", action="store_true", help="Keep raw FASTA file instead of deleting")
     args = parser.parse_args()
     
