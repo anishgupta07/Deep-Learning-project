@@ -5,6 +5,9 @@ if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(line_buffering=True)
 
 import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 import time
 import json
 import gzip
@@ -30,7 +33,7 @@ import bio_chemistry_engine as bce
 #   one_hot_alt_0_A ... one_hot_alt_20_T (84 alt one-hot)
 # ==============================================================================
 
-BASE_DIR = r"D:\DL"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REF_PANEL_WIN = os.path.join(BASE_DIR, "unified_128_gene_reference_panel.fna")
 COHORT_CSV = os.path.join(BASE_DIR, "master_1100_patient_cohorts.csv")
 
