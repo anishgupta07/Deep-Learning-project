@@ -143,7 +143,8 @@ Computers cannot understand chemical biology from letters like `p.Cys61Gly`. Gen
 | **11** | `is_transition` | **Chemical Mutation Type:** Purine-to-Purine ($A \leftrightarrow G$) or Pyrimidine-to-Pyrimidine ($C \leftrightarrow T$) swap. | Distinguishes common spontaneous transitions from aggressive transversions. |
 | **12–15** | `ref_A, ref_C, ref_G, ref_T` | **Original Reference Nucleotide:** One-hot indicator of the starting DNA base. | Establishes the wild-type genetic baseline. |
 | **16–19** | `alt_A, alt_C, alt_G, alt_T` | **Mutated Alternate Nucleotide:** One-hot indicator of the new DNA base. | Captures nucleotide-level substitution signatures. |
-| **20–21** | `is_brca1, is_brca2` | **Gene Context Flags:** Entity indicator routing the mutation to specific gene biology. | Expanded across the 80 gene embeddings to capture gene-specific tolerance. |
+| **20** | `gene_id` (Entity Embedding) | **Pan-Cancer Gene Identity:** Categorical ID covering all **80+ cancer genes** (*TP53, APC, MLH1, PTEN, CDH1, BRCA1/2...*). | Learnable 16-D embedding capturing gene-specific essentiality and structural tolerance. |
+| **21** | `cancer_syndrome_id` | **Syndromic Lineage Mapping:** Links variant to its clinical syndrome (*Lynch, FAP, Li-Fraumeni, HBOC, Cowden...*). | Routes the biophysical prediction to primary organ-level risk radars. |
 
 ---
 
