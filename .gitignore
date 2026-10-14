@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environments
+.venv/
+env/
+venv/
+
 # Large intermediate genomics sequencing data and alignments
 *.bam
 *.bai
@@ -17,8 +22,11 @@ class_*/*.fasta
 class_*/*.fastq
 class_*/*.fastq.gz
 
-# VCF files: ignore all VCF files, leave reference VCF for reference
+# VCF and large genomic archives (>100MB cannot be pushed to standard GitHub)
 *.vcf
 *.vcf.gz
+*.txt.gz
+variant_summary.txt.gz
+HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
