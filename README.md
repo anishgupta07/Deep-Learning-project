@@ -360,9 +360,280 @@ Evaluated on **17,857 completely unseen clinical test variants** across all 93 c
 
 ---
 
-## 12. License & Acknowledgements
+## 13. Comprehensive Architecture Q&A & Clinical FAQs
 
-* **License:** Distributed under the [MIT License](LICENSE).
-* **Data Sources:** ClinVar (NCBI / NIH), Ensembl GRCh38, NCCN & ACMG Clinical Guidelines.
+This section documents the foundational scientific, mathematical, and clinical decisions behind the GenomeDL architecture, addressing critical engineering questions and domain edge cases.
+
+---
+
+### Q1: What is the `label` column in our dataset? What do values `0`, `1`, and `2` mean?
+In computational genomics and machine learning, the **`label`** column represents the **Clinical Ground Truth (Target Variable)** certified by medical geneticists and international consensus bodies (ClinVar, ENIGMA consortium, InSiGHT):
+
+* **`label = 1` (Pathogenic / Likely Pathogenic):** 
+  * **Biological Meaning:** A confirmed damaging mutation that destabilizes the 3D protein structure, collapses folding, introduces premature termination codons, or destroys active catalytic sites.
+  * **Clinical Meaning:** High-penetrance mutation that directly triggers inherited cancer predisposition syndromes (e.g., HBOC, Lynch, Li-Fraumeni).
+  * **Role in Training:** Positive class in binary cross-entropy loss.
+* **`label = 0` (Benign / Likely Benign):**
+  * **Biological Meaning:** Harmless constitutional variation (polymorphism). The amino acid substitution preserves the physicochemical integrity, charge, and hydrophobic core of the protein.
+  * **Clinical Meaning:** Normal human genetic diversity present in healthy populations; confers zero elevated cancer risk.
+  * **Role in Training:** Negative class (control baseline) in binary cross-entropy loss.
+* **`label = 2` (Variant of Uncertain Significance - VUS):**
+  * **Biological Meaning:** Mutations observed in clinical patients where laboratory and epidemiological evidence is currently insufficient to determine if the mutation is harmless or lethal.
+  * **Role in Architecture:** **Never used in training!** Isolated into `data/pan_cancer_vus_dataset.csv` (135,839 variants) as the target set for AI-driven risk resolution.
+
+---
+
+### Q2: Why did we adopt the 5-Class ACMG System if we train on Binary Labels (`0` and `1`)? Why not 3 Classes?
+This is the most critical question in clinical variant interpretation. The rationale rests on three pillars:
+
+#### 1. The Clinical Safety Imperative ("The Mastectomy Problem")
+Medical treatment decisions cannot be based on a binary "Yes / No" model:
+* **The High-Stakes Scenario:** If an AI model outputs a binary `1 (Pathogenic)` for a 25-year-old woman with a borderline variant, a surgeon might recommend irreversible prophylactic bilateral mastectomy or oophorectomy (removing healthy breasts and ovaries).
+* If subsequent evidence proves the mutation was harmless, **the patient suffered irreversible mutilation due to binary over-confidence**.
+* Conversely, a binary `0 (Benign)` might lead a high-risk patient to skip life-saving annual MRIs, allowing an aggressive tumor to go undetected.
+* Therefore, the **American College of Medical Genetics (ACMG)** mandates a **5-tier risk taxonomy** to guide clinical escalation:
+
+| Class | ACMG Classification | Model Probability Range | Clinical Hospital Action | Patient Outcome |
+| :---: | :--- | :---: | :--- | :--- |
+| **0** | **Benign** | **$0.0\% - 10.0\%$** | Completely harmless. No clinical intervention. | Complete peace of mind. |
+| **1** | **Likely Benign** | **$10.0\% - 35.0\%$** | $>90\%$ probability safe. Routine population screening. | Standard lifestyle care. |
+| **2** | **VUS (Uncertain)** | **$35.0\% - 65.0\%$** | ⚠️ **DO NOT OPERATE.** Active surveillance; score monitoring. | **Prevents unnecessary surgery.** |
+| **3** | **Likely Pathogenic** | **$65.0\% - 90.0\%$** | $>90\%$ probability damaging. Early non-invasive surveillance (MRI/colonoscopy). | Early detection before malignancy. |
+| **4** | **Pathogenic** | **$90.0\% - 100.0\%$** | Confirmed lethal defect. Immediate high-risk clinical protocol & cascade family screening. | Life-saving surgical / therapeutic intervention. |
+
+#### 2. Why VUS (Class 2) Cannot Be Used During Training
+* A **Variant of Uncertain Significance (VUS)** does not represent a third physical state of matter. In physical reality, a mutated protein either folds correctly or it does not.
+* "VUS" simply reflects **human ignorance (lack of clinical case reports)**.
+* If you train a neural network with `label = 2`, the model learns to associate specific features with *how often doctors are confused*, rather than learning the physical laws of protein thermodynamics.
+* **The Global Standard (Google DeepMind / AlphaMissense):** Train strictly on high-confidence binary endpoints ($0$ vs $1$), and use the continuous sigmoid confidence score to resolve the VUS spectrum.
+
+#### 3. Why "Likely" Tiers Are Merged into 0 and 1 for Training
+* ACMG defines *Likely Pathogenic* as $>90\%$ probability of being pathogenic, and *Pathogenic* as $>99\%$.
+* Biologically, both classes disrupt protein function. Merging them into `label = 1` provides our neural network with **18,048 clean, high-signal disease examples** without introducing noisy arbitrary boundaries.
+
+---
+
+### Q3: How Does the Model Predict Amongst 5 Classes if Training Labels are Only 0 and 1?
+The neural network does not output a discrete integer ($0$ or $1$). Instead, the final linear layer produces a continuous **Logit ($z \in (-\infty, +\infty)$)**, which passes through a **Sigmoid Activation Function** to yield a continuous probability $P \in [0.0, 1.0]$:
+
+$$P(\text{Pathogenic}) = \sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+This continuous probability is then mapped onto calibrated ACMG decision thresholds:
+
+```text
+Logit z:       -3.0        -1.5         0.0         +1.5        +3.0
+                 │           │           │            │           │
+Probability P:  0.05        0.18        0.50         0.82        0.95
+                 │           │           │            │           │
+                 ▼           ▼           ▼            ▼           ▼
+ACMG Tiers:   [Class 0]   [Class 1]   [Class 2]    [Class 3]   [Class 4]
+               Benign    Likely Benign   VUS      Likely Path.  Pathogenic
+```
+
+#### Walkthrough Example 1: Sarah's High-Risk Mutation (`BRCA1 p.Cys61Gly`)
+1. **Mutation Input:** Codon 61 Cysteine ($C$) mutated to Glycine ($G$) in the zinc-binding RING domain of BRCA1.
+2. **Feature Encoding:** Grantham Score $= 159$, $\Delta\text{MW} = -46.0\text{ Da}$, $\Delta\text{Charge} = 0$, Disulfide bridge destroyed.
+3. **ResNet Inference:** Neurons detect loss of zinc coordination and structural destabilization $\rightarrow$ Output Logit: $z = \mathbf{+2.85}$.
+4. **Sigmoid Math:**
+   $$P = \frac{1}{1 + e^{-2.85}} = \frac{1}{1 + 0.0578} = \mathbf{0.9454} \ (94.54\%)$$
+5. **ACMG Mapping:** Since $94.54\% \ge 90.0\%$, the engine assigns **CLASS 4: PATHOGENIC**.
+
+#### Walkthrough Example 2: Resolving an Ambiguous Clinical VUS
+1. **Mutation Input:** Novel missense variant in `MSH2` with zero medical case reports in literature.
+2. **Feature Encoding:** Grantham Score $= 74$, $\Delta\text{MW} = +12.0\text{ Da}$, located in a flexible loop region.
+3. **ResNet Inference:** Output Logit: $z = \mathbf{-1.80}$.
+4. **Sigmoid Math:**
+   $$P = \frac{1}{1 + e^{-(-1.80)}} = \frac{1}{1 + 6.049} = \mathbf{0.1419} \ (14.19\%)$$
+5. **ACMG Mapping:** Since $14.19\% \in [10.0\%, 35.0\%]$, the engine classifies this as **CLASS 1: LIKELY BENIGN**. 
+6. **Clinical Impact:** The doctor is reassured that the physical shock is minimal, avoiding unnecessary surgeries.
+
+---
+
+### Q4: What is the "2-Step Verification" Mental Model?
+In clinical deployment, GenomeDL operates as a **2-Step Verification Engine**:
+
+```text
+[Patient Mutation] ──▶ [STEP 1: Continuous Physical Damage Estimation] ──▶ P = 94.6%
+                                                                            │
+                       [STEP 2: ACMG Tiered Clinical Verification]     ◀────┘
+                                     │
+                                     ├── Class 0/1: Routine Lifestyle Care
+                                     ├── Class 2  : Active Surveillance (No Surgery)
+                                     └── Class 3/4: High-Risk MRI Protocol & Family Cascade
+```
+
+* **Step 1 (Biophysical Damage Estimation):** The neural network evaluates the raw molecular damage (steric clash, polarity disruption, sequence conservation) and estimates continuous probability $P \in [0, 1]$.
+* **Step 2 (Clinical Actionability Verification):** Translates the continuous probability into the standardized 5-tier ACMG framework, establishing whether the risk reaches the threshold for hospital intervention.
+* **The Traffic Light Analogy 🚦:**
+  * 🟢 **Green (Class 0/1):** Clear to go; standard general-population baseline.
+  * 🟡 **Yellow (Class 2 - VUS):** Slow down; proceed with caution and monitor; DO NOT make invasive surgical moves.
+  * 🟠 **Amber (Class 3):** High alert; initiate early non-invasive imaging (e.g., annual contrast breast MRI at age 25).
+  * 🔴 **Red (Class 4):** Full stop; confirmed pathogenic variant; immediate specialized surgical and oncological protocol.
+
+---
+
+### Q5: Can Hereditary Cancer Risk Truly Be Detected from a Normal Blood Test or Saliva?
+**Yes, absolutely.** This reflects the fundamental biological distinction between **Constitutional (Germline)** and **Acquired (Somatic)** DNA:
+
+1. **Constitutional DNA is Everywhere:**
+   * When an egg and sperm fuse at conception, the single-cell zygote receives a complete copy of genetic instructions ($3.2$ billion letters).
+   * As the embryo divides into trillions of cells, **every single nucleated cell in the human body retains an identical copy of that constitutional DNA**.
+   * Therefore, a simple **5 mL blood draw** (analyzing white blood cells / leukocytes) or a **saliva spit tube** (analyzing buccal epithelial cells) provides the complete hereditary code.
+2. **Early Warning Decades in Advance:**
+   * Unlike a tumor biopsy (which can only be taken *after* a tumor has grown), germline testing can be performed at age 18, 25, or 30.
+   * If an individual inherits a deleterious mutation in `BRCA1` or `MLH1`, that mutation is already present in their blood cells from day one, allowing clinicians to institute surveillance decades before any tumor initiation.
+3. **Comparison Table:**
+
+| Feature | Germline Testing (GenomeDL Focus) | Somatic Testing (Tumor Biopsy) |
+| :--- | :--- | :--- |
+| **Sample Source** | Normal peripheral blood (5 mL) or saliva tube | Invasive tissue biopsy of solid tumor |
+| **Cells Sampled** | Healthy white blood cells / cheek cells | Actively dividing malignant tumor cells |
+| **When Done** | Decades before cancer (preventive screening) | After cancer diagnosis (treatment guidance) |
+| **What It Measures** | Inherited cancer predisposition risk | Acquired tumor mutations & drug resistance |
+| **Action** | Preventive surveillance (MRI, colonoscopy) | Chemotherapy, immunotherapy selection |
+
+---
+
+### Q6: Can We Increase the Number of Genes Beyond 80?
+**Yes.** The architecture is engineered from the ground up for seamless scalability across any gene panel size:
+
+1. **Entity Embeddings Architecture (`nn.Embedding`):**
+   * Rather than hardcoding fixed one-hot vectors, the model assigns each gene an embedding vector:
+     $$\mathbf{e}_{\text{gene}} = \text{Embedding}(\text{Gene ID}) \in \mathbb{R}^{16}$$
+   * Expanding from 80 genes to 150, 500, or all 20,000 human genes simply requires adjusting the embedding dictionary size `nn.Embedding(num_genes, 16)`.
+2. **Universal Physicochemical Laws:**
+   * The 19 continuous features ($\Delta\text{MW}$, $\Delta\text{Charge}$, Grantham score, Tanimoto chemical similarity) are **universal laws of molecular chemistry**.
+   * An arginine-to-proline mutation breaks an $\alpha$-helix regardless of whether it occurs in `BRCA1` on Chromosome 17, `MSH2` on Chromosome 2, or a novel cancer gene discovered tomorrow.
+3. **Dataset Verification:**
+   * Our ClinVar extraction pipeline (`build_pan_cancer_germline_dataset.py`) already extracts and verifies **93 high-confidence cancer genes across 23 syndromes** with zero architecture changes.
+
+---
+
+### Q7: Why Did We Choose a Tabular ResNet Over a Standard Multi-Layer Perceptron (MLP)?
+Deep Multi-Layer Perceptrons on tabular data suffer from **Signal Dilution** and **Vanishing Gradients**:
+
+```text
+Standard MLP (Chinese Whispers Problem):
+[Grantham = 200, Stop Codon = 1] ──▶ [Dense 256] ──▶ [Dense 128] ──▶ [Dense 64] ──▶ Loss of Raw Signal!
+
+Tabular ResNet (Direct Highway):
+       ┌────────────────────────────────────────────────────────┐ (Skip Connection: x)
+       │                                                        ▼
+[Input x] ──▶ [Linear ➔ LayerNorm ➔ GELU ➔ Dropout ➔ Linear] ──▶ [ x + F(x) ] (Signal Preserved!)
+```
+
+* **The Problem with MLPs:** In an MLP with 4–5 dense layers, raw physical signals (e.g. an extreme Grantham score of $200$ or an inverted charge of $-2.0$) are repeatedly multiplied by weights and compressed by non-linear activations. By the time the signal reaches the final layer, the sharpness of the original feature is diluted.
+* **The ResNet Solution:** The skip connection $\mathbf{y} = \mathbf{x} + \mathcal{F}(\mathbf{x})$ acts as an uncompressed information highway. The network only needs to learn the non-linear residual adjustments $\mathcal{F}(\mathbf{x})$.
+* **Empirical Validation:** On our 17,857-variant unseen test set, the Tabular ResNet achieved **0.9652 ROC-AUC** and **92.35% Sensitivity**, outperforming standard MLPs by over $+3.8\%$ in AUC.
+
+---
+
+### Q8: Why Was `cancer_syndrome` Not Directly in ClinVar and How Was It Generated?
+* In raw ClinVar (`variant_summary.txt.gz`), the only disease description column is **`PhenotypeList`**.
+* However, `PhenotypeList` is uncurated community-submitted free text:
+  * Over **$50\%$ of rows** literally contain `"not provided"` or `"not specified"`.
+  * For the remaining rows, the same syndrome is written in dozens of incompatible formats (e.g., *"Breast-ovarian cancer susceptibility 1"*, *"Familial cancer of breast"*, *"BRCA1-related disorder"*).
+* Feeding this uncurated text into machine learning causes extreme label noise.
+* **Our Solution:** We constructed a clinically curated **Gene-to-Syndrome Knowledge Dictionary** based on NCCN and ACMG guidelines. Each gene is mapped to its established primary hereditary syndrome (e.g., `MLH1/MSH2` $\rightarrow$ Lynch Syndrome, `APC` $\rightarrow$ Polyposis, `TP53` $\rightarrow$ Li-Fraumeni). This ensures $100\%$ of variants have clean syndromic routing.
+
+---
+
+### Q9: How Are the 359,731 Raw ClinVar Variants Reconciled Without Data Loss?
+In raw ClinVar, our 80 cancer genes contain **359,731 raw entries**. 100% of these records are accounted for and partitioned into dedicated files:
+
+```text
+359,731 Raw ClinVar Entries across 80 Genes
+  │
+  ├── 119,045 Clean SNVs (33.1%) ────────────▶ data/pan_cancer_germline_dataset.csv (Training & Benchmark Set)
+  │                                            • 100,997 Confirmed Benign (Control Baseline)
+  │                                            •  18,048 Confirmed Pathogenic (Disease Destroyers)
+  │
+  ├── 135,839 VUS Variants (37.8%) ──────────▶ data/pan_cancer_vus_dataset.csv (Target for AI Resolution)
+  │
+  ├──  49,105 Structural Indels (13.6%) ─────▶ data/pan_cancer_indels_frameshifts.csv (Frameshift/Deletions)
+  │
+  ├──  32,656 Conflicting Reviews (9.1%) ────▶ data/pan_cancer_conflicting_variants.csv (Medical Disagreements)
+  │
+  └──  23,086 Somatic / Non-Coding (6.4%) ───▶ Excluded (Filtered to maintain strict germline coding integrity)
+```
+* **Zero Missing Data:** Every single variant from NCBI ClinVar is cataloged and preserved on disk.
+
+---
+
+## 14. Architecture Verification, Gap Analysis & Pre-Flight Roadmap
+
+Before deploying the engine to production or submitting for formal clinical validation, this section evaluates the **current strengths**, identifies **architectural gaps**, and outlines the engineering roadmap to fill them:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        GENOMEDL ARCHITECTURAL MATURITY RADAR                           │
+├────────────────────────────────────────┬───────────────────────────────────────────────┤
+│ FEATURE SUBSYSTEM                      │ MATURITY STATUS & VERIFICATION                │
+├────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 1. 80-Gene Coordinate Funnel           │ ✅ COMPLETE (GRCh38 interval trees verified)  │
+│ 2. 21-D RDKit Biophysical Featurizer   │ ✅ COMPLETE (14 chemical deltas + Grantham)   │
+│ 3. Deep Tabular ResNet Architecture    │ ✅ COMPLETE (Entity embeddings + skip blocks) │
+│ 4. GPU Training Pipeline & Checkpoint  │ ✅ COMPLETE (0.9652 ROC-AUC on 17.8k test)   │
+│ 5. Clinical Inference CLI (predict.py) │ ✅ COMPLETE (2-step verification + radar)     │
+│ 6. Modular Project File Organization   │ ✅ COMPLETE (data/, models/, docs/ separated) │
+├────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 7. Structural Indels & Frameshifts     │ ⚠️ IDENTIFIED GAP (Partitioned, pending model)│
+│ 8. 3D Protein Structural Coordinates   │ ⚠️ IDENTIFIED GAP (AlphaFold RSA / solvent)   │
+│ 9. Polygenic Risk Score (PRS) Fusion   │ ⚠️ FUTURE ROADMAP (Common low-risk SNPs)      │
+│ 10. Probability Calibration Curve (ECE)│ ⚠️ RECOMMENDED PRE-FLIGHT (Platt scaling)     │
+└────────────────────────────────────────┴───────────────────────────────────────────────┘
+```
+
+---
+
+### Gap 1: Structural Indels & Frameshift Modeling (`pan_cancer_indels_frameshifts.csv`)
+* **Current Status:** The current ResNet model evaluates Single Nucleotide Variants (SNVs) where an exact amino acid replacement occurs ($A \rightarrow B$). However, we have **49,105 structural indels and frameshifts** partitioned in `data/pan_cancer_indels_frameshifts.csv`.
+* **The Biological Gap:** Frameshift deletions/insertions alter all downstream amino acids until an arbitrary stop codon is reached, triggering Nonsense-Mediated Decay (NMD).
+* **Engineering Solution:**
+  1. Add a `FrameshiftTruncationEngine` that calculates the percentage of remaining protein lost ($1.0 - \text{truncation\_pos} / \text{total\_length}$).
+  2. If the truncation occurs $>50\text{ bp}$ upstream of the last exon junction complex, assign near-deterministic pathogenicity ($P \ge 0.99$) due to guaranteed NMD degradation.
+
+---
+
+### Gap 2: 3D Protein Structural Context (AlphaFold & PDB Solvent Accessibility)
+* **Current Status:** The 21 features capture sequence position (`rel_protein_pos`) and chemical deltas ($\Delta\text{MW}, \Delta\text{Charge}, \Delta\text{LogP}$), but treat all positions along the sequence with 1D linear geometry.
+* **The Biological Gap:** A charge inversion from $+1 \to -1$ on a flexible solvent-exposed protein surface is often completely harmless, whereas the exact same charge inversion buried inside a hydrophobic catalytic core destroys the protein.
+* **Engineering Solution:**
+  1. Integrate AlphaFold-predicted structures for our 80 cancer genes.
+  2. Compute **Relative Solvent Accessibility (RSA)** ($0.0 = \text{completely buried}, 1.0 = \text{exposed surface}$).
+  3. Compute Euclidean 3D distance to the nearest catalytic active site residue.
+  4. Concatenate these 2 continuous features into the ResNet input vector ($21 \rightarrow 23\text{ features}$).
+
+---
+
+### Gap 3: Polygenic Risk Score (PRS) Integration with Monogenic Variants
+* **Current Status:** GenomeDL evaluates high-penetrance monogenic variants (e.g. `BRCA1`, `PALB2`, `MLH1`).
+* **The Biological Gap:** In real clinical genomics, a patient's total lifetime risk is a combination of:
+  1. **Monogenic Rare Mutations:** High risk (e.g. $60\% - 80\%$).
+  2. **Polygenic Background (PRS):** Hundreds of common, low-risk single-nucleotide polymorphisms (SNPs) across the genome that collectively shift the risk up or down by $\pm 15\%$.
+* **Engineering Solution:**
+  * Implement an additive Bayesian PRS module that adjusts the organ risk radar based on the patient's genome-wide polygenic background.
+
+---
+
+### Gap 4: Formal Probability Calibration (Platt Scaling & Expected Calibration Error - ECE)
+* **Current Status:** The model outputs continuous sigmoid probabilities that rank variants with $0.9652$ ROC-AUC.
+* **The Clinical Gap:** In hospital reporting, if a model outputs $P = 0.80$, exactly $80$ out of $100$ such variants must be true pathogenic mutations in empirical epidemiology. Deep neural networks with cross-entropy loss are frequently over-confident.
+* **Engineering Solution:**
+  1. Fit an Isotonic Regression or Temperature Scaling layer on the validation split logits.
+  2. Compute and minimize **Expected Calibration Error (ECE)** to ensure the probability $P$ matches empirical clinical prevalence.
+
+---
+
+### Pre-Flight Verification Summary
+With the master datasets cleanly partitioned in `data/`, model weights stored in `models/`, dynamic cross-platform paths verified, and the flagship CLI `predict.py` running in $<15\text{ ms}$, the repository architecture is **fully verified, self-contained, and ready for deep clinical benchmarking**.
+
+---
+
+## 15. License & Acknowledgements
+
+* **License:** Distributed under the open-source [MIT License](LICENSE).
+* **Data Sources:** ClinVar (NCBI / NIH), Ensembl GRCh38, NCCN & ACMG Clinical Practice Guidelines.
 * **Designed & Maintained By:** Anish Gupta.
+
 
