@@ -284,13 +284,13 @@ uv pip install pandas numpy scikit-learn matplotlib rdkit
 ```bash
 python build_pan_cancer_germline_dataset.py
 ```
-*Generates `pan_cancer_germline_dataset.csv` (119,045 clean variants) in ~20 seconds.*
+*Ingests raw ClinVar and generates `data/pan_cancer_germline_dataset.csv` (119,045 clean variants) in ~20 seconds.*
 
 ### 3. Train the Deep Residual Neural Network
 ```bash
 python train_tabular_mlp.py
 ```
-*Trains Pan-Cancer ResNet on GPU in ~90 seconds, producing `pan_cancer_germline_resnet.pth` with 96.52% ROC-AUC and 92.35% Sensitivity across all 93 cancer genes.*
+*Trains Pan-Cancer ResNet on GPU in ~90 seconds, producing `models/pan_cancer_germline_resnet.pth` with 96.52% ROC-AUC and 92.35% Sensitivity across all 93 cancer genes.*
 
 ### 4. Run Clinical Inference & Patient Risk Predictor
 Execute end-to-end clinical inference on demo patients or custom patient mutations:
@@ -302,51 +302,46 @@ python predict.py --demo
 python predict.py --gene BRCA1 --chrom chr17 --pos 43044295 --ref C --alt G --patient PATIENT_001
 ```
 
-### 5. Interactive Visualizers
-Explore neural activations, 2D decision boundaries, and mutation probing in real-time in any web browser:
-```bash
-# Launch interactive genomic playground (TensorFlow Playground style)
-start genomic_playground.html
-
-# Launch interactive 5-stage patient-to-hospital clinical flow diagram
-start cancer_detection_flow.html
-```
-
 ---
 
 ## 10. Repository Architecture & Directory Structure
 
-The repository is organized following modern scientific deep learning best practices:
+The repository is organized following clean, modular deep learning engineering best practices:
 
 ```text
 Deep-Learning-project/
+├── data/                                 # Clean Pan-Cancer Datasets (Partitioned)
+│   ├── pan_cancer_germline_dataset.csv   # 119,045 clean labeled SNVs across 93 genes (10.8 MB)
+│   ├── pan_cancer_vus_dataset.csv        # 135,839 VUS variants for AI resolution (13.6 MB)
+│   ├── pan_cancer_indels_frameshifts.csv # 49,105 structural indels & frameshifts (8.8 MB)
+│   └── pan_cancer_conflicting_variants.csv # 32,656 disputed clinical interpretations (6.2 MB)
+│
+├── models/                               # Trained Deep Learning Checkpoints
+│   └── pan_cancer_germline_resnet.pth    # Production PyTorch model checkpoint (0.9652 ROC-AUC)
+│
+├── raw_data/                             # Raw NCBI/NIH archives (excluded from Git tracking)
+│   ├── variant_summary.txt.gz            # Master ClinVar variant summary (450 MB)
+│   └── HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz # GIAB benchmark whole-genome VCF (156 MB)
+│
+├── docs/
+│   └── archive/                          # Archived pilot scripts, legacy designs, and exploratory data
+│       ├── README.md                     # Documentation detailing archived experiments
+│       ├── context.md                    # Legacy 12-class somatic MIL architecture doc
+│       ├── MASTER_IMPLEMENTATION_PLAN.md # Legacy SRA streaming plan
+│       ├── build_brca_germline_dataset.py# Pilot BRCA1/2 extractor
+│       ├── brca_germline_pilot_dataset.csv # Pilot BRCA1/2 dataset
+│       ├── germline_brca_tabular_mlp.pth # Pilot 2-layer MLP weights
+│       ├── verify_model.py               # Pilot model verification test
+│       └── import_all_359k_variants.py   # Diagnostic ClinVar audit script
+│
 ├── predict.py                            # Production Clinical Inference CLI & Risk Predictor
-├── train_tabular_mlp.py                  # PyTorch ResNet training engine (Entity Embeddings + Skip Connections)
+├── train_tabular_mlp.py                  # PyTorch ResNet training engine (Entity Embeddings + Residual Blocks)
 ├── bio_chemistry_engine.py               # RDKit biophysical featurizer & 20 AA chemical property matrix
 ├── build_pan_cancer_germline_dataset.py  # High-throughput ClinVar extraction & featurization pipeline
-├── pan_cancer_germline_resnet.pth        # Trained PyTorch model checkpoint (0.9652 ROC-AUC)
-│
-├── pan_cancer_germline_dataset.csv       # 119,045 clean labeled SNVs across 93 genes (10.8 MB)
-├── pan_cancer_vus_dataset.csv            # 135,839 VUS variants for AI resolution (13.6 MB)
-├── pan_cancer_indels_frameshifts.csv     # 49,105 structural indels & frameshifts (8.8 MB)
-├── pan_cancer_conflicting_variants.csv   # 32,656 disputed clinical interpretations (6.2 MB)
-│
 ├── requirements.txt                      # Production pinned dependencies
 ├── LICENSE                               # MIT Open-Source License
 ├── README.md                             # Comprehensive scientific & engineering documentation
-│
-├── genomic_playground.html               # Interactive browser-based neural network explorer
-├── cancer_detection_flow.html            # Interactive end-to-end clinical workflow visualizer
-│
-└── docs/
-    └── archive/                          # Archived pilot scripts, legacy designs, and exploratory data
-        ├── README.md                     # Documentation detailing archived experiments
-        ├── context.md                    # Legacy 12-class somatic MIL architecture doc
-        ├── MASTER_IMPLEMENTATION_PLAN.md # Legacy SRA streaming plan
-        ├── build_brca_germline_dataset.py# Pilot BRCA1/2 extractor
-        ├── brca_germline_pilot_dataset.csv# Pilot BRCA1/2 dataset
-        ├── germline_brca_tabular_mlp.pth # Pilot 2-layer MLP weights
-        └── verify_model.py               # Pilot model verification test
+└── .gitignore                            # Git exclusion rules for large datasets and binaries
 ```
 
 ---

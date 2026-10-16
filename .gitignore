@@ -26,6 +26,7 @@ class_*/*.fastq.gz
 *.vcf
 *.vcf.gz
 *.txt.gz
+raw_data/
 variant_summary.txt.gz
 HG002*.vcf.gz
 !reference.vcf

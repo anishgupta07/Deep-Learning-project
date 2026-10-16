@@ -143,11 +143,24 @@ def parse_protein_change(name_str):
     return None, None, None
 
 def build_pan_cancer_dataset(
-    clinvar_path="variant_summary.txt.gz",
-    out_csv="pan_cancer_germline_dataset.csv",
+    clinvar_path=None,
+    out_csv=None,
     save_vus=True,
-    vus_out_csv="pan_cancer_vus_dataset.csv"
+    vus_out_csv=None
 ):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if clinvar_path is None:
+        raw_path = os.path.join(script_dir, "raw_data", "variant_summary.txt.gz")
+        clinvar_path = raw_path if os.path.exists(raw_path) else os.path.join(script_dir, "variant_summary.txt.gz")
+        
+    data_dir = os.path.join(script_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    
+    if out_csv is None:
+        out_csv = os.path.join(data_dir, "pan_cancer_germline_dataset.csv")
+    if vus_out_csv is None:
+        vus_out_csv = os.path.join(data_dir, "pan_cancer_vus_dataset.csv")
+        
     print(f"[*] Starting Pan-Cancer Germline Extraction across {len(CANCER_GENES)} Cancer Genes...")
     print(f"[*] Source Database: {clinvar_path}")
     t0 = time.time()

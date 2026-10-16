@@ -38,11 +38,15 @@ class PanCancerDataset(Dataset):
     def __getitem__(self, idx):
         return self.X_cont[idx], self.gene_ids[idx], self.syndrome_ids[idx], self.y[idx]
 
-def prepare_pan_cancer_data(csv_path="pan_cancer_germline_dataset.csv"):
-    if not os.path.exists(csv_path):
-        print(f"[!] Warning: {csv_path} not found. Falling back to brca_germline_pilot_dataset.csv")
-        csv_path = "brca_germline_pilot_dataset.csv"
-        
+def prepare_pan_cancer_data(csv_path=None):
+    if csv_path is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        data_path = os.path.join(script_dir, "data", "pan_cancer_germline_dataset.csv")
+        if os.path.exists(data_path):
+            csv_path = data_path
+        else:
+            csv_path = os.path.join(script_dir, "pan_cancer_germline_dataset.csv")
+            
     print(f"[*] Loading Pan-Cancer dataset from: {csv_path}")
     df = pd.read_csv(csv_path)
     print(f"[+] Loaded {len(df):,} variants across {df['gene'].nunique()} genes.")
@@ -205,7 +209,10 @@ def train_pan_cancer_model(epochs=25, batch_size=256, lr=1e-3, weight_decay=1e-4
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
     
     best_val_auc = 0.0
-    best_model_path = "pan_cancer_germline_resnet.pth"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    models_dir = os.path.join(script_dir, "models")
+    os.makedirs(models_dir, exist_ok=True)
+    best_model_path = os.path.join(models_dir, "pan_cancer_germline_resnet.pth")
     t0 = time.time()
     
     print("\n" + "="*80)

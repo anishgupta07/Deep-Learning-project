@@ -75,7 +75,15 @@ SYNDROME_ORGAN_RISKS = {
     ]
 }
 
-def load_inference_model(weights_path="pan_cancer_germline_resnet.pth"):
+def load_inference_model(weights_path=None):
+    if weights_path is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        candidate_models = os.path.join(script_dir, "models", "pan_cancer_germline_resnet.pth")
+        if os.path.exists(candidate_models):
+            weights_path = candidate_models
+        else:
+            weights_path = os.path.join(script_dir, "pan_cancer_germline_resnet.pth")
+            
     if not os.path.exists(weights_path):
         print(f"[!] Error: Model weights not found at {weights_path}")
         print("    Please run: python train_tabular_mlp.py first.")
@@ -233,10 +241,11 @@ def main():
     parser.add_argument("--ref_aa", type=str, default="C", help="Original amino acid code")
     parser.add_argument("--alt_aa", type=str, default="G", help="New amino acid code")
     parser.add_argument("--pos", type=int, default=43044295, help="Genomic coordinate")
+    parser.add_argument("--weights", type=str, default=None, help="Custom path to trained ResNet checkpoint (.pth)")
     args = parser.parse_args()
     
     print("[*] Loading GenomeDL Pan-Cancer ResNet Engine...")
-    model, gene_to_id, scaler, device = load_inference_model()
+    model, gene_to_id, scaler, device = load_inference_model(args.weights)
     print(f"[+] Loaded model on {device}. Ready for clinical inference across {len(gene_to_id)} cancer genes.")
     
     if args.demo or len(sys.argv) == 1:
