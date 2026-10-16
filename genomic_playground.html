@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GenomeDL Playground - Interactive Variant Interpretation Visualizer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes signalPulse {
+      0% { offset-distance: 0%; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { offset-distance: 100%; opacity: 0; }
+    }
+    .flowing-particle {
+      animation: signalPulse 1.8s infinite linear;
+    }
+    input[type=range] {
+      accent-color: #3b82f6;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- TOP APP BAR / CONTROLS (PLAYGROUND HEADER) -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Simulation controls -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center font-black text-white text-lg shadow-md shadow-blue-500/20">
+            G
+          </div>
+          <div>
+            <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+              GenomeDL <span class="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono font-semibold">PLAYGROUND v2</span>
+            </h1>
+            <p class="text-[12px] text-slate-400 leading-none">Neural Variant Interpretation Engine</p>
+          </div>
+        </div>
+
+        <div class="h-6 w-px bg-slate-800"></div>
+
+        <!-- Play / Pause / Step Controls -->
+        <div class="flex items-center gap-2">
+          <button id="playBtn" class="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 active:scale-95 flex items-center justify-center text-white transition shadow-lg shadow-blue-600/30" title="Train / Run Live Inference">
+            <svg id="playIcon" class="w-4 h-4 ml-0.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="pauseIcon" class="w-4 h-4 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+
+          <button id="stepBtn" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center text-slate-300 transition" title="Step One Mini-Batch">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+
+          <button id="resetBtn" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center text-slate-300 transition" title="Reset Weights">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Neural Telemetry -->
+      <div class="flex items-center gap-6 text-xs font-mono">
+        <div>
+          <span class="text-slate-400 block text-[11px] font-sans">EPOCH</span>
+          <span id="epochCount" class="text-white font-bold text-sm tracking-wider">001,420</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[11px] font-sans">TRAINING LOSS</span>
+          <span id="trainLoss" class="text-emerald-400 font-semibold">0.038</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[11px] font-sans">TEST ROC-AUC</span>
+          <span id="testAuc" class="text-cyan-400 font-semibold">0.9698</span>
+        </div>
+      </div>
+
+      <!-- Presets Selector -->
+      <div class="flex items-center gap-2">
+        <label for="presetSelect" class="text-xs text-slate-400 font-medium">Mutation Preset:</label>
+        <select id="presetSelect" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <option value="brca1_cys61gly">BRCA1: p.Cys61Gly (Pathogenic Founder)</option>
+          <option value="brca2_asn372his">BRCA2: p.Asn372His (Benign Polymorphism)</option>
+          <option value="tp53_arg273his">TP53: p.Arg273His (Pathogenic Li-Fraumeni)</option>
+          <option value="mlh1_val384asp">MLH1: p.Val384Asp (Likely Pathogenic Lynch)</option>
+          <option value="brca2_glu1550ter">BRCA2: p.Glu1550Ter (Nonsense Truncation)</option>
+          <option value="custom">-- Custom Mutation (Manual Probing) --</option>
+        </select>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE: 4 INTERACTIVE COLUMNS -->
+  <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- COL 1: VARIANT BIOLOGY & RAW MUTATION (3 Cols) -->
+    <section class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+      <div>
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Variant Biology (VCF)</h2>
+          <span id="geneBadge" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">BRCA1</span>
+        </div>
+
+        <!-- Genomic DNA Locus Display -->
+        <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 font-mono text-xs space-y-2 mb-4">
+          <div class="flex justify-between text-slate-400 text-[11px]">
+            <span>LOCUS</span>
+            <span id="locusDisplay" class="text-slate-200">chr17:43044295</span>
+          </div>
+          <div class="flex justify-between items-center text-sm font-bold">
+            <span class="text-slate-400">NUCLEOTIDE DIFF:</span>
+            <div class="flex items-center gap-1.5">
+              <span id="refBase" class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center">C</span>
+              <span class="text-slate-600">→</span>
+              <span id="altBase" class="w-6 h-6 rounded bg-rose-500/20 text-rose-400 flex items-center justify-center">G</span>
+            </div>
+          </div>
+          <div class="flex justify-between text-slate-400 text-[11px]">
+            <span>PROTEIN HGVS:</span>
+            <span id="hgvsDisplay" class="text-cyan-300 font-semibold">p.Cys61Gly</span>
+          </div>
+        </div>
+
+        <!-- Interactive Biophysical Property Sliders -->
+        <div class="space-y-3.5">
+          <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Biophysical Properties (RDKit)</h3>
+
+          <!-- Grantham Score -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Grantham Distance ($X_1$)</span>
+              <span id="granthamVal" class="font-mono text-blue-400 font-bold">159</span>
+            </div>
+            <input type="range" id="granthamSlider" min="0" max="215" value="159" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <p class="text-[11px] text-slate-400 mt-0.5">Evolutionary & composition penalty</p>
+          </div>
+
+          <!-- Delta MW -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Steric Clash $\Delta\text{MW}$ ($X_2$)</span>
+              <span id="mwVal" class="font-mono text-blue-400 font-bold">-46.1 Da</span>
+            </div>
+            <input type="range" id="mwSlider" min="-120" max="120" value="-46" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <p class="text-[11px] text-slate-400 mt-0.5">Side-chain volume displacement</p>
+          </div>
+
+          <!-- Delta Charge -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Electrostatic $\Delta\text{Charge}$ ($X_3$)</span>
+              <span id="chargeVal" class="font-mono text-blue-400 font-bold">0.0</span>
+            </div>
+            <input type="range" id="chargeSlider" min="-2" max="2" step="1" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <p class="text-[11px] text-slate-400 mt-0.5">Salt-bridge disruption potential</p>
+          </div>
+
+          <!-- Population Frequency -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">gnomAD Allele Frequency ($X_4$)</span>
+              <span id="afVal" class="font-mono text-blue-400 font-bold">0.00001 (Rare)</span>
+            </div>
+            <input type="range" id="afSlider" min="0" max="100" value="5" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <p class="text-[11px] text-slate-400 mt-0.5">Evolutionary conservation in population</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+        💡 <em>Slide properties to watch neurons fire and decision boundaries react in real-time.</em>
+      </div>
+    </section>
+
+    <!-- COL 2: NEURAL NETWORK GRAPH (HOW THE MODEL SEES IT) (5 Cols) -->
+    <section class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col shadow-xl overflow-hidden relative">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Deep Tabular ResNet Wiring</h2>
+        <span class="text-[11px] text-slate-400 font-mono">Forward Flow: Input → Hidden → Logit</span>
+      </div>
+
+      <!-- Neural Network Canvas / SVG -->
+      <div class="relative flex-1 flex items-center justify-center min-h-[380px]">
+        <svg id="networkSvg" class="w-full h-full absolute inset-0" viewBox="0 0 460 380">
+          <defs>
+            <linearGradient id="synapseGradientPos" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#f97316" stop-opacity="0.8"/>
+            </linearGradient>
+            <linearGradient id="synapseGradientNeg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.5"/>
+            </linearGradient>
+          </defs>
+          <!-- Dynamic Synapse lines and animated pulses will be drawn here by JS -->
+          <g id="synapsesLayer"></g>
+          <g id="pulsesLayer"></g>
+          <g id="nodesLayer"></g>
+        </svg>
+      </div>
+
+      <!-- Legend for Synapse weights -->
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-sky-400 inline-block"></span>
+          <span>Benign Weight (-)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>
+          <span>Pathogenic Weight (+)</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span>Active Pulse</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COL 3 & 4: 2D DECISION BOUNDARY & CLINICAL IMPACT (4 Cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-6">
+
+      <!-- 2D DECISION BOUNDARY SPACE -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Decision Boundary Space</h2>
+          <span class="text-[11px] text-slate-400 font-mono">2D Feature Projection</span>
+        </div>
+
+        <div class="relative w-full aspect-square bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+          <canvas id="boundaryCanvas" width="300" height="300" class="w-full h-full block"></canvas>
+
+          <!-- Floating Coordinates indicator -->
+          <div class="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 border border-slate-800">
+            X: Grantham | Y: ΔMW
+          </div>
+
+          <div class="absolute top-2 right-2 flex items-center gap-2 text-[10px] bg-slate-900/80 backdrop-blur px-2 py-0.5 rounded border border-slate-800">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Benign</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span> Pathogenic</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLINICAL PREDICTION & ORGAN RISK -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">4. Clinical Interpretation</h2>
+            <span id="verdictPill" class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+              PATHOGENIC
+            </span>
+          </div>
+
+          <!-- 5-Class ACMG Probability Distribution -->
+          <div class="space-y-2 mb-4">
+            <div class="text-[11px] font-semibold text-slate-300 flex justify-between">
+              <span>ACMG 5-CLASS PROBABILITIES</span>
+              <span id="topClassConf" class="text-rose-400 font-mono">Class 4: 94.6%</span>
+            </div>
+            
+            <div class="grid grid-cols-5 gap-1.5 text-center font-mono text-[10px]">
+              <!-- 0: Benign -->
+              <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <div class="text-slate-400 font-sans text-[9px]">0: Benign</div>
+                <div id="bar0" class="h-12 w-full bg-slate-800 rounded mt-1 relative flex items-end justify-center overflow-hidden">
+                  <div class="w-full bg-sky-500 transition-all duration-300" style="height: 2%;"></div>
+                </div>
+                <div id="prob0" class="text-slate-300 mt-1">2%</div>
+              </div>
+
+              <!-- 1: Likely Benign -->
+              <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <div class="text-slate-400 font-sans text-[9px]">1: L.Benign</div>
+                <div id="bar1" class="h-12 w-full bg-slate-800 rounded mt-1 relative flex items-end justify-center overflow-hidden">
+                  <div class="w-full bg-teal-500 transition-all duration-300" style="height: 1%;"></div>
+                </div>
+                <div id="prob1" class="text-slate-300 mt-1">1%</div>
+              </div>
+
+              <!-- 2: VUS -->
+              <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <div class="text-slate-400 font-sans text-[9px]">2: VUS</div>
+                <div id="bar2" class="h-12 w-full bg-slate-800 rounded mt-1 relative flex items-end justify-center overflow-hidden">
+                  <div class="w-full bg-amber-500 transition-all duration-300" style="height: 1%;"></div>
+                </div>
+                <div id="prob2" class="text-slate-300 mt-1">1%</div>
+              </div>
+
+              <!-- 3: Likely Pathogenic -->
+              <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <div class="text-slate-400 font-sans text-[9px]">3: L.Patho</div>
+                <div id="bar3" class="h-12 w-full bg-slate-800 rounded mt-1 relative flex items-end justify-center overflow-hidden">
+                  <div class="w-full bg-orange-500 transition-all duration-300" style="height: 6%;"></div>
+                </div>
+                <div id="prob3" class="text-slate-300 mt-1">6%</div>
+              </div>
+
+              <!-- 4: Pathogenic -->
+              <div class="bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <div class="text-slate-400 font-sans text-[9px]">4: Patho</div>
+                <div id="bar4" class="h-12 w-full bg-slate-800 rounded mt-1 relative flex items-end justify-center overflow-hidden">
+                  <div class="w-full bg-rose-500 transition-all duration-300" style="height: 90%;"></div>
+                </div>
+                <div id="prob4" class="text-rose-400 font-bold mt-1">90%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Organ Predisposition Radar List -->
+          <div class="space-y-2">
+            <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Organ Risk Projections</h3>
+            
+            <!-- Organ 1 -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span id="organ1Name" class="text-slate-300">Breast Cancer</span>
+                <span id="organ1Val" class="font-mono text-rose-400 font-bold">72.0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="organ1Bar" class="h-full bg-rose-500 transition-all duration-500" style="width: 72%;"></div>
+              </div>
+            </div>
+
+            <!-- Organ 2 -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span id="organ2Name" class="text-slate-300">Ovarian Cancer</span>
+                <span id="organ2Val" class="font-mono text-orange-400 font-bold">44.0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="organ2Bar" class="h-full bg-orange-500 transition-all duration-500" style="width: 44%;"></div>
+              </div>
+            </div>
+
+            <!-- Organ 3 -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span id="organ3Name" class="text-slate-300">Pancreatic Cancer</span>
+                <span id="organ3Val" class="font-mono text-amber-400 font-bold">8.5%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="organ3Bar" class="h-full bg-amber-500 transition-all duration-500" style="width: 8.5%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+          <span>Action: <strong id="actionRecommendation" class="text-slate-200">Annual Breast MRI + Surveillance</strong></span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- JAVASCRIPT: INTERACTIVE NEURAL SIMULATOR & BOUNDARY RENDERER -->
+  <script>
+    // --- PRESETS DATA ---
+    const PRESETS = {
+      brca1_cys61gly: {
+        gene: 'BRCA1', locus: 'chr17:43044295', ref: 'C', alt: 'G', hgvs: 'p.Cys61Gly',
+        grantham: 159, mw: -46, charge: 0, af: 1,
+        organ1: { name: 'Breast Cancer', val: 72.0, color: 'bg-rose-500' },
+        organ2: { name: 'Ovarian Cancer', val: 44.0, color: 'bg-orange-500' },
+        organ3: { name: 'Pancreatic Cancer', val: 8.5, color: 'bg-amber-500' },
+        action: 'Annual Contrast MRI (Age 25+) + RRSO (Age 35+)'
+      },
+      brca2_asn372his: {
+        gene: 'BRCA2', locus: 'chr13:32332592', ref: 'A', alt: 'C', hgvs: 'p.Asn372His',
+        grantham: 68, mw: 23, charge: 1, af: 75,
+        organ1: { name: 'Breast Cancer', val: 12.0, color: 'bg-sky-500' },
+        organ2: { name: 'Ovarian Cancer', val: 1.3, color: 'bg-sky-500' },
+        organ3: { name: 'Prostate Cancer', val: 11.0, color: 'bg-sky-500' },
+        action: 'Standard population routine screening only'
+      },
+      tp53_arg273his: {
+        gene: 'TP53', locus: 'chr17:7673802', ref: 'C', alt: 'T', hgvs: 'p.Arg273His',
+        grantham: 112, mw: -19, charge: -1, af: 0.1,
+        organ1: { name: 'Sarcoma & Multi-Organ', val: 85.0, color: 'bg-rose-600' },
+        organ2: { name: 'Breast (Pre-menopausal)', val: 60.0, color: 'bg-rose-500' },
+        organ3: { name: 'Brain & Adrenocortical', val: 30.0, color: 'bg-orange-500' },
+        action: 'Whole-Body MRI protocol (Li-Fraumeni Surveillance)'
+      },
+      mlh1_val384asp: {
+        gene: 'MLH1', locus: 'chr3:36993424', ref: 'T', alt: 'A', hgvs: 'p.Val384Asp',
+        grantham: 152, mw: 16, charge: -1, af: 2,
+        organ1: { name: 'Colorectal (Lynch)', val: 75.0, color: 'bg-rose-500' },
+        organ2: { name: 'Endometrial / Uterine', val: 45.0, color: 'bg-orange-500' },
+        organ3: { name: 'Gastric / Stomach', val: 12.0, color: 'bg-amber-500' },
+        action: 'Colonoscopy every 1-2 years starting at age 20-25'
+      },
+      brca2_glu1550ter: {
+        gene: 'BRCA2', locus: 'chr13:32338782', ref: 'G', alt: 'T', hgvs: 'p.Glu1550Ter (Nonsense)',
+        grantham: 215, mw: -147, charge: -1, af: 0.0,
+        organ1: { name: 'Breast Cancer (Female & Male)', val: 69.0, color: 'bg-rose-500' },
+        organ2: { name: 'Ovarian Cancer', val: 20.0, color: 'bg-orange-500' },
+        organ3: { name: 'Prostate / Pancreas', val: 18.0, color: 'bg-amber-500' },
+        action: 'High-Risk HBOC Management & Cascade Family Testing'
+      }
+    };
+
+    // --- DOM REFERENCES ---
+    const granthamSlider = document.getElementById('granthamSlider');
+    const mwSlider = document.getElementById('mwSlider');
+    const chargeSlider = document.getElementById('chargeSlider');
+    const afSlider = document.getElementById('afSlider');
+    const presetSelect = document.getElementById('presetSelect');
+
+    const granthamVal = document.getElementById('granthamVal');
+    const mwVal = document.getElementById('mwVal');
+    const chargeVal = document.getElementById('chargeVal');
+    const afVal = document.getElementById('afVal');
+
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const epochCount = document.getElementById('epochCount');
+    const trainLoss = document.getElementById('trainLoss');
+
+    // --- SIMULATED NEURAL NETWORK ARCHITECTURE ---
+    // Layers: Input (4), Hidden 1 (4), Hidden 2 (3), Output (1)
+    const NETWORK_LAYOUT = {
+      inputs: [
+        { id: 'in_grantham', label: 'X₁ (Grantham)', y: 60 },
+        { id: 'in_mw',       label: 'X₂ (ΔMW)',       y: 140 },
+        { id: 'in_charge',   label: 'X₃ (ΔCharge)',   y: 220 },
+        { id: 'in_af',       label: 'X₄ (gnomAD AF)', y: 300 }
+      ],
+      h1: [
+        { id: 'h1_0', label: 'Fold Disruptor', y: 50 },
+        { id: 'h1_1', label: 'Steric Clash',   y: 130 },
+        { id: 'h1_2', label: 'Charge Defect',  y: 210 },
+        { id: 'h1_3', label: 'Rareness Filter',y: 290 }
+      ],
+      h2: [
+        { id: 'h2_0', label: 'Structural Threat',   y: 90 },
+        { id: 'h2_1', label: 'Evol. Intolerance',  y: 175 },
+        { id: 'h2_2', label: 'Syndrome Lethality', y: 260 }
+      ],
+      output: [
+        { id: 'out_0', label: 'ACMG Risk Logit', y: 175 }
+      ]
+    };
+
+    const SVG_X_COORDS = { input: 60, h1: 180, h2: 300, output: 410 };
+
+    // Initialize Network Connections (Synapses)
+    let synapses = [];
+    function initSynapses() {
+      synapses = [];
+      // Input -> H1
+      NETWORK_LAYOUT.inputs.forEach((inp, i) => {
+        NETWORK_LAYOUT.h1.forEach((h, j) => {
+          const weight = ((i === 0 && j === 0) || (i === 1 && j === 1) || (i === 2 && j === 2)) ? 0.85 : (i === 3 ? -0.7 : (Math.random() * 0.8 - 0.4));
+          synapses.push({ from: inp, to: h, x1: SVG_X_COORDS.input, y1: inp.y, x2: SVG_X_COORDS.h1, y2: h.y, weight: weight });
+        });
+      });
+      // H1 -> H2
+      NETWORK_LAYOUT.h1.forEach((h1, i) => {
+        NETWORK_LAYOUT.h2.forEach((h2, j) => {
+          const weight = (i < 3) ? 0.75 : -0.6;
+          synapses.push({ from: h1, to: h2, x1: SVG_X_COORDS.h1, y1: h1.y, x2: SVG_X_COORDS.h2, y2: h2.y, weight: weight });
+        });
+      });
+      // H2 -> Output
+      NETWORK_LAYOUT.h2.forEach((h2, i) => {
+        synapses.push({ from: h2, to: NETWORK_LAYOUT.output[0], x1: SVG_X_COORDS.h2, y1: h2.y, x2: SVG_X_COORDS.output, y2: NETWORK_LAYOUT.output[0].y, weight: 0.9 });
+      });
+    }
+
+    // Render Static SVG Framework
+    function renderSvgNetwork() {
+      const synapsesLayer = document.getElementById('synapsesLayer');
+      const nodesLayer = document.getElementById('nodesLayer');
+      synapsesLayer.innerHTML = '';
+      nodesLayer.innerHTML = '';
+
+      // Draw Synapse Lines
+      synapses.forEach((syn, idx) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', syn.x1);
+        line.setAttribute('y1', syn.y1);
+        line.setAttribute('x2', syn.x2);
+        line.setAttribute('y2', syn.y2);
+        line.setAttribute('stroke', syn.weight > 0 ? '#f97316' : '#38bdf8');
+        line.setAttribute('stroke-width', Math.max(1, Math.abs(syn.weight) * 3));
+        line.setAttribute('stroke-opacity', Math.min(0.8, Math.max(0.15, Math.abs(syn.weight))));
+        line.setAttribute('id', `syn_${idx}`);
+        synapsesLayer.appendChild(line);
+      });
+
+      // Draw Nodes Helper
+      function drawNodes(nodes, xCoord, colorClass) {
+        nodes.forEach(node => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('transform', `translate(${xCoord}, ${node.y})`);
+
+          // Outer circle
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('r', '14');
+          circle.setAttribute('fill', '#0f172a');
+          circle.setAttribute('stroke', colorClass);
+          circle.setAttribute('stroke-width', '2.5');
+          circle.setAttribute('id', `node_${node.id}`);
+
+          // Inner glow
+          const innerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerCircle.setAttribute('r', '7');
+          innerCircle.setAttribute('fill', colorClass);
+          innerCircle.setAttribute('opacity', '0.6');
+          innerCircle.setAttribute('id', `inner_${node.id}`);
+
+          // Label text
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', '0');
+          text.setAttribute('y', '26');
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('fill', '#94a3b8');
+          text.setAttribute('font-size', '10px');
+          text.setAttribute('font-family', 'monospace');
+          text.textContent = node.label.split(' ')[0];
+
+          g.appendChild(circle);
+          g.appendChild(innerCircle);
+          g.appendChild(text);
+          nodesLayer.appendChild(g);
+        });
+      }
+
+      drawNodes(NETWORK_LAYOUT.inputs, SVG_X_COORDS.input, '#38bdf8');
+      drawNodes(NETWORK_LAYOUT.h1, SVG_X_COORDS.h1, '#60a5fa');
+      drawNodes(NETWORK_LAYOUT.h2, SVG_X_COORDS.h2, '#c084fc');
+      drawNodes(NETWORK_LAYOUT.output, SVG_X_COORDS.output, '#f43f5e');
+    }
+
+    // --- DECISION BOUNDARY 2D CANVAS ---
+    const canvas = document.getElementById('boundaryCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Synthetic Background Variants (ClinVar Reference points)
+    const BACKGROUND_VARIANTS = [];
+    for (let i = 0; i < 90; i++) {
+      // Benign cluster (Low grantham, moderate delta MW)
+      const gBenign = Math.random() * 85 + 10;
+      const mwBenign = (Math.random() - 0.5) * 60;
+      BACKGROUND_VARIANTS.push({ grantham: gBenign, mw: mwBenign, isPathogenic: false });
+
+      // Pathogenic cluster (High grantham, large delta MW)
+      const gPath = Math.random() * 110 + 95;
+      const mwPath = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 80 + 20);
+      BACKGROUND_VARIANTS.push({ grantham: gPath, mw: mwPath, isPathogenic: true });
+    }
+
+    function drawDecisionBoundary(curGrantham, curMW, curProbPathogenic) {
+      const W = canvas.width;
+      const H = canvas.height;
+      const imgData = ctx.createImageData(W, H);
+      const data = imgData.data;
+
+      // Color every pixel according to a smooth 2D decision function
+      // X maps 0 to 215 (Grantham)
+      // Y maps -120 to +120 (MW)
+      for (let y = 0; y < H; y += 2) {
+        const mwNorm = 120 - (y / H) * 240; // top is +120, bottom is -120
+        for (let x = 0; x < W; x += 2) {
+          const gNorm = (x / W) * 215; // 0 to 215
+
+          // Model decision boundary approximation:
+          // Pathogenic score elevated if grantham > 90 OR abs(mw) > 55
+          const score = (gNorm / 215) * 0.75 + (Math.abs(mwNorm) / 120) * 0.35 - 0.45;
+          const prob = 1 / (1 + Math.exp(-score * 6)); // sigmoid
+
+          // Interpolate color: Blue (Benign) to Orange/Red (Pathogenic)
+          const r = Math.floor(prob * 220 + (1 - prob) * 15);
+          const g = Math.floor(prob * 60 + (1 - prob) * 95);
+          const b = Math.floor(prob * 30 + (1 - prob) * 210);
+
+          // Fill 2x2 blocks for speed
+          for (let dy = 0; dy < 2; dy++) {
+            for (let dx = 0; dx < 2; dx++) {
+              const idx = ((y + dy) * W + (x + dx)) * 4;
+              data[idx] = r;
+              data[idx + 1] = g;
+              data[idx + 2] = b;
+              data[idx + 3] = 160; // transparency
+            }
+          }
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Draw background ClinVar training points
+      BACKGROUND_VARIANTS.forEach(pt => {
+        const px = (pt.grantham / 215) * W;
+        const py = ((120 - pt.mw) / 240) * H;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = pt.isPathogenic ? 'rgba(251, 146, 60, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+        ctx.fill();
+      });
+
+      // Draw ACTIVE MUTATION Crosshair / Marker
+      const curX = (curGrantham / 215) * W;
+      const curY = ((120 - curMW) / 240) * H;
+
+      // Outer pulsing ring
+      ctx.beginPath();
+      ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(curX, curY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = curProbPathogenic > 0.5 ? '#f43f5e' : '#38bdf8';
+      ctx.fill();
+    }
+
+    // --- MATHEMATICAL INFERENCE PIPELINE ---
+    function computePathogenicity() {
+      const g = parseFloat(granthamSlider.value);
+      const mw = parseFloat(mwSlider.value);
+      const charge = parseFloat(chargeSlider.value);
+      const af = parseFloat(afSlider.value) / 100.0;
+
+      // Update Slider value displays
+      granthamVal.textContent = g;
+      mwVal.textContent = (mw >= 0 ? '+' : '') + mw + ' Da';
+      chargeVal.textContent = (charge >= 0 ? '+' : '') + charge.toFixed(1);
+      afVal.textContent = af.toFixed(5) + (af > 0.05 ? ' (Common Polymorphism)' : ' (Rare Germline)');
+
+      // Neural Forward Pass approximation:
+      // Z = w1 * Grantham + w2 * abs(MW) + w3 * abs(Charge) - w4 * AF - bias
+      const z = (g / 215.0) * 3.8 + (Math.abs(mw) / 120.0) * 1.8 + (Math.abs(charge) / 2.0) * 1.4 - (af * 8.5) - 1.6;
+      const pPathogenic = 1 / (1 + Math.exp(-z));
+
+      // Calculate 5-Class ACMG Probabilities
+      let p0 = 0, p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+      if (pPathogenic < 0.15) {
+        p0 = 0.90 + (0.15 - pPathogenic) * 0.5;
+        p1 = 0.08; p2 = 0.01; p3 = 0.005; p4 = 0.005;
+      } else if (pPathogenic < 0.35) {
+        p0 = 0.25; p1 = 0.65; p2 = 0.07; p3 = 0.02; p4 = 0.01;
+      } else if (pPathogenic < 0.65) {
+        p0 = 0.05; p1 = 0.15; p2 = 0.60; p3 = 0.15; p4 = 0.05;
+      } else if (pPathogenic < 0.85) {
+        p0 = 0.01; p1 = 0.03; p2 = 0.08; p3 = 0.68; p4 = 0.20;
+      } else {
+        p0 = 0.005; p1 = 0.01; p2 = 0.025; p3 = 0.11;
+        p4 = 0.85 + (pPathogenic - 0.85) * 0.9;
+      }
+      // Normalize sum to 1.0
+      const total = p0 + p1 + p2 + p3 + p4;
+      p0 /= total; p1 /= total; p2 /= total; p3 /= total; p4 /= total;
+
+      // Update Probability Bars in UI
+      updateClassBars(p0, p1, p2, p3, p4);
+
+      // Update Verdict Badge
+      const verdictPill = document.getElementById('verdictPill');
+      const topClassConf = document.getElementById('topClassConf');
+
+      if (p4 >= 0.5) {
+        verdictPill.textContent = 'CLASS 4: PATHOGENIC';
+        verdictPill.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        topClassConf.textContent = `Class 4: ${(p4 * 100).toFixed(1)}%`;
+        topClassConf.className = 'text-rose-400 font-mono';
+      } else if (p3 >= 0.4) {
+        verdictPill.textContent = 'CLASS 3: LIKELY PATHOGENIC';
+        verdictPill.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30';
+        topClassConf.textContent = `Class 3: ${(p3 * 100).toFixed(1)}%`;
+        topClassConf.className = 'text-orange-400 font-mono';
+      } else if (p2 >= 0.4) {
+        verdictPill.textContent = 'CLASS 2: VUS (UNCERTAIN)';
+        verdictPill.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        topClassConf.textContent = `Class 2: ${(p2 * 100).toFixed(1)}%`;
+        topClassConf.className = 'text-amber-400 font-mono';
+      } else if (p1 >= 0.4) {
+        verdictPill.textContent = 'CLASS 1: LIKELY BENIGN';
+        verdictPill.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-teal-500/20 text-teal-400 border border-teal-500/30';
+        topClassConf.textContent = `Class 1: ${(p1 * 100).toFixed(1)}%`;
+        topClassConf.className = 'text-teal-400 font-mono';
+      } else {
+        verdictPill.textContent = 'CLASS 0: BENIGN';
+        verdictPill.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        topClassConf.textContent = `Class 0: ${(p0 * 100).toFixed(1)}%`;
+        topClassConf.className = 'text-sky-400 font-mono';
+      }
+
+      // Update Dynamic Organ Risks
+      updateOrganRisks(pPathogenic);
+
+      // Re-render Decision Boundary
+      drawDecisionBoundary(g, mw, pPathogenic);
+
+      // Light up network nodes according to activation
+      updateNodeActivations(g, mw, charge, af, pPathogenic);
+    }
+
+    function updateClassBars(p0, p1, p2, p3, p4) {
+      document.querySelector('#bar0 > div').style.height = `${Math.max(4, p0 * 100)}%`;
+      document.querySelector('#bar1 > div').style.height = `${Math.max(4, p1 * 100)}%`;
+      document.querySelector('#bar2 > div').style.height = `${Math.max(4, p2 * 100)}%`;
+      document.querySelector('#bar3 > div').style.height = `${Math.max(4, p3 * 100)}%`;
+      document.querySelector('#bar4 > div').style.height = `${Math.max(4, p4 * 100)}%`;
+
+      document.getElementById('prob0').textContent = `${(p0 * 100).toFixed(0)}%`;
+      document.getElementById('prob1').textContent = `${(p1 * 100).toFixed(0)}%`;
+      document.getElementById('prob2').textContent = `${(p2 * 100).toFixed(0)}%`;
+      document.getElementById('prob3').textContent = `${(p3 * 100).toFixed(0)}%`;
+      document.getElementById('prob4').textContent = `${(p4 * 100).toFixed(0)}%`;
+    }
+
+    function updateOrganRisks(riskFactor) {
+      const presetKey = presetSelect.value;
+      const data = PRESETS[presetKey] || PRESETS.brca1_cys61gly;
+
+      const r1 = Math.min(85, Math.max(12, data.organ1.val * riskFactor));
+      const r2 = Math.min(60, Math.max(1.3, data.organ2.val * riskFactor));
+      const r3 = Math.min(25, Math.max(1.6, data.organ3.val * riskFactor));
+
+      document.getElementById('organ1Val').textContent = `${r1.toFixed(1)}%`;
+      document.getElementById('organ2Val').textContent = `${r2.toFixed(1)}%`;
+      document.getElementById('organ3Val').textContent = `${r3.toFixed(1)}%`;
+
+      document.getElementById('organ1Bar').style.width = `${r1}%`;
+      document.getElementById('organ2Bar').style.width = `${r2}%`;
+      document.getElementById('organ3Bar').style.width = `${r3}%`;
+
+      document.getElementById('organ1Name').textContent = data.organ1.name;
+      document.getElementById('organ2Name').textContent = data.organ2.name;
+      document.getElementById('organ3Name').textContent = data.organ3.name;
+
+      if (riskFactor > 0.6) {
+        document.getElementById('actionRecommendation').textContent = data.action;
+        document.getElementById('actionRecommendation').className = 'text-rose-300 font-bold';
+      } else {
+        document.getElementById('actionRecommendation').textContent = 'Routine age-based wellness screening';
+        document.getElementById('actionRecommendation').className = 'text-emerald-400 font-semibold';
+      }
+    }
+
+    function updateNodeActivations(g, mw, charge, af, pPath) {
+      // Glow input nodes
+      setNodeGlow('in_grantham', g / 215);
+      setNodeGlow('in_mw', Math.abs(mw) / 120);
+      setNodeGlow('in_charge', Math.abs(charge) / 2);
+      setNodeGlow('in_af', 1 - af);
+
+      // Glow Hidden nodes
+      setNodeGlow('h1_0', (g / 215) * 0.9);
+      setNodeGlow('h1_1', (Math.abs(mw) / 120) * 0.9);
+      setNodeGlow('h1_2', (Math.abs(charge) / 2) * 0.8);
+      setNodeGlow('h1_3', (1 - af) * 0.8);
+
+      setNodeGlow('h2_0', pPath * 0.9);
+      setNodeGlow('h2_1', pPath * 0.85);
+      setNodeGlow('h2_2', pPath * 0.95);
+
+      setNodeGlow('out_0', pPath);
+    }
+
+    function setNodeGlow(id, intensity) {
+      const el = document.getElementById(`inner_${id}`);
+      if (el) {
+        el.setAttribute('opacity', Math.max(0.15, Math.min(1.0, intensity)));
+        el.setAttribute('r', 5 + intensity * 6);
+      }
+    }
+
+    // --- PRESET SWITCHING ---
+    presetSelect.addEventListener('change', () => {
+      const selected = presetSelect.value;
+      if (selected === 'custom') return;
+
+      const p = PRESETS[selected];
+      if (!p) return;
+
+      document.getElementById('geneBadge').textContent = p.gene;
+      document.getElementById('locusDisplay').textContent = p.locus;
+      document.getElementById('refBase').textContent = p.ref;
+      document.getElementById('altBase').textContent = p.alt;
+      document.getElementById('hgvsDisplay').textContent = p.hgvs;
+
+      granthamSlider.value = p.grantham;
+      mwSlider.value = p.mw;
+      chargeSlider.value = p.charge;
+      afSlider.value = p.af;
+
+      computePathogenicity();
+    });
+
+    // Event listeners on sliders
+    [granthamSlider, mwSlider, chargeSlider, afSlider].forEach(slider => {
+      slider.addEventListener('input', () => {
+        presetSelect.value = 'custom';
+        computePathogenicity();
+      });
+    });
+
+    // --- ANIMATED PLAY / SIMULATION LOOP ---
+    let isPlaying = false;
+    let epoch = 1420;
+    let animFrame = null;
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+        runSimulationLoop();
+      } else {
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+        cancelAnimationFrame(animFrame);
+      }
+    });
+
+    function runSimulationLoop() {
+      if (!isPlaying) return;
+      epoch += 12;
+      epochCount.textContent = epoch.toLocaleString().padStart(7, '0');
+      trainLoss.textContent = Math.max(0.018, (0.045 - (epoch / 100000) * 0.02)).toFixed(3);
+
+      // Slightly perturb synaptic weights to simulate SGD gradient updates
+      synapses.forEach((syn, i) => {
+        if (Math.random() < 0.2) {
+          syn.weight += (Math.random() - 0.5) * 0.04;
+          const line = document.getElementById(`syn_${i}`);
+          if (line) {
+            line.setAttribute('stroke-width', Math.max(1, Math.abs(syn.weight) * 3));
+          }
+        }
+      });
+
+      animFrame = requestAnimationFrame(runSimulationLoop);
+    }
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      epoch += 10;
+      epochCount.textContent = epoch.toLocaleString().padStart(7, '0');
+      computePathogenicity();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      epoch = 0;
+      epochCount.textContent = '000,000';
+      initSynapses();
+      renderSvgNetwork();
+      computePathogenicity();
+    });
+
+    // --- INITIAL BOOTSTRAP ---
+    initSynapses();
+    renderSvgNetwork();
+    computePathogenicity();
+  </script>
+</body>
+</html>

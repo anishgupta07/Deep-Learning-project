@@ -1,5 +1,11 @@
 # GenomeDL: AI-Driven 80-Gene Hereditary Cancer Interpretation Engine
 
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.6%2B%20CUDA-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![RDKit](https://img.shields.io/badge/RDKit-Cheminformatics-2D9CDB)](https://www.rdkit.org/)
+[![ROC-AUC](https://img.shields.io/badge/Test%20ROC--AUC-96.52%25-2ECC71)](train_tabular_mlp.py)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 An end-to-end computational genomics and deep learning framework designed to analyze an individual's constitutional DNA (from a simple blood or saliva test) across **80 hereditary cancer genes**, predict the clinical pathogenicity of genetic mutations, and deliver **personalized, organ-specific cancer risk projections**.
 
 ---
@@ -284,10 +290,84 @@ python build_pan_cancer_germline_dataset.py
 ```bash
 python train_tabular_mlp.py
 ```
-*Trains on GPU in ~20 seconds, producing `germline_brca_tabular_mlp.pth` with 97% ROC-AUC.*
+*Trains Pan-Cancer ResNet on GPU in ~90 seconds, producing `pan_cancer_germline_resnet.pth` with 96.52% ROC-AUC and 92.35% Sensitivity across all 93 cancer genes.*
 
-### 4. Interactive Visualizer
-Explore neural activations, 2D decision boundaries, and mutation probing in real-time:
+### 4. Run Clinical Inference & Patient Risk Predictor
+Execute end-to-end clinical inference on demo patients or custom patient mutations:
 ```bash
-start genomic_playground.html
+# Run Sarah's high-risk clinical case study vs benchmark control
+python predict.py --demo
+
+# Evaluate a custom clinical mutation
+python predict.py --gene BRCA1 --chrom chr17 --pos 43044295 --ref C --alt G --patient PATIENT_001
 ```
+
+### 5. Interactive Visualizers
+Explore neural activations, 2D decision boundaries, and mutation probing in real-time in any web browser:
+```bash
+# Launch interactive genomic playground (TensorFlow Playground style)
+start genomic_playground.html
+
+# Launch interactive 5-stage patient-to-hospital clinical flow diagram
+start cancer_detection_flow.html
+```
+
+---
+
+## 10. Repository Architecture & Directory Structure
+
+The repository is organized following modern scientific deep learning best practices:
+
+```text
+Deep-Learning-project/
+├── predict.py                            # Production Clinical Inference CLI & Risk Predictor
+├── train_tabular_mlp.py                  # PyTorch ResNet training engine (Entity Embeddings + Skip Connections)
+├── bio_chemistry_engine.py               # RDKit biophysical featurizer & 20 AA chemical property matrix
+├── build_pan_cancer_germline_dataset.py  # High-throughput ClinVar extraction & featurization pipeline
+├── pan_cancer_germline_resnet.pth        # Trained PyTorch model checkpoint (0.9652 ROC-AUC)
+│
+├── pan_cancer_germline_dataset.csv       # 119,045 clean labeled SNVs across 93 genes (10.8 MB)
+├── pan_cancer_vus_dataset.csv            # 135,839 VUS variants for AI resolution (13.6 MB)
+├── pan_cancer_indels_frameshifts.csv     # 49,105 structural indels & frameshifts (8.8 MB)
+├── pan_cancer_conflicting_variants.csv   # 32,656 disputed clinical interpretations (6.2 MB)
+│
+├── requirements.txt                      # Production pinned dependencies
+├── LICENSE                               # MIT Open-Source License
+├── README.md                             # Comprehensive scientific & engineering documentation
+│
+├── genomic_playground.html               # Interactive browser-based neural network explorer
+├── cancer_detection_flow.html            # Interactive end-to-end clinical workflow visualizer
+│
+└── docs/
+    └── archive/                          # Archived pilot scripts, legacy designs, and exploratory data
+        ├── README.md                     # Documentation detailing archived experiments
+        ├── context.md                    # Legacy 12-class somatic MIL architecture doc
+        ├── MASTER_IMPLEMENTATION_PLAN.md # Legacy SRA streaming plan
+        ├── build_brca_germline_dataset.py# Pilot BRCA1/2 extractor
+        ├── brca_germline_pilot_dataset.csv# Pilot BRCA1/2 dataset
+        ├── germline_brca_tabular_mlp.pth # Pilot 2-layer MLP weights
+        └── verify_model.py               # Pilot model verification test
+```
+
+---
+
+## 11. Clinical Verification & Benchmark Results
+
+Evaluated on **17,857 completely unseen clinical test variants** across all 93 cancer genes:
+
+| Metric | Result | Clinical Significance |
+| :--- | :---: | :--- |
+| **ROC-AUC** | **0.9652** | Exceptional discriminative power between damaging and benign variants |
+| **Sensitivity (Recall)** | **92.35%** | Minimizes false negatives; critical for detecting life-threatening mutations |
+| **Specificity** | **94.80%** | Minimizes false positives; prevents unnecessary prophylactic surgeries |
+| **Training Speed** | **89.6 sec** | Full 25-epoch convergence on NVIDIA RTX 3050 GPU (1.19 Lakh samples) |
+| **Inference Latency** | **< 15 ms** | Real-time clinical scoring per patient variant |
+
+---
+
+## 12. License & Acknowledgements
+
+* **License:** Distributed under the [MIT License](LICENSE).
+* **Data Sources:** ClinVar (NCBI / NIH), Ensembl GRCh38, NCCN & ACMG Clinical Guidelines.
+* **Designed & Maintained By:** Anish Gupta.
+

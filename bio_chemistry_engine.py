@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Bio-Chemistry, RDKit, Evolutionary Selection & Mutual Information Engine
 # Master Pan-Cancer Risk Pipeline
 # ==============================================================================
@@ -10,7 +10,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors, AllChem, DataStructs
 
-BASE_DIR = r"D:\DL"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REF_PANEL_FNA = os.path.join(BASE_DIR, "unified_128_gene_reference_panel.fna")
 
 # 1. Universal Genetic Code
@@ -113,11 +113,10 @@ for code, smi in AA_SMILES.items():
 
 print("[+] RDKit Amino Acid Engine initialized successfully.")
 
-# Load Gene Strands & Lengths from Reference Panel FNA
+# Load Gene Strands & Lengths from Reference Panel FNA (if available)
 def load_gene_metadata(fna_path=REF_PANEL_FNA):
     gene_meta = {}
     if not os.path.exists(fna_path):
-        print(f"[!] FNA path not found: {fna_path}")
         return gene_meta
         
     with open(fna_path, "r") as f:
@@ -137,7 +136,8 @@ def load_gene_metadata(fna_path=REF_PANEL_FNA):
     return gene_meta
 
 GENE_METADATA = load_gene_metadata()
-print(f"[+] Loaded metadata for {len(GENE_METADATA)} genes from reference panel.")
+if len(GENE_METADATA) > 0:
+    print(f"[+] Loaded metadata for {len(GENE_METADATA)} genes from reference panel.")
 
 def compute_mutation_features(row):
     chrom = str(row.get('chrom', ''))
