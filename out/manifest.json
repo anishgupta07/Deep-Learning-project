@@ -1,0 +1,1077 @@
+{
+  "created": "2026-10-17 12:56:27",
+  "input": {
+    "file": "variant_summary.txt.gz",
+    "bytes": 450727547,
+    "mtime": "2026-10-05"
+  },
+  "params": {
+    "min_stars": 1,
+    "indels": true
+  },
+  "n_panel_genes": 130,
+  "counts": {
+    "rows": 9223698,
+    "panel_rows": 879854,
+    "grch38": 436951,
+    "germline": 419070,
+    "snv_pathogenic": 21168,
+    "dropped_low_stars": 2284,
+    "snv_benign": 127657,
+    "indel_labelled": 40153,
+    "snv_conflict": 36608,
+    "snv_vus": 175796,
+    "no_vcf_alleles": 1672,
+    "not_snv_skipped": 1370,
+    "ref_equals_alt_skipped": 41,
+    "skipped_overlapping_panel_genes": 67,
+    "labelled_snv_off_primary_transcript": 949
+  },
+  "primary_transcripts": {
+    "TMEM127": "NM_017849.4",
+    "XPC": "NM_004628.5",
+    "NF1": "NM_001042492.3",
+    "SDHAF2": "NM_017841.4",
+    "APC": "NM_000038.6",
+    "FANCI": "NM_001113378.2",
+    "XPA": "NM_000380.4",
+    "SAMD9": "NM_017654.4",
+    "PALB2": "NM_024675.4",
+    "MSH2": "NM_000251.3",
+    "SPRED1": "NM_152594.3",
+    "VHL": "NM_000551.4",
+    "EXT2": "NM_207122.2",
+    "EXT1": "NM_000127.3",
+    "ATM": "NM_000051.4",
+    "SBDS": "NM_016038.4",
+    "CDC73": "NM_024529.5",
+    "NF2": "NM_000268.4",
+    "FLCN": "NM_144997.7",
+    "WT1": "NM_024426.6",
+    "SUFU": "NM_016169.4",
+    "NSD1": "NM_022455.5",
+    "DICER1": "NM_177438.3",
+    "BRIP1": "NM_032043.3",
+    "AIP": "NM_003977.4",
+    "TSC1": "NM_000368.5",
+    "MUTYH": "NM_001048174.2",
+    "WRN": "NM_000553.6",
+    "MLH3": "NM_001040108.2",
+    "CHEK2": "NM_007194.4",
+    "TINF2": "NM_001099274.3",
+    "RAD50": "NM_005732.4",
+    "AXIN2": "NM_004655.4",
+    "POLH": "NM_006502.3",
+    "RECQL4": "NM_004260.4",
+    "SMARCA4": "NM_003072.5",
+    "FANCG": "NM_004629.2",
+    "BUB1B": "NM_001211.6",
+    "RAD51C": "NM_058216.3",
+    "SDHD": "NM_003002.4",
+    "NBN": "NM_002485.5",
+    "SDHC": "NM_003001.5",
+    "STK11": "NM_000455.5",
+    "PTEN": "NM_000314.8",
+    "SMARCB1": "NM_003073.5",
+    "BARD1": "NM_000465.4",
+    "PTCH1": "NM_000264.5",
+    "BMPR1A": "NM_004329.3",
+    "SMAD4": "NM_005359.6",
+    "FANCE": "NM_021922.3",
+    "SDHA": "NM_004168.4",
+    "CDKN1C": "NM_001122630.2",
+    "MRE11": "NM_005591.4",
+    "DDB2": "NM_000107.3",
+    "CDKN1B": "NM_004064.5",
+    "MSH6": "NM_000179.3",
+    "PMS2": "NM_000535.7",
+    "BRCA2": "NM_000059.4",
+    "CDKN2A": "NM_000077.5",
+    "DKC1": "NM_001363.5",
+    "FANCD2": "NM_001018115.3",
+    "FANCC": "NM_000136.3",
+    "CDH1": "NM_004360.5",
+    "TP53": "NM_000546.6",
+    "TSC2": "NM_000548.5",
+    "PRKAR1A": "NM_002734.5",
+    "TERT": "NM_198253.3",
+    "EPCAM": "NM_002354.3",
+    "SDHB": "NM_003000.3",
+    "RB1": "NM_000321.3",
+    "PTPN11": "NM_002834.5",
+    "CBL": "NM_005188.4",
+    "MET": "NM_000245.4",
+    "RET": "NM_020975.6",
+    "MITF": "NM_001354604.2",
+    "RUNX1": "NM_001754.5",
+    "FH": "NM_000143.4",
+    "ERCC5": "NM_000123.4",
+    "ERCC3": "NM_000122.2",
+    "MEN1": "NM_001370259.2",
+    "ERCC2": "NM_000400.4",
+    "CDK4": "NM_000075.4",
+    "MLH1": "NM_000249.4",
+    "BRCA1": "NM_007294.4",
+    "CEBPA": "NM_004364.5",
+    "GATA2": "NM_032638.5",
+    "MAX": "NM_002382.5",
+    "RAD51D": "NM_002878.4",
+    "BAP1": "NM_004656.4",
+    "SMARCE1": "NM_003079.5",
+    "CEP57": "NM_014679.5",
+    "ANKRD26": "NM_014915.3",
+    "SLX4": "NM_032444.4",
+    "FAN1": "NM_014967.5",
+    "POLD1": "NM_002691.4",
+    "POLE": "NM_006231.4",
+    "RTEL1": "NM_001283009.2",
+    "BLM": "NM_000057.4",
+    "ERCC4": "NM_005236.3",
+    "TRIP13": "NM_004237.4",
+    "SAMD9L": "NM_152703.5",
+    "FANCB": "NM_001018113.3",
+    "LZTR1": "NM_006767.4",
+    "XRCC2": "NM_005431.2",
+    "HOXB13": "NM_006361.6",
+    "ABRAXAS1": "NM_139076.3",
+    "PMS1": "NM_000534.5",
+    "FANCA": "NM_000135.4",
+    "FANCF": "NM_022725.4",
+    "ETV6": "NM_001987.5",
+    "PHOX2B": "NM_003924.4",
+    "PARN": "NM_002582.4",
+    "DDX41": "NM_016222.4",
+    "FANCM": "NM_020937.4",
+    "NTHL1": "NM_002528.7",
+    "FANCL": "NM_018062.4",
+    "CTNNA1": "NM_001903.5",
+    "RAD51B": "NM_133510.4",
+    "PTCH2": "NM_003738.5",
+    "DIS3L2": "NM_152383.5",
+    "MSH3": "NM_002439.5",
+    "GREM1": "NM_013372.7",
+    "RNF43": "NM_017763.6",
+    "REST": "NM_005612.5",
+    "ACD": "NM_001082486.2",
+    "POT1": "NM_015450.3",
+    "RECQL": "NM_002907.4",
+    "RPS20": "NM_001023.4",
+    "MBD4": "NM_001276270.2",
+    "TERF2IP": "NM_018975.4"
+  },
+  "dropped_duplicate_label_conflicts": 0,
+  "genes_with_zero_labelled": [],
+  "genes_with_lt30_labelled": [],
+  "per_gene": {
+    "BRCA1": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 3388,
+      "pathogenic": 991,
+      "vus": 2175,
+      "conflict": 2897
+    },
+    "BRCA2": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 5556,
+      "pathogenic": 1286,
+      "vus": 3794,
+      "conflict": 5638
+    },
+    "PALB2": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 1467,
+      "pathogenic": 352,
+      "vus": 2626,
+      "conflict": 728
+    },
+    "ATM": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 4772,
+      "pathogenic": 1244,
+      "vus": 7867,
+      "conflict": 1457
+    },
+    "CHEK2": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 957,
+      "pathogenic": 279,
+      "vus": 1887,
+      "conflict": 269
+    },
+    "BARD1": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 1175,
+      "pathogenic": 185,
+      "vus": 1979,
+      "conflict": 420
+    },
+    "BRIP1": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 1617,
+      "pathogenic": 279,
+      "vus": 2974,
+      "conflict": 409
+    },
+    "RAD51C": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 659,
+      "pathogenic": 123,
+      "vus": 681,
+      "conflict": 454
+    },
+    "RAD51D": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 618,
+      "pathogenic": 80,
+      "vus": 833,
+      "conflict": 190
+    },
+    "RAD51B": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 238,
+      "pathogenic": 1,
+      "vus": 368,
+      "conflict": 9
+    },
+    "NBN": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 1054,
+      "pathogenic": 193,
+      "vus": 1717,
+      "conflict": 245
+    },
+    "MRE11": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 735,
+      "pathogenic": 91,
+      "vus": 1280,
+      "conflict": 118
+    },
+    "RAD50": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 1398,
+      "pathogenic": 206,
+      "vus": 2606,
+      "conflict": 146
+    },
+    "XRCC2": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 231,
+      "pathogenic": 6,
+      "vus": 487,
+      "conflict": 42
+    },
+    "RECQL": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 517,
+      "pathogenic": 2,
+      "vus": 1063,
+      "conflict": 55
+    },
+    "ABRAXAS1": {
+      "group": "Breast_Ovarian_HR_repair",
+      "benign": 317,
+      "pathogenic": 0,
+      "vus": 574,
+      "conflict": 35
+    },
+    "TP53": {
+      "group": "Li_Fraumeni",
+      "benign": 1011,
+      "pathogenic": 395,
+      "vus": 699,
+      "conflict": 515
+    },
+    "MLH1": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 1322,
+      "pathogenic": 620,
+      "vus": 1992,
+      "conflict": 494
+    },
+    "MSH2": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 1910,
+      "pathogenic": 589,
+      "vus": 2101,
+      "conflict": 1392
+    },
+    "MSH6": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 2087,
+      "pathogenic": 480,
+      "vus": 4029,
+      "conflict": 1157
+    },
+    "PMS2": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 1464,
+      "pathogenic": 323,
+      "vus": 2627,
+      "conflict": 539
+    },
+    "EPCAM": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 348,
+      "pathogenic": 20,
+      "vus": 540,
+      "conflict": 15
+    },
+    "MSH3": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 1603,
+      "pathogenic": 183,
+      "vus": 2709,
+      "conflict": 224
+    },
+    "MLH3": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 996,
+      "pathogenic": 21,
+      "vus": 2072,
+      "conflict": 144
+    },
+    "PMS1": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 67,
+      "pathogenic": 2,
+      "vus": 106,
+      "conflict": 9
+    },
+    "POLE": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 3951,
+      "pathogenic": 190,
+      "vus": 5177,
+      "conflict": 855
+    },
+    "POLD1": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 2251,
+      "pathogenic": 4,
+      "vus": 2528,
+      "conflict": 460
+    },
+    "MBD4": {
+      "group": "Lynch_MMR_polymerase",
+      "benign": 387,
+      "pathogenic": 54,
+      "vus": 757,
+      "conflict": 69
+    },
+    "APC": {
+      "group": "Polyposis_hamartoma",
+      "benign": 3346,
+      "pathogenic": 664,
+      "vus": 8315,
+      "conflict": 759
+    },
+    "MUTYH": {
+      "group": "Polyposis_hamartoma",
+      "benign": 1133,
+      "pathogenic": 205,
+      "vus": 1801,
+      "conflict": 667
+    },
+    "NTHL1": {
+      "group": "Polyposis_hamartoma",
+      "benign": 529,
+      "pathogenic": 47,
+      "vus": 897,
+      "conflict": 133
+    },
+    "AXIN2": {
+      "group": "Polyposis_hamartoma",
+      "benign": 1349,
+      "pathogenic": 56,
+      "vus": 2154,
+      "conflict": 319
+    },
+    "GREM1": {
+      "group": "Polyposis_hamartoma",
+      "benign": 221,
+      "pathogenic": 0,
+      "vus": 221,
+      "conflict": 4
+    },
+    "BMPR1A": {
+      "group": "Polyposis_hamartoma",
+      "benign": 847,
+      "pathogenic": 127,
+      "vus": 1155,
+      "conflict": 183
+    },
+    "SMAD4": {
+      "group": "Polyposis_hamartoma",
+      "benign": 809,
+      "pathogenic": 117,
+      "vus": 1059,
+      "conflict": 159
+    },
+    "STK11": {
+      "group": "Polyposis_hamartoma",
+      "benign": 958,
+      "pathogenic": 144,
+      "vus": 1028,
+      "conflict": 335
+    },
+    "PTEN": {
+      "group": "Polyposis_hamartoma",
+      "benign": 691,
+      "pathogenic": 496,
+      "vus": 1378,
+      "conflict": 231
+    },
+    "RNF43": {
+      "group": "Polyposis_hamartoma",
+      "benign": 440,
+      "pathogenic": 2,
+      "vus": 779,
+      "conflict": 89
+    },
+    "FAN1": {
+      "group": "Polyposis_hamartoma",
+      "benign": 173,
+      "pathogenic": 26,
+      "vus": 296,
+      "conflict": 13
+    },
+    "RPS20": {
+      "group": "Polyposis_hamartoma",
+      "benign": 199,
+      "pathogenic": 5,
+      "vus": 133,
+      "conflict": 4
+    },
+    "CDH1": {
+      "group": "Hereditary_gastric",
+      "benign": 1558,
+      "pathogenic": 191,
+      "vus": 1976,
+      "conflict": 565
+    },
+    "CTNNA1": {
+      "group": "Hereditary_gastric",
+      "benign": 1263,
+      "pathogenic": 76,
+      "vus": 1590,
+      "conflict": 150
+    },
+    "CDKN2A": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 372,
+      "pathogenic": 73,
+      "vus": 651,
+      "conflict": 171
+    },
+    "CDK4": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 459,
+      "pathogenic": 2,
+      "vus": 613,
+      "conflict": 77
+    },
+    "BAP1": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 1275,
+      "pathogenic": 168,
+      "vus": 1291,
+      "conflict": 384
+    },
+    "MITF": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 417,
+      "pathogenic": 75,
+      "vus": 717,
+      "conflict": 62
+    },
+    "POT1": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 846,
+      "pathogenic": 106,
+      "vus": 1232,
+      "conflict": 165
+    },
+    "ACD": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 562,
+      "pathogenic": 1,
+      "vus": 749,
+      "conflict": 29
+    },
+    "TERF2IP": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 315,
+      "pathogenic": 1,
+      "vus": 524,
+      "conflict": 9
+    },
+    "TERT": {
+      "group": "Melanoma_skin_telomere",
+      "benign": 1638,
+      "pathogenic": 85,
+      "vus": 1641,
+      "conflict": 280
+    },
+    "MEN1": {
+      "group": "Endocrine_MEN",
+      "benign": 876,
+      "pathogenic": 317,
+      "vus": 1162,
+      "conflict": 236
+    },
+    "RET": {
+      "group": "Endocrine_MEN",
+      "benign": 1612,
+      "pathogenic": 119,
+      "vus": 1982,
+      "conflict": 433
+    },
+    "CDKN1B": {
+      "group": "Endocrine_MEN",
+      "benign": 283,
+      "pathogenic": 30,
+      "vus": 551,
+      "conflict": 102
+    },
+    "CDC73": {
+      "group": "Endocrine_MEN",
+      "benign": 801,
+      "pathogenic": 71,
+      "vus": 846,
+      "conflict": 64
+    },
+    "AIP": {
+      "group": "Endocrine_MEN",
+      "benign": 404,
+      "pathogenic": 36,
+      "vus": 616,
+      "conflict": 65
+    },
+    "PRKAR1A": {
+      "group": "Endocrine_MEN",
+      "benign": 558,
+      "pathogenic": 53,
+      "vus": 548,
+      "conflict": 55
+    },
+    "SDHA": {
+      "group": "Paraganglioma_pheo",
+      "benign": 1045,
+      "pathogenic": 149,
+      "vus": 1538,
+      "conflict": 208
+    },
+    "SDHB": {
+      "group": "Paraganglioma_pheo",
+      "benign": 465,
+      "pathogenic": 151,
+      "vus": 670,
+      "conflict": 96
+    },
+    "SDHC": {
+      "group": "Paraganglioma_pheo",
+      "benign": 321,
+      "pathogenic": 56,
+      "vus": 412,
+      "conflict": 51
+    },
+    "SDHD": {
+      "group": "Paraganglioma_pheo",
+      "benign": 245,
+      "pathogenic": 75,
+      "vus": 402,
+      "conflict": 52
+    },
+    "SDHAF2": {
+      "group": "Paraganglioma_pheo",
+      "benign": 217,
+      "pathogenic": 21,
+      "vus": 384,
+      "conflict": 46
+    },
+    "TMEM127": {
+      "group": "Paraganglioma_pheo",
+      "benign": 327,
+      "pathogenic": 40,
+      "vus": 646,
+      "conflict": 35
+    },
+    "MAX": {
+      "group": "Paraganglioma_pheo",
+      "benign": 247,
+      "pathogenic": 30,
+      "vus": 285,
+      "conflict": 25
+    },
+    "VHL": {
+      "group": "Paraganglioma_pheo",
+      "benign": 524,
+      "pathogenic": 222,
+      "vus": 725,
+      "conflict": 246
+    },
+    "FH": {
+      "group": "Renal",
+      "benign": 690,
+      "pathogenic": 278,
+      "vus": 929,
+      "conflict": 205
+    },
+    "FLCN": {
+      "group": "Renal",
+      "benign": 930,
+      "pathogenic": 140,
+      "vus": 1145,
+      "conflict": 235
+    },
+    "MET": {
+      "group": "Renal",
+      "benign": 1658,
+      "pathogenic": 7,
+      "vus": 2410,
+      "conflict": 493
+    },
+    "TSC1": {
+      "group": "Renal",
+      "benign": 1619,
+      "pathogenic": 271,
+      "vus": 2119,
+      "conflict": 686
+    },
+    "TSC2": {
+      "group": "Renal",
+      "benign": 3920,
+      "pathogenic": 678,
+      "vus": 4093,
+      "conflict": 1832
+    },
+    "NF1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 4050,
+      "pathogenic": 1866,
+      "vus": 5454,
+      "conflict": 1299
+    },
+    "NF2": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 825,
+      "pathogenic": 151,
+      "vus": 1139,
+      "conflict": 142
+    },
+    "SMARCB1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 586,
+      "pathogenic": 63,
+      "vus": 524,
+      "conflict": 55
+    },
+    "LZTR1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 1239,
+      "pathogenic": 337,
+      "vus": 2171,
+      "conflict": 277
+    },
+    "SUFU": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 724,
+      "pathogenic": 51,
+      "vus": 878,
+      "conflict": 112
+    },
+    "PTCH1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 2166,
+      "pathogenic": 315,
+      "vus": 2513,
+      "conflict": 628
+    },
+    "PTCH2": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 443,
+      "pathogenic": 0,
+      "vus": 597,
+      "conflict": 20
+    },
+    "SMARCA4": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 2871,
+      "pathogenic": 195,
+      "vus": 2637,
+      "conflict": 484
+    },
+    "SMARCE1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 450,
+      "pathogenic": 40,
+      "vus": 503,
+      "conflict": 108
+    },
+    "DICER1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 2490,
+      "pathogenic": 300,
+      "vus": 3711,
+      "conflict": 308
+    },
+    "SPRED1": {
+      "group": "Neurocutaneous_rhabdoid_DICER1",
+      "benign": 364,
+      "pathogenic": 66,
+      "vus": 626,
+      "conflict": 64
+    },
+    "RB1": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 1339,
+      "pathogenic": 407,
+      "vus": 1752,
+      "conflict": 261
+    },
+    "WT1": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 721,
+      "pathogenic": 95,
+      "vus": 924,
+      "conflict": 142
+    },
+    "DIS3L2": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 851,
+      "pathogenic": 40,
+      "vus": 1191,
+      "conflict": 63
+    },
+    "CDKN1C": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 355,
+      "pathogenic": 38,
+      "vus": 529,
+      "conflict": 30
+    },
+    "REST": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 246,
+      "pathogenic": 10,
+      "vus": 454,
+      "conflict": 27
+    },
+    "NSD1": {
+      "group": "Retinoblastoma_Wilms_overgrowth",
+      "benign": 778,
+      "pathogenic": 363,
+      "vus": 953,
+      "conflict": 230
+    },
+    "RUNX1": {
+      "group": "Hematologic_predisposition",
+      "benign": 654,
+      "pathogenic": 98,
+      "vus": 905,
+      "conflict": 0
+    },
+    "GATA2": {
+      "group": "Hematologic_predisposition",
+      "benign": 613,
+      "pathogenic": 73,
+      "vus": 845,
+      "conflict": 97
+    },
+    "CEBPA": {
+      "group": "Hematologic_predisposition",
+      "benign": 396,
+      "pathogenic": 7,
+      "vus": 632,
+      "conflict": 125
+    },
+    "DDX41": {
+      "group": "Hematologic_predisposition",
+      "benign": 554,
+      "pathogenic": 65,
+      "vus": 623,
+      "conflict": 109
+    },
+    "ETV6": {
+      "group": "Hematologic_predisposition",
+      "benign": 379,
+      "pathogenic": 27,
+      "vus": 423,
+      "conflict": 53
+    },
+    "ANKRD26": {
+      "group": "Hematologic_predisposition",
+      "benign": 937,
+      "pathogenic": 12,
+      "vus": 1907,
+      "conflict": 151
+    },
+    "TINF2": {
+      "group": "Hematologic_predisposition",
+      "benign": 310,
+      "pathogenic": 14,
+      "vus": 308,
+      "conflict": 27
+    },
+    "DKC1": {
+      "group": "Hematologic_predisposition",
+      "benign": 272,
+      "pathogenic": 17,
+      "vus": 144,
+      "conflict": 33
+    },
+    "RTEL1": {
+      "group": "Hematologic_predisposition",
+      "benign": 2135,
+      "pathogenic": 134,
+      "vus": 2127,
+      "conflict": 136
+    },
+    "PARN": {
+      "group": "Hematologic_predisposition",
+      "benign": 375,
+      "pathogenic": 51,
+      "vus": 437,
+      "conflict": 23
+    },
+    "SAMD9": {
+      "group": "Hematologic_predisposition",
+      "benign": 823,
+      "pathogenic": 23,
+      "vus": 1722,
+      "conflict": 74
+    },
+    "SAMD9L": {
+      "group": "Hematologic_predisposition",
+      "benign": 728,
+      "pathogenic": 13,
+      "vus": 1672,
+      "conflict": 98
+    },
+    "SBDS": {
+      "group": "Hematologic_predisposition",
+      "benign": 135,
+      "pathogenic": 23,
+      "vus": 232,
+      "conflict": 10
+    },
+    "FANCA": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 2536,
+      "pathogenic": 416,
+      "vus": 2614,
+      "conflict": 365
+    },
+    "FANCB": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 300,
+      "pathogenic": 4,
+      "vus": 360,
+      "conflict": 50
+    },
+    "FANCC": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 754,
+      "pathogenic": 122,
+      "vus": 1014,
+      "conflict": 146
+    },
+    "FANCD2": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 907,
+      "pathogenic": 123,
+      "vus": 758,
+      "conflict": 97
+    },
+    "FANCE": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 331,
+      "pathogenic": 24,
+      "vus": 347,
+      "conflict": 50
+    },
+    "FANCF": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 131,
+      "pathogenic": 15,
+      "vus": 320,
+      "conflict": 25
+    },
+    "FANCG": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 599,
+      "pathogenic": 90,
+      "vus": 657,
+      "conflict": 44
+    },
+    "FANCI": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 1000,
+      "pathogenic": 112,
+      "vus": 953,
+      "conflict": 76
+    },
+    "FANCL": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 338,
+      "pathogenic": 58,
+      "vus": 302,
+      "conflict": 18
+    },
+    "FANCM": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 1147,
+      "pathogenic": 84,
+      "vus": 2544,
+      "conflict": 140
+    },
+    "SLX4": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 873,
+      "pathogenic": 68,
+      "vus": 1407,
+      "conflict": 140
+    },
+    "BLM": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 1566,
+      "pathogenic": 195,
+      "vus": 2635,
+      "conflict": 269
+    },
+    "WRN": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 1254,
+      "pathogenic": 197,
+      "vus": 1872,
+      "conflict": 96
+    },
+    "RECQL4": {
+      "group": "Fanconi_DNA_repair_chromosome_instability",
+      "benign": 1854,
+      "pathogenic": 177,
+      "vus": 2846,
+      "conflict": 213
+    },
+    "XPA": {
+      "group": "Xeroderma_NER",
+      "benign": 182,
+      "pathogenic": 34,
+      "vus": 76,
+      "conflict": 11
+    },
+    "XPC": {
+      "group": "Xeroderma_NER",
+      "benign": 658,
+      "pathogenic": 89,
+      "vus": 198,
+      "conflict": 38
+    },
+    "ERCC2": {
+      "group": "Xeroderma_NER",
+      "benign": 1035,
+      "pathogenic": 94,
+      "vus": 945,
+      "conflict": 78
+    },
+    "ERCC3": {
+      "group": "Xeroderma_NER",
+      "benign": 284,
+      "pathogenic": 35,
+      "vus": 264,
+      "conflict": 34
+    },
+    "ERCC4": {
+      "group": "Xeroderma_NER",
+      "benign": 342,
+      "pathogenic": 39,
+      "vus": 550,
+      "conflict": 55
+    },
+    "ERCC5": {
+      "group": "Xeroderma_NER",
+      "benign": 216,
+      "pathogenic": 28,
+      "vus": 187,
+      "conflict": 58
+    },
+    "POLH": {
+      "group": "Xeroderma_NER",
+      "benign": 295,
+      "pathogenic": 31,
+      "vus": 245,
+      "conflict": 24
+    },
+    "DDB2": {
+      "group": "Xeroderma_NER",
+      "benign": 69,
+      "pathogenic": 10,
+      "vus": 67,
+      "conflict": 12
+    },
+    "HOXB13": {
+      "group": "Other_hereditary",
+      "benign": 336,
+      "pathogenic": 1,
+      "vus": 775,
+      "conflict": 52
+    },
+    "EXT1": {
+      "group": "Other_hereditary",
+      "benign": 265,
+      "pathogenic": 245,
+      "vus": 341,
+      "conflict": 39
+    },
+    "EXT2": {
+      "group": "Other_hereditary",
+      "benign": 309,
+      "pathogenic": 114,
+      "vus": 368,
+      "conflict": 55
+    },
+    "PHOX2B": {
+      "group": "Other_hereditary",
+      "benign": 453,
+      "pathogenic": 20,
+      "vus": 641,
+      "conflict": 39
+    },
+    "BUB1B": {
+      "group": "Other_hereditary",
+      "benign": 825,
+      "pathogenic": 43,
+      "vus": 1462,
+      "conflict": 46
+    },
+    "PTPN11": {
+      "group": "Other_hereditary",
+      "benign": 499,
+      "pathogenic": 156,
+      "vus": 524,
+      "conflict": 73
+    },
+    "CEP57": {
+      "group": "Other_hereditary",
+      "benign": 299,
+      "pathogenic": 12,
+      "vus": 604,
+      "conflict": 14
+    },
+    "TRIP13": {
+      "group": "Other_hereditary",
+      "benign": 126,
+      "pathogenic": 3,
+      "vus": 83,
+      "conflict": 2
+    },
+    "CBL": {
+      "group": "Other_hereditary",
+      "benign": 827,
+      "pathogenic": 25,
+      "vus": 1393,
+      "conflict": 125
+    }
+  }
+}
