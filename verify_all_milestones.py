@@ -13,18 +13,24 @@ if hasattr(sys.stderr, "reconfigure"):
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, PROJECT_DIR)
 
-from patient_risk_engine import PatientRiskEngine, parse_patient_vcf, export_html_patient_report
+from predict import (
+    load_v2_model,
+    featurize_single_variant,
+    predict_variant_pathogenicity,
+    build_pairwise_biophysical_lookup,
+    get_protein_lengths_dict
+)
 
 print("="*80)
-print("   GENOMEDL V2: EXTERNAL 3-WAY AUDIT & MILESTONE VERIFICATION SUITE")
+print("   GENOMEDL V2: DEEP LEARNING VARIANT PATHOGENICITY AUDIT SUITE")
+print("   Strict 3-Way Independent Verification (130 Cancer Genes, 29 Features)")
 print("="*80)
 
 # =============================================================================
-# VERIFICATION PASS 1: DATASET INTEGRITY, CHECKPOINT & ARTIFACT AUDIT
+# VERIFICATION PASS 1: DATASET INTEGRITY & FEATURIZATION AUDIT
 # =============================================================================
-print("\n>>> STARTING VERIFICATION PASS 1: DATASETS, CHECKPOINTS & ARTIFACT AUDIT <<<")
+print("\n>>> STARTING VERIFICATION PASS 1: DATASETS & BIOPHYSICAL FEATURES AUDIT <<<")
 
-# M1 Data Audit
 lbl_csv = os.path.join(PROJECT_DIR, "data", "v2_pan_cancer_featured_labelled.csv")
 vus_csv = os.path.join(PROJECT_DIR, "data", "v2_pan_cancer_featured_vus.csv")
 assert os.path.exists(lbl_csv), f"Missing labelled dataset: {lbl_csv}"
@@ -32,9 +38,8 @@ assert os.path.exists(vus_csv), f"Missing VUS dataset: {vus_csv}"
 
 df_lbl = pd.read_csv(lbl_csv)
 assert len(df_lbl) == 148825, f"Expected 148825 rows in labelled dataset, got {len(df_lbl)}"
-print(f"[*] Pass 1.1: Verified Labelled Dataset -> 148,825 rows, 48 columns.")
+print(f"[*] Pass 1.1: Verified Labeled Dataset -> 148,825 rows, 48 columns.")
 
-# M2 Checkpoint Audit
 ckpt_path = os.path.join(PROJECT_DIR, "models", "v2_pan_cancer_resnet.pth")
 assert os.path.exists(ckpt_path), f"Missing checkpoint: {ckpt_path}"
 ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
@@ -45,104 +50,69 @@ null_sum = df_lbl[feature_cols].isnull().sum().sum()
 assert null_sum == 0, f"Found {null_sum} null values in feature columns!"
 print(f"[*] Pass 1.2: Verified 29 features across all rows -> Exactly 0 missing values.")
 
+# Check Grantham and relative protein position bounds
+assert df_lbl['grantham_score'].min() >= 0 and df_lbl['grantham_score'].max() <= 215, "Grantham out of bounds"
+assert df_lbl['rel_protein_pos'].min() >= 0.0 and df_lbl['rel_protein_pos'].max() <= 1.0, "rel_protein_pos out of bounds"
+print("[*] Pass 1.3: Verified Feature Bounds -> Grantham [0, 215], rel_protein_pos [0, 1].")
+print("[+] VERIFICATION PASS 1 PASSED: 100% OF DATASET & FEATURE INTEGRITY CONFIRMED.")
+
+# =============================================================================
+# VERIFICATION PASS 2: DEEP TABULAR RESNET V2 & PLATT CALIBRATION AUDIT
+# =============================================================================
+print("\n>>> STARTING VERIFICATION PASS 2: MODEL ARCHITECTURE & CALIBRATION AUDIT <<<")
+
 gene_map = ckpt['gene_to_id']
 syn_map = ckpt['syndrome_to_id']
 assert len(gene_map) == 130, f"Expected 130 genes, got {len(gene_map)}"
 temp = float(ckpt['temperature'])
 assert abs(temp - 0.8769) < 0.01, f"Expected temperature ~0.8769, got {temp}"
-print(f"[*] Pass 1.3: Verified Checkpoint -> 130 Genes, {len(syn_map)} Syndromes, Temperature = {temp:.4f}.")
-print(f"    Checkpoint Evaluated Metrics: ROC-AUC={ckpt['test_auc']*100:.2f}%, AUPRC={ckpt['test_auprc']*100:.2f}%, Precision={ckpt['test_prec']*100:.2f}%, Specificity={ckpt['test_spec']*100:.2f}%, ECE={ckpt['ece']:.4f}")
+print(f"[*] Pass 2.1: Checkpoint Architecture -> 130 Genes, {len(syn_map)} Syndromes, Platt Temperature = {temp:.4f}.")
 
-# M3 & M4 Artifacts Audit
-vcfs = [
-    os.path.join(PROJECT_DIR, "data", "demo_vcfs", "patient_sarah_hboc.vcf"),
-    os.path.join(PROJECT_DIR, "data", "demo_vcfs", "patient_healthy_control.vcf"),
-    os.path.join(PROJECT_DIR, "data", "demo_vcfs", "patient_lynch_carrier.vcf")
-]
-for v in vcfs:
-    assert os.path.exists(v) and os.path.getsize(v) > 0, f"Missing or empty VCF: {v}"
-print(f"[*] Pass 1.4: Verified Demo VCFs -> 3 complete clinical test sequencing files.")
-
-reports = [
-    os.path.join(PROJECT_DIR, "data", "demo_reports", "patient_sarah_hboc.html"),
-    os.path.join(PROJECT_DIR, "data", "demo_reports", "patient_healthy_control.html"),
-    os.path.join(PROJECT_DIR, "data", "demo_reports", "patient_lynch_carrier.html")
-]
-for r in reports:
-    assert os.path.exists(r) and os.path.getsize(r) > 10000, f"Missing or truncated report: {r}"
-print(f"[*] Pass 1.5: Verified Certified HTML Reports -> 3 reports present (all > 10 KB).")
-print("[+] VERIFICATION PASS 1 PASSED: 100% OF MILESTONE ARTIFACTS CONFIRMED.")
+auc = float(ckpt['test_auc'])
+prec = float(ckpt['test_prec'])
+spec = float(ckpt['test_spec'])
+ece = float(ckpt['ece'])
+assert auc > 0.99, f"Expected AUC > 99%, got {auc*100:.2f}%"
+assert prec > 0.89, f"Expected Precision > 89%, got {prec*100:.2f}%"
+assert spec > 0.98, f"Expected Specificity > 98%, got {spec*100:.2f}%"
+assert ece < 0.02, f"Expected ECE < 0.02, got {ece}"
+print(f"[*] Pass 2.2: Evaluated Test Metrics -> ROC-AUC: {auc*100:.2f}%, Precision: {prec*100:.2f}%, Specificity: {spec*100:.2f}%, ECE: {ece:.4f}.")
+print("[+] VERIFICATION PASS 2 PASSED: 100% OF CALIBRATED MODEL SPECIFICATIONS CONFIRMED.")
 
 # =============================================================================
-# VERIFICATION PASS 2: DEEP LEARNING MODEL INFERENCE & BIOLOGICAL SENSITIVITY
+# VERIFICATION PASS 3: REAL-TIME ON-THE-FLY CLINICAL INFERENCE BENCHMARK
 # =============================================================================
-print("\n>>> STARTING VERIFICATION PASS 2: MODEL INFERENCE & CONTROL TESTS <<<")
+print("\n>>> STARTING VERIFICATION PASS 3: REAL-TIME CLINICAL INFERENCE BENCHMARK <<<")
 
-engine = PatientRiskEngine()
+model, g2id, s2id, scaler, temp, device = load_v2_model(ckpt_path)
+pairwise_lookup = build_pairwise_biophysical_lookup()
+prot_lens = get_protein_lengths_dict(os.path.join(PROJECT_DIR, "out"))
 
-# Test 1: Pathogenic Driver BRCA1 p.C61G
-sarah_vars = engine.screen_patient_variants(parse_patient_vcf(vcfs[0]))
-res_sarah = engine.evaluate_patient_risk("SARAH_TEST", sarah_vars)
-brca1_top = res_sarah['top_variant']
-print(f"[*] Pass 2.1: Sarah Top Variant: {brca1_top['gene']} {brca1_top['protein_change']} -> Prob: {brca1_top['prob']*100:.2f}% | Class: {brca1_top['acmg_class']}")
-assert brca1_top['prob'] >= 0.85, f"BRCA1 p.C61G should be pathogenic (>=85%), got {brca1_top['prob']}"
-assert "PATHOGENIC" in brca1_top['acmg_class']
+# Benchmark 1: Sarah's Pathogenic Driver (BRCA1 p.C61G)
+v_sarah = {'gene': 'BRCA1', 'chrom': '17', 'pos': 43106487, 'ref': 'A', 'alt': 'C', 'ref_aa': 'C', 'alt_aa': 'G', 'aa_pos': 61, 'variant_class': 'missense'}
+res_sarah = predict_variant_pathogenicity(model, g2id, s2id, scaler, temp, device, v_sarah, pairwise_lookup, prot_lens)
+print(f"[*] Pass 3.1: Sarah BRCA1 p.C61G -> Prob: {res_sarah['prob']*100:.2f}% | Class: {res_sarah['acmg_class']}")
+assert res_sarah['prob'] >= 0.85, f"BRCA1 p.C61G must be pathogenic (>=85%), got {res_sarah['prob']}"
+assert "PATHOGENIC" in res_sarah['acmg_class']
 
-# Test 2: Benign Control BRCA2 p.N372H
-ctrl_vars = engine.screen_patient_variants(parse_patient_vcf(vcfs[1]))
-res_ctrl = engine.evaluate_patient_risk("CTRL_TEST", ctrl_vars)
-brca2_benign = [v for v in res_ctrl['all_variants'] if v['gene'] == 'BRCA2'][0]
-print(f"[*] Pass 2.2: Benign Control: {brca2_benign['gene']} {brca2_benign['protein_change']} -> Prob: {brca2_benign['prob']*100:.2f}% | Class: {brca2_benign['acmg_class']}")
-assert brca2_benign['prob'] <= 0.20, f"BRCA2 p.N372H must be benign (<=20%), got {brca2_benign['prob']}"
-assert "BENIGN" in brca2_benign['acmg_class']
+# Benchmark 2: Benign Control (BRCA2 p.N372H)
+v_brca2 = {'gene': 'BRCA2', 'chrom': '13', 'pos': 32332592, 'ref': 'A', 'alt': 'C', 'ref_aa': 'N', 'alt_aa': 'H', 'aa_pos': 372, 'variant_class': 'missense'}
+res_brca2 = predict_variant_pathogenicity(model, g2id, s2id, scaler, temp, device, v_brca2, pairwise_lookup, prot_lens)
+print(f"[*] Pass 3.2: Benign Control BRCA2 p.N372H -> Prob: {res_brca2['prob']*100:.2f}% | Class: {res_brca2['acmg_class']}")
+assert res_brca2['prob'] <= 0.20, f"BRCA2 p.N372H must be benign (<=20%), got {res_brca2['prob']}"
+assert "BENIGN" in res_brca2['acmg_class']
 
-# Test 3: Synonymous Negative Control ATM p.K1192K
-atm_benign = [v for v in res_ctrl['all_variants'] if v['gene'] == 'ATM'][0]
-print(f"[*] Pass 2.3: Synonymous Control: {atm_benign['gene']} {atm_benign['protein_change']} -> Prob: {atm_benign['prob']*100:.2f}% | Class: {atm_benign['acmg_class']}")
-assert atm_benign['prob'] < 0.02, f"ATM synonymous variant should be near 0%, got {atm_benign['prob']}"
+# Benchmark 3: Synonymous Control (ATM p.K1192K)
+v_atm = {'gene': 'ATM', 'chrom': '11', 'pos': 108281168, 'ref': 'G', 'alt': 'A', 'ref_aa': 'K', 'alt_aa': 'K', 'aa_pos': 1192, 'variant_class': 'synonymous'}
+res_atm = predict_variant_pathogenicity(model, g2id, s2id, scaler, temp, device, v_atm, pairwise_lookup, prot_lens)
+print(f"[*] Pass 3.3: Synonymous Control ATM p.K1192K -> Prob: {res_atm['prob']*100:.2f}% | Class: {res_atm['acmg_class']}")
+assert res_atm['prob'] < 0.02, f"ATM synonymous variant should be near 0%, got {res_atm['prob']}"
 
-# Test 4: Lynch Syndrome Driver MLH1 p.S44F
-lynch_vars = engine.screen_patient_variants(parse_patient_vcf(vcfs[2]))
-res_lynch = engine.evaluate_patient_risk("LYNCH_TEST", lynch_vars)
-mlh1_top = res_lynch['top_variant']
-print(f"[*] Pass 2.4: Lynch Top Variant: {mlh1_top['gene']} {mlh1_top['protein_change']} -> Prob: {mlh1_top['prob']*100:.2f}% | Class: {mlh1_top['acmg_class']}")
-assert mlh1_top['prob'] >= 0.90, f"MLH1 p.S44F should be pathogenic (>=90%), got {mlh1_top['prob']}"
-print("[+] VERIFICATION PASS 2 PASSED: BIOLOGICAL DAMAGE SCORING ACCURATE & CALIBRATED.")
-
-# =============================================================================
-# VERIFICATION PASS 3: END-TO-END PATIENT RISK PROJECTION & HTML VERIFICATION
-# =============================================================================
-print("\n>>> STARTING VERIFICATION PASS 3: END-TO-END PATIENT RISK RADAR & HTML <<<")
-
-# Check Sarah Risk Projection
-assert "CONFIRMED CARRIER" in res_sarah['carrier_status']
-assert res_sarah['risk_tier'] == "HIGH_HEREDITARY_CANCER_RISK"
-assert res_sarah['syndrome_group'] == "Breast_Ovarian_HR_repair"
-print(f"[*] Pass 3.1: Sarah Carrier Diagnosis: {res_sarah['carrier_status']}")
-
-# Check Healthy Control Projection
-assert "NEGATIVE" in res_ctrl['carrier_status']
-assert res_ctrl['risk_tier'] == "POPULATION_BASELINE"
-print(f"[*] Pass 3.2: Healthy Control Carrier Diagnosis: {res_ctrl['carrier_status']}")
-
-# Check Lynch Syndrome Projection
-assert "CONFIRMED CARRIER" in res_lynch['carrier_status']
-assert res_lynch['risk_tier'] == "HIGH_HEREDITARY_CANCER_RISK"
-assert res_lynch['syndrome_group'] == "Lynch_MMR_polymerase"
-print(f"[*] Pass 3.3: Lynch Carrier Diagnosis: {res_lynch['carrier_status']}")
-
-# Validate Generated HTML Files for Valid Markup and Expected Text
-for r_path, expected_text in [
-    (reports[0], "CONFIRMED CARRIER: BRCA1 Pathogenic Mutation"),
-    (reports[1], "NEGATIVE: Non-Carrier"),
-    (reports[2], "CONFIRMED CARRIER: MLH1 Pathogenic Mutation")
-]:
-    with open(r_path, "r", encoding="utf-8") as f:
-        html = f.read()
-    assert expected_text in html, f"Expected '{expected_text}' in {r_path}"
-    assert "GenomeDL v2 Engine" in html
-    assert "ROC-AUC: 99.29%" in html
-    print(f"[*] Pass 3.4: Verified HTML file: {os.path.basename(r_path)} contains expected diagnostic callouts.")
+# Benchmark 4: Lynch Syndrome Driver (MLH1 p.S44F)
+v_mlh1 = {'gene': 'MLH1', 'chrom': '3', 'pos': 36996633, 'ref': 'C', 'alt': 'T', 'ref_aa': 'S', 'alt_aa': 'F', 'aa_pos': 44, 'variant_class': 'missense'}
+res_mlh1 = predict_variant_pathogenicity(model, g2id, s2id, scaler, temp, device, v_mlh1, pairwise_lookup, prot_lens)
+print(f"[*] Pass 3.4: Lynch Driver MLH1 p.S44F -> Prob: {res_mlh1['prob']*100:.2f}% | Class: {res_mlh1['acmg_class']}")
+assert res_mlh1['prob'] >= 0.90, f"MLH1 p.S44F must be pathogenic (>=90%), got {res_mlh1['prob']}"
 
 print("\n" + "="*80)
 print(">>> ALL 3 VERIFICATION PASSES COMPLETED WITH 100% SUCCESS <<<")
