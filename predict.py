@@ -1,280 +1,229 @@
-# ==============================================================================
-# GenomeDL: AI-Driven 80-Gene Hereditary Cancer Interpretation Engine
-# Clinical Inference & Patient Risk Predictor (predict.py)
-# ==============================================================================
+#!/usr/bin/env python3
+"""
+==============================================================================
+GenomeDL v2: Clinical Single-Variant Inference & Pathogenicity Predictor
+==============================================================================
+Evaluates individual genetic variants in any of the 130 hereditary cancer genes
+using the calibrated GenomeDL v2 Deep Tabular Residual Network.
+"""
 
 import os
 import sys
+import argparse
+import warnings
+warnings.filterwarnings('ignore')
 
-# Force UTF-8 encoding on console streams with graceful fallback
+# Force UTF-8 on Windows console
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-import warnings
-warnings.filterwarnings('ignore')
-
-from rdkit import RDLogger
-RDLogger.DisableLog('rdApp.*')
-
-import argparse
 import torch
 import numpy as np
 import pandas as pd
 
-# Import architecture & biochemistry
-from train_tabular_mlp import GenomeDLResNet, TabularResidualBlock
-import bio_chemistry_engine as bce
-import rdkit.DataStructs as ds
+from train_v2_model import GenomeDLResNetV2, FEATURE_COLS, SCALE_COLS
+from build_features_v2 import build_pairwise_biophysical_lookup, get_protein_lengths_dict, TRANSITIONS
 
-# Pre-defined Organ Penetrance & Syndrome Mapping
-SYNDROME_ORGAN_RISKS = {
-    'Breast_and_Ovarian_Cancer': [
-        ('Breast Cancer', 72.0, 'Extreme Lifetime Risk (Population: 12.5%)'),
-        ('Ovarian Cancer', 44.0, 'High Lifetime Risk (Population: 1.3%)'),
-        ('Pancreatic Cancer', 8.5, 'Elevated Risk (Population: 1.6%)'),
-        ('Prostate Cancer (m)', 15.0, 'Elevated Risk (Population: 11.0%)')
-    ],
-    'Lynch_Syndrome_Colorectal': [
-        ('Colorectal / Colon Cancer', 75.0, 'Extreme Lifetime Risk (Population: 4.2%)'),
-        ('Endometrial / Uterine Cancer', 50.0, 'High Lifetime Risk (Population: 2.8%)'),
-        ('Stomach / Gastric Cancer', 12.0, 'Elevated Lifetime Risk (Population: 0.9%)'),
-        ('Ovarian Cancer', 10.0, 'Elevated Risk (Population: 1.3%)')
-    ],
-    'Polyposis_Colorectal': [
-        ('Colorectal Polyposis & Cancer', 95.0, 'Critical Risk (>95% without surveillance)'),
-        ('Duodenal / Small Bowel Cancer', 10.0, 'Elevated Risk (Population: 0.3%)')
-    ],
-    'Li_Fraumeni_Multi_Organ': [
-        ('Soft-Tissue Sarcomas', 85.0, 'Severe Lifetime Predisposition'),
-        ('Pre-menopausal Breast Cancer', 60.0, 'High Early-Onset Risk'),
-        ('Brain & Adrenocortical Tumors', 30.0, 'Elevated Childhood & Adult Risk')
-    ],
-    'Cowden_Syndrome': [
-        ('Breast Cancer', 80.0, 'Extreme Lifetime Risk'),
-        ('Thyroid Cancer (Follicular)', 35.0, 'High Lifetime Risk (Population: 1.2%)'),
-        ('Endometrial Cancer', 28.0, 'Elevated Risk (Population: 2.8%)')
-    ],
-    'Gastric_Cancer': [
-        ('Diffuse Gastric (Stomach) Cancer', 70.0, 'Extreme Lifetime Risk'),
-        ('Lobular Breast Cancer', 42.0, 'High Lifetime Risk (Population: 1.5%)')
-    ],
-    'Endocrine_Thyroid_MEN': [
-        ('Medullary Thyroid Cancer', 95.0, 'Critical Endocrine Risk'),
-        ('Pheochromocytoma', 40.0, 'Adrenal Gland Tumor Risk'),
-        ('Parathyroid Adenomas', 25.0, 'Elevated Risk')
-    ],
-    'Renal_VHL_Syndrome': [
-        ('Clear Cell Renal (Kidney) Cancer', 70.0, 'High Lifetime Risk (Population: 1.8%)'),
-        ('Pheochromocytoma', 20.0, 'Elevated Endocrine Risk')
-    ],
-    'Melanoma_Pancreatic_Cancer': [
-        ('Cutaneous Melanoma', 60.0, 'High Lifetime Risk (Population: 2.2%)'),
-        ('Pancreatic Adenocarcinoma', 20.0, 'Elevated Lifetime Risk (Population: 1.6%)')
-    ]
-}
-
-def load_inference_model(weights_path=None):
+def load_v2_model(weights_path=None):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     if weights_path is None:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        candidate_models = os.path.join(script_dir, "models", "pan_cancer_germline_resnet.pth")
-        if os.path.exists(candidate_models):
-            weights_path = candidate_models
-        else:
-            weights_path = os.path.join(script_dir, "pan_cancer_germline_resnet.pth")
-            
+        v2_path = os.path.join(script_dir, "models", "v2_pan_cancer_resnet.pth")
+        weights_path = v2_path if os.path.exists(v2_path) else os.path.join(script_dir, "models", "pan_cancer_germline_resnet.pth")
+        
     if not os.path.exists(weights_path):
-        print(f"[!] Error: Model weights not found at {weights_path}")
-        print("    Please run: python train_tabular_mlp.py first.")
-        sys.exit(1)
+        sys.exit(f"[!] Error: Model weights not found at {weights_path}")
         
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint = torch.load(weights_path, map_location=device, weights_only=False)
     
     gene_to_id = checkpoint['gene_to_id']
+    syn_to_id = checkpoint.get('syndrome_to_id', {})
     scaler = checkpoint['scaler']
+    temperature = checkpoint.get('temperature', 0.8769)
     
-    # 19 continuous features + 93 genes + 23 syndromes
-    model = GenomeDLResNet(
-        num_cont=19,
+    model = GenomeDLResNetV2(
+        num_cont=len(FEATURE_COLS),
         num_genes=len(gene_to_id),
-        num_syndromes=23,
+        num_syndromes=len(syn_to_id),
         hidden_dim=256
     ).to(device)
     
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
-    return model, gene_to_id, scaler, device
+    return model, gene_to_id, syn_to_id, scaler, temperature, device
 
-def evaluate_variant(model, gene_to_id, scaler, device, variant):
+# Gene to Syndrome default lookup for 130 genes
+from extract_clinvar_hereditary import GENE2SYN
+
+def featurize_single_variant(variant, pairwise_lookup, prot_lens):
     gene = variant['gene']
-    gene_id = gene_to_id.get(gene, 0)
-    syn_id = 0 # Default / HBOC syndrome index
+    ref = variant['ref'].upper()
+    alt = variant['alt'].upper()
+    ref_aa = variant.get('ref_aa', '.').upper()
+    alt_aa = variant.get('alt_aa', '.').upper()
+    aa_pos = int(variant.get('aa_pos', 0))
+    vclass = variant.get('variant_class', 'missense' if ref_aa != alt_aa and ref_aa != '.' else 'intronic')
     
-    ref_aa = variant.get('ref_aa', 'C')
-    alt_aa = variant.get('alt_aa', 'G')
+    # 1. Base one-hots
+    ref_onehot = [1.0 if ref == b else 0.0 for b in ['A', 'C', 'G', 'T']]
+    alt_onehot = [1.0 if alt == b else 0.0 for b in ['A', 'C', 'G', 'T']]
+    is_trans = 1.0 if (ref, alt) in TRANSITIONS else 0.0
     
-    # RDKit biophysics
-    ref_p = bce.AA_PROPS.get(ref_aa, bce.AA_PROPS['A'])
-    alt_p = bce.AA_PROPS.get(alt_aa, bce.AA_PROPS['A'])
+    # 2. Molecular class flags
+    is_miss = 1.0 if vclass == 'missense' else 0.0
+    is_non = 1.0 if vclass == 'nonsense' or alt_aa == '*' else 0.0
+    is_syn = 1.0 if vclass == 'synonymous' or (ref_aa == alt_aa and ref_aa != '.') else 0.0
+    is_sl = 1.0 if vclass == 'start_lost' or (ref_aa == 'M' and aa_pos == 1 and alt_aa != 'M') else 0.0
+    is_sc = 1.0 if vclass == 'splice_canonical' else 0.0
+    is_sr = 1.0 if vclass == 'splice_region' else 0.0
+    is_int = 1.0 if vclass == 'intronic' else 0.0
+    is_utr = 1.0 if vclass in ('utr5', 'utr3') else 0.0
+    is_onc = 1.0 if vclass in ('other_noncoding', 'coding_no_protein_annot') else 0.0
     
-    delta_mw = round(alt_p['mw'] - ref_p['mw'], 3)
-    delta_logp = round(alt_p['logp'] - ref_p['logp'], 3)
-    delta_tpsa = round(alt_p['tpsa'] - ref_p['tpsa'], 3)
-    delta_charge = round(alt_p['charge'] - ref_p['charge'], 1)
-    grantham = bce.get_grantham(ref_aa, alt_aa)
-    sim = ds.TanimotoSimilarity(ref_p['fp'], alt_p['fp'])
-    tanimoto_chem_dist = round(1.0 - sim, 3)
+    # 3. Position metrics
+    g_len = prot_lens.get(gene, 1000)
+    if is_miss or is_non or is_syn or is_sl:
+        rel_pos = min(1.0, max(0.0, float(aa_pos) / float(g_len)))
+        has_prot = 1.0
+    else:
+        rel_pos = 0.0
+        has_prot = 0.0
+        
+    # 4. Biophysical features
+    if (ref_aa, alt_aa) in pairwise_lookup:
+        (g_dist, b_score, d_mw, d_logp, d_tpsa, d_chg, c_dist, pol_chg, chg_chg) = pairwise_lookup[(ref_aa, alt_aa)]
+    elif is_non:
+        g_dist, b_score, d_mw, d_logp, d_tpsa, d_chg, c_dist, pol_chg, chg_chg = (200.0, -4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
+    elif is_syn:
+        g_dist, b_score, d_mw, d_logp, d_tpsa, d_chg, c_dist, pol_chg, chg_chg = (0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    else:
+        g_dist, b_score, d_mw, d_logp, d_tpsa, d_chg, c_dist, pol_chg, chg_chg = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        
+    feat_vector = (
+        ref_onehot + alt_onehot + [is_trans] +
+        [is_miss, is_non, is_syn, is_sl, is_sc, is_sr, is_int, is_utr, is_onc] +
+        [has_prot, rel_pos, g_dist, b_score, d_mw, d_logp, d_tpsa, d_chg, c_dist, pol_chg, chg_chg]
+    )
+    return np.array(feat_vector, dtype=np.float32), g_dist, d_mw, d_chg
+
+def predict_variant_pathogenicity(model, gene_to_id, syn_to_id, scaler, temperature, device, variant, pairwise_lookup, prot_lens):
+    gene = variant['gene'].upper()
+    if gene not in gene_to_id:
+        print(f"[!] Warning: Gene {gene} not in 130-gene training panel. Falling back to index 0.")
+        gene_id = 0
+    else:
+        gene_id = gene_to_id[gene]
+        
+    syndrome = GENE2SYN.get(gene, 'Other_hereditary')
+    syn_id = syn_to_id.get(syndrome, 0)
     
-    is_missense = 1 if (ref_aa != alt_aa and ref_aa != '*' and alt_aa != '*') else 0
-    is_nonsense = 1 if (alt_aa == '*') else 0
-    is_synonymous = 1 if (ref_aa == alt_aa) else 0
-    is_transition = 1 if (variant['ref'], variant['alt']) in {('A','G'),('G','A'),('C','T'),('T','C')} else 0
-    
-    # 19 continuous features
-    ref_onehot = [1.0 if variant['ref'] == b else 0.0 for b in ['A', 'C', 'G', 'T']]
-    alt_onehot = [1.0 if variant['alt'] == b else 0.0 for b in ['A', 'C', 'G', 'T']]
-    
-    cont_vals = ref_onehot + alt_onehot + [
-        variant.get('rel_protein_pos', 0.5),
-        float(is_transition),
-        float(is_missense),
-        float(is_nonsense),
-        float(is_synonymous),
-        float(delta_mw),
-        float(delta_logp),
-        float(delta_tpsa),
-        float(delta_charge),
-        float(tanimoto_chem_dist),
-        float(grantham)
-    ]
+    feat_vec, grantham, delta_mw, delta_charge = featurize_single_variant(variant, pairwise_lookup, prot_lens)
     
     # Scale continuous subset
-    scaled_subset = scaler.transform([[delta_mw, delta_logp, delta_tpsa, delta_charge, grantham]])[0]
-    cont_vals[14:19] = scaled_subset
+    sub_idx = [FEATURE_COLS.index(c) for c in SCALE_COLS]
+    feat_vec[sub_idx] = scaler.transform([feat_vec[sub_idx]])[0]
     
-    x_cont = torch.tensor([cont_vals], dtype=torch.float32).to(device)
-    g_id = torch.tensor([gene_id], dtype=torch.long).to(device)
-    s_id = torch.tensor([syn_id], dtype=torch.long).to(device)
+    gt = torch.tensor([gene_id], dtype=torch.long).to(device)
+    st = torch.tensor([syn_id], dtype=torch.long).to(device)
+    xt = torch.tensor(np.array([feat_vec]), dtype=torch.float32).to(device)
     
     with torch.no_grad():
-        logit = model(x_cont, g_id, s_id).item()
-        prob_pathogenic = 1.0 / (1.0 + np.exp(-logit))
+        logit = model(xt, gt, st).item()
+        prob = 1.0 / (1.0 + np.exp(-logit / temperature))
         
-    # 2-Step Verification: Continuous Prob -> 5 ACMG Classes
-    if prob_pathogenic >= 0.90:
+    if prob >= 0.85:
         acmg_class = "CLASS 4: PATHOGENIC"
-        tier_symbol = "🔴"
-        action = "Immediate Clinical High-Risk Protocol & Family Screening"
-    elif prob_pathogenic >= 0.65:
+        symbol = "[!]"
+        action = "Immediate Clinical High-Risk Protocol & Cascade Family Genetic Counseling"
+    elif prob >= 0.65:
         acmg_class = "CLASS 3: LIKELY PATHOGENIC"
-        tier_symbol = "🟠"
-        action = "Early Non-Invasive Surveillance (Annual Contrast MRI / Colonoscopy)"
-    elif prob_pathogenic >= 0.35:
+        symbol = "[*]"
+        action = "Early Specialized Surveillance (Annual Contrast MRI / High-Definition Colonoscopy)"
+    elif prob >= 0.35:
         acmg_class = "CLASS 2: VUS (UNCERTAIN)"
-        tier_symbol = "🟡"
-        action = "Monitor; DO NOT perform invasive surgical interventions"
-    elif prob_pathogenic >= 0.10:
+        symbol = "[?]"
+        action = "Active Surveillance; DO NOT perform irreversible prophylactic surgeries"
+    elif prob >= 0.10:
         acmg_class = "CLASS 1: LIKELY BENIGN"
-        tier_symbol = "🟢"
-        action = "Routine population lifestyle & wellness checkups"
+        symbol = "[OK]"
+        action = "Routine population lifestyle and age-based wellness screening"
     else:
         acmg_class = "CLASS 0: BENIGN"
-        tier_symbol = "🟢"
-        action = "Confirmed Harmless Variant; No medical intervention"
+        symbol = "[OK]"
+        action = "Confirmed Harmless Polymorphism; Standard general population care"
         
     return {
+        'gene': gene,
+        'syndrome': syndrome,
         'logit': logit,
-        'prob': prob_pathogenic,
-        'class': acmg_class,
-        'symbol': tier_symbol,
+        'prob': prob,
+        'acmg_class': acmg_class,
+        'symbol': symbol,
         'action': action,
         'grantham': grantham,
         'delta_mw': delta_mw,
         'delta_charge': delta_charge
     }
 
-def print_clinical_report(patient_id, variant, result, syndrome_key='Breast_and_Ovarian_Cancer'):
-    print("\n" + "="*84)
-    print(f"      GERMLINE HEREDITARY CANCER RISK REPORT  |  GenomeDL Engine v2")
-    print(f"      Patient ID: {patient_id}  |  Genome Build: GRCh38")
-    print("="*84)
+def print_variant_report(patient_id, variant, res):
+    print("\n" + "="*80)
+    print("      GENOMEDL V2: VARIANT PATHOGENICITY CLINICAL REPORT")
+    print(f"      Patient ID: {patient_id} | Reference Build: GRCh38 | Status: Calibrated")
+    print("="*80)
     
-    print(f"\n[1] 2-STEP VERIFICATION VERDICT:")
-    print(f"    • Step 1 (Risk Probability): {result['prob']*100:.2f}% (Logit: {result['logit']:+.2f})")
-    print(f"    • Step 2 (ACMG Classification): {result['symbol']} {result['class']}")
-    print(f"    • Clinical Action: {result['action']}")
+    print("\n[1] PATHOGENICITY VERDICT:")
+    print(f"    * Result: {res['symbol']} {res['acmg_class']}")
+    print(f"    * Calibrated Probability: {res['prob']*100:.2f}% (Logit: {res['logit']:+.2f})")
+    print(f"    * Clinical Action: {res['action']}")
     
-    print(f"\n[2] MOLECULAR BIOMARKER DETAILS:")
-    print(f"    • Gene:            {variant['gene']}")
-    print(f"    • Locus:           {variant.get('chrom', 'chr17')}:{variant.get('pos', '43044295')} ({variant['ref']} > {variant['alt']})")
-    print(f"    • Protein Change:  p.{variant.get('ref_aa', 'Cys')}{variant.get('aa_pos', 61)}{variant.get('alt_aa', 'Gly')}")
-    print(f"    • Biophysics:      Grantham = {result['grantham']} | ΔMW = {result['delta_mw']:+.1f} Da | ΔCharge = {result['delta_charge']:+.1f}")
-    
-    print(f"\n[3] ORGAN-SPECIFIC CANCER RISK RADAR:")
-    organ_risks = SYNDROME_ORGAN_RISKS.get(syndrome_key, SYNDROME_ORGAN_RISKS['Breast_and_Ovarian_Cancer'])
-    for idx, (organ, base_risk, desc) in enumerate(organ_risks, 1):
-        adjusted_risk = min(99.0, max(base_risk * 0.15, base_risk * result['prob']))
-        bar_len = int(adjusted_risk / 5)
-        bar = "█" * bar_len + "░" * (20 - bar_len)
-        print(f"    {idx}. {organ:<28} : {adjusted_risk:>5.1f}% [{bar}] ({desc})")
-        
-    print(f"\n[4] ACTIONABLE SURVEILLANCE RECOMMENDATION:")
-    if result['prob'] >= 0.65:
-        print(f"    🔴 High-penetrance mutation detected in {variant['gene']}.")
-        print(f"    • Routine mammography/colonoscopy may be insufficient.")
-        print(f"    • Recommend specialized high-risk surveillance starting 10 years earlier than family onset.")
-        print(f"    • Recommend cascade germline genetic counseling for all 1st-degree biological relatives.")
-    else:
-        print(f"    🟢 No high-penetrance disease-causing mutations detected in the screened panel.")
-        print(f"    • Patient maintains standard general-population baseline cancer risk.")
-        print(f"    • Standard age-based lifestyle guidelines advised.")
-    print("="*84 + "\n")
+    print("\n[2] MOLECULAR & BIOPHYSICAL EVIDENCE:")
+    print(f"    * Gene Symbol:     {res['gene']} (Hereditary Group: {res['syndrome']})")
+    print(f"    * Genomic Locus:   chr{variant.get('chrom', '.')}:{variant.get('pos', '.')} ({variant['ref']} > {variant['alt']})")
+    print(f"    * Protein Change:  p.{variant.get('ref_aa', '.')}{variant.get('aa_pos', '.')}{variant.get('alt_aa', '.')}")
+    print(f"    * Grantham Score:  {res['grantham']:.0f} (Canonical 20x20 distance matrix)")
+    print(f"    * Molecular Deltas: ΔMW = {res['delta_mw']:+.1f} Da | ΔCharge = {res['delta_charge']:+.1f}")
+    print("="*80 + "\n")
 
 def main():
-    parser = argparse.ArgumentParser(description="GenomeDL: Clinical Hereditary Cancer Predictor")
-    parser.add_argument("--demo", action="store_true", help="Run live demo cases (Sarah's High-Risk BRCA1 vs Benign Control)")
+    parser = argparse.ArgumentParser(description="GenomeDL v2 Single-Variant Pathogenicity Predictor")
+    parser.add_argument("--demo", action="store_true", help="Run Sarah's BRCA1 pathogenic case vs BRCA2 benign control")
     parser.add_argument("--gene", type=str, default="BRCA1", help="Target gene symbol")
-    parser.add_argument("--ref", type=str, default="C", help="Reference base")
-    parser.add_argument("--alt", type=str, default="G", help="Mutated alternate base")
-    parser.add_argument("--ref_aa", type=str, default="C", help="Original amino acid code")
-    parser.add_argument("--alt_aa", type=str, default="G", help="New amino acid code")
-    parser.add_argument("--pos", type=int, default=43044295, help="Genomic coordinate")
-    parser.add_argument("--weights", type=str, default=None, help="Custom path to trained ResNet checkpoint (.pth)")
+    parser.add_argument("--ref", type=str, default="A", help="Reference nucleotide base")
+    parser.add_argument("--alt", type=str, default="C", help="Mutated alternate base")
+    parser.add_argument("--ref_aa", type=str, default="C", help="Original reference amino acid")
+    parser.add_argument("--alt_aa", type=str, default="G", help="Mutated alternate amino acid")
+    parser.add_argument("--aa_pos", type=int, default=61, help="Amino acid position along protein")
+    parser.add_argument("--chrom", type=str, default="17", help="Chromosome identifier")
+    parser.add_argument("--pos", type=int, default=43106487, help="Genomic coordinate (GRCh38)")
+    parser.add_argument("--patient_id", type=str, default="QUERY_SAMPLE", help="Patient / Query ID")
     args = parser.parse_args()
     
-    print("[*] Loading GenomeDL Pan-Cancer ResNet Engine...")
-    model, gene_to_id, scaler, device = load_inference_model(args.weights)
-    print(f"[+] Loaded model on {device}. Ready for clinical inference across {len(gene_to_id)} cancer genes.")
+    model, gene_to_id, syn_to_id, scaler, temp, device = load_v2_model()
+    pairwise_lookup = build_pairwise_biophysical_lookup()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    prot_lens = get_protein_lengths_dict(os.path.join(script_dir, "out"))
     
-    if args.demo or len(sys.argv) == 1:
-        # Case 1: Sarah's High-Risk Founder Mutation (BRCA1 p.Cys61Gly)
-        var_sarah = {
-            'gene': 'BRCA1', 'chrom': 'chr17', 'pos': 43044295,
-            'ref': 'C', 'alt': 'G', 'ref_aa': 'C', 'alt_aa': 'G', 'aa_pos': 61,
-            'rel_protein_pos': 61 / 1863
-        }
-        res_sarah = evaluate_variant(model, gene_to_id, scaler, device, var_sarah)
-        print_clinical_report("DEMO_PATIENT_SARAH_24Y", var_sarah, res_sarah, 'Breast_and_Ovarian_Cancer')
+    if args.demo:
+        # Case 1: Sarah's Pathogenic Founder Mutation (BRCA1 p.Cys61Gly)
+        v_sarah = {'gene': 'BRCA1', 'chrom': '17', 'pos': 43106487, 'ref': 'A', 'alt': 'C', 'ref_aa': 'C', 'alt_aa': 'G', 'aa_pos': 61, 'variant_class': 'missense'}
+        res_sarah = predict_variant_pathogenicity(model, gene_to_id, syn_to_id, scaler, temp, device, v_sarah, pairwise_lookup, prot_lens)
+        print_variant_report("DEMO_PATIENT_SARAH_24Y", v_sarah, res_sarah)
         
         # Case 2: Healthy Control Polymorphism (BRCA2 p.Asn372His)
-        var_healthy = {
-            'gene': 'BRCA2', 'chrom': 'chr13', 'pos': 32332592,
-            'ref': 'A', 'alt': 'C', 'ref_aa': 'N', 'alt_aa': 'H', 'aa_pos': 372,
-            'rel_protein_pos': 372 / 3418
-        }
-        res_healthy = evaluate_variant(model, gene_to_id, scaler, device, var_healthy)
-        print_clinical_report("DEMO_PATIENT_BENCHMARK_CONTROL", var_healthy, res_healthy, 'Breast_and_Ovarian_Cancer')
+        v_control = {'gene': 'BRCA2', 'chrom': '13', 'pos': 32332592, 'ref': 'A', 'alt': 'C', 'ref_aa': 'N', 'alt_aa': 'H', 'aa_pos': 372, 'variant_class': 'missense'}
+        res_control = predict_variant_pathogenicity(model, gene_to_id, syn_to_id, scaler, temp, device, v_control, pairwise_lookup, prot_lens)
+        print_variant_report("DEMO_PATIENT_BENCHMARK_CONTROL", v_control, res_control)
     else:
-        var_custom = {
-            'gene': args.gene.upper(), 'chrom': 'chr', 'pos': args.pos,
-            'ref': args.ref.upper(), 'alt': args.alt.upper(),
-            'ref_aa': args.ref_aa.upper(), 'alt_aa': args.alt_aa.upper(), 'aa_pos': 100,
-            'rel_protein_pos': 0.5
+        var = {
+            'gene': args.gene.upper(), 'chrom': str(args.chrom).replace('chr', ''),
+            'pos': args.pos, 'ref': args.ref.upper(), 'alt': args.alt.upper(),
+            'ref_aa': args.ref_aa.upper(), 'alt_aa': args.alt_aa.upper(),
+            'aa_pos': args.aa_pos, 'variant_class': 'missense'
         }
-        res_custom = evaluate_variant(model, gene_to_id, scaler, device, var_custom)
-        print_clinical_report("CUSTOM_PATIENT_QUERY", var_custom, res_custom)
+        res = predict_variant_pathogenicity(model, gene_to_id, syn_to_id, scaler, temp, device, var, pairwise_lookup, prot_lens)
+        print_variant_report(args.patient_id, var, res)
 
 if __name__ == '__main__':
     main()

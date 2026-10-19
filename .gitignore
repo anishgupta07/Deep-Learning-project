@@ -31,3 +31,4 @@ variant_summary.txt.gz
 HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
+!data/demo_vcfs/*.vcf

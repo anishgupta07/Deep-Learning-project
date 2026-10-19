@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenomeDL v2 Clinical Report - PATIENT_LYNCH_CARRIER_40Y</title>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
+        margin: 0;
+        padding: 30px 20px;
+    }
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+    .header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #ffffff;
+        padding: 28px 36px;
+    }
+    .header h1 {
+        margin: 0 0 6px 0;
+        font-size: 1.6rem;
+        letter-spacing: -0.5px;
+    }
+    .header .subtitle {
+        color: #94a3b8;
+        font-size: 0.92rem;
+    }
+    .meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        font-size: 0.88rem;
+    }
+    .meta-item span {
+        color: #94a3b8;
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .body {
+        padding: 32px 36px;
+    }
+    .card {
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.5px;
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #f87171;
+        margin-bottom: 12px;
+    }
+    h2 {
+        font-size: 1.18rem;
+        color: #0f172a;
+        margin: 28px 0 14px 0;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 8px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        margin-top: 8px;
+    }
+    th {
+        text-align: left;
+        padding: 10px 14px;
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #cbd5e1;
+    }
+    ul {
+        padding-left: 20px;
+        margin: 8px 0;
+    }
+    .footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 20px 36px;
+        font-size: 0.8rem;
+        color: #64748b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>GenomeDL Clinical Cancer Risk Assessment</h1>
+        <div class="subtitle">Constitutional Germline Sequencing & Deep Learning Pathogenicity Interpretation</div>
+        <div class="meta-bar">
+            <div class="meta-item"><span>Patient ID</span><strong>PATIENT_LYNCH_CARRIER_40Y</strong></div>
+            <div class="meta-item"><span>Genome Build</span><strong>GRCh38 / hg38</strong></div>
+            <div class="meta-item"><span>Gene Screen</span><strong>130 Hereditary Cancer Genes</strong></div>
+            <div class="meta-item"><span>Engine Model</span><strong>GenomeDL ResNet v2 (Calibrated)</strong></div>
+        </div>
+    </div>
+    
+    <div class="body">
+        <div class="card" style="border-left: 4px solid #b91c1c;">
+            <div class="status-badge">HIGH-RISK CARRIER</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">CONFIRMED CARRIER: MLH1 Pathogenic Mutation</div>
+            <div style="color: #475569; font-size: 0.95rem; line-height: 1.5;">Carrier of pathogenic constitutional alteration in MLH1. Clinical management protocol indicated.</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: #334155;"><strong>Syndrome:</strong> Lynch Syndrome (Hereditary Non-Polyposis Colorectal Cancer) &mdash; <em>Defective DNA Mismatch Repair causing high Microsatellite Instability (MSI-H).</em></div>
+        </div>
+
+        <h2>Screened Cancer Gene Variants</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Gene</th>
+                    <th>Genomic Locus</th>
+                    <th>Mutation</th>
+                    <th>Protein Change</th>
+                    <th>DL Pathogenicity</th>
+                    <th>ACMG Verdict</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">MLH1</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">chr3:36996633</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">C > T</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 500; color: #334155;">p.S44F</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">97.03%</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;"><span style="background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85em;">CLASS 4: PATHOGENIC</span></td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">BRCA1</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">chr17:43092412</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">C > T</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 500; color: #334155;">p.S1040N</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">36.87%</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;"><span style="background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85em;">CLASS 2: VUS (UNCERTAIN)</span></td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">BRCA2</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">chr13:32332592</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9em; color: #475569;">A > C</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 500; color: #334155;">p.N372H</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">10.64%</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;"><span style="background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85em;">CLASS 1: LIKELY BENIGN</span></td>
+        </tr>
+        
+            </tbody>
+        </table>
+
+        <h2>Personalized Organ-Specific Lifetime Risk Radar</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cancer Type / Target Tissue</th>
+                    <th>Patient Lifetime Risk</th>
+                    <th>General Population</th>
+                    <th>Visual Risk Profile</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #0f172a;">Colorectal Cancer</div>
+                <div style="font-size: 0.82em; color: #64748b; margin-top: 2px;">Critical Lifetime Risk (Population: 4.2%)</div>
+            </td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 1.05em; color: #dc2626;">75.0%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 0.95em;">4.2%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; width: 35%;">
+                <div style="background: #e2e8f0; border-radius: 9999px; height: 12px; overflow: hidden; width: 100%;">
+                    <div style="background: #dc2626; width: 75.0%; height: 100%; border-radius: 9999px;"></div>
+                </div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #0f172a;">Endometrial (Uterine) Cancer</div>
+                <div style="font-size: 0.82em; color: #64748b; margin-top: 2px;">High Lifetime Risk (Population: 2.8%)</div>
+            </td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 1.05em; color: #dc2626;">50.0%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 0.95em;">2.8%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; width: 35%;">
+                <div style="background: #e2e8f0; border-radius: 9999px; height: 12px; overflow: hidden; width: 100%;">
+                    <div style="background: #dc2626; width: 50.0%; height: 100%; border-radius: 9999px;"></div>
+                </div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #0f172a;">Stomach / Gastric Cancer</div>
+                <div style="font-size: 0.82em; color: #64748b; margin-top: 2px;">Elevated Lifetime Risk (Population: 0.9%)</div>
+            </td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 1.05em; color: #10b981;">12.0%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 0.95em;">0.9%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; width: 35%;">
+                <div style="background: #e2e8f0; border-radius: 9999px; height: 12px; overflow: hidden; width: 100%;">
+                    <div style="background: #10b981; width: 12.0%; height: 100%; border-radius: 9999px;"></div>
+                </div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-weight: 600; color: #0f172a;">Ovarian Cancer</div>
+                <div style="font-size: 0.82em; color: #64748b; margin-top: 2px;">Elevated Risk (Population: 1.3%)</div>
+            </td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 1.05em; color: #10b981;">10.0%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 0.95em;">1.3%</td>
+            <td style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; width: 35%;">
+                <div style="background: #e2e8f0; border-radius: 9999px; height: 12px; overflow: hidden; width: 100%;">
+                    <div style="background: #10b981; width: 10.0%; height: 100%; border-radius: 9999px;"></div>
+                </div>
+            </td>
+        </tr>
+        
+            </tbody>
+        </table>
+
+        <h2>Actionable Clinical Surveillance Protocol (NCCN / ACMG Guidelines)</h2>
+        <div class="card" style="background: #ffffff; border-color: #cbd5e1;">
+            <ul>
+                <li style='margin-bottom: 10px; line-height: 1.5; color: #1e293b;'>High-definition colonoscopy every 1 to 2 years starting at age 20-25.</li><li style='margin-bottom: 10px; line-height: 1.5; color: #1e293b;'>Annual transvaginal ultrasound and endometrial biopsy starting at age 30-35.</li><li style='margin-bottom: 10px; line-height: 1.5; color: #1e293b;'>Testing of all resected colorectal tumors for MMR deficiency (IHC / MSI testing).</li><li style='margin-bottom: 10px; line-height: 1.5; color: #1e293b;'>Consider daily aspirin chemoprevention under physician guidance.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div><strong>GenomeDL v2 Engine</strong> &bull; ResNet Skip-Connection Classifier &bull; ROC-AUC: 99.29% &bull; Precision: 89.91% &bull; ECE: 0.0138</div>
+        <div>For Investigational & Clinical Decision Support Use</div>
+    </div>
+</div>
+</body>
+</html>
