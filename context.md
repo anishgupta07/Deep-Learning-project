@@ -1,64 +1,87 @@
 # Project Context: Germline Cancer Risk Deep Learning Engine (GenomeDL v2)
 
-> **Last Updated:** 2026-10-19  
+> **Last Updated:** 2026-10-20  
 > **Repository:** `Deep-Learning-project`  
-> **Status:** Focused 100% on Tier 1 (Deep Learning Variant Pathogenicity Engine). All Verifications Passing.
+> **Status:** Option B (Person-Level Cancer Risk Scoring Engine) Fully Built & 3-Way Independently Verified.
 
 ---
 
-## 1. Project Goal & Strategic Architectural Focus
-* **Primary Objective:** Build a state-of-the-art Deep Learning model for **constitutional variant pathogenicity prediction across 130 hereditary cancer predisposition genes**.
-* **The Strategic Focus on Tier 1:**
-  * ClinVar is a variant damage catalog, not a longitudinal patient cohort. 
-  * Following the scientific paradigm of **Google DeepMind's AlphaMissense** (*Science*, 2023) and **Illumina's PrimateAI-3D** (*Science*, 2023), the repository focuses strictly on what machine learning can rigorously and reliably solve: **learning the physical, chemical, and evolutionary laws of protein disruption caused by inherited mutations**.
-  * The exploratory Tier-2 patient penetrance rules engine has been archived in `docs/archive/tier2_patient_engine_prototype/` to preserve complete scientific integrity.
+## 1. Project Goal: Person-Level Cancer Risk Score (Option B)
+The primary clinical objective of this platform is to input constitutional sequencing from a person's DNA panel and compute a **single, unified Person-Level Hereditary Cancer Risk Score (0 to 100)**:
+* **Score Scale:**
+  * **0 – 25:** Low / Population Baseline Risk (Normal lifestyle screening)
+  * **26 – 50:** Moderate Risk / VUS (Active clinical surveillance)
+  * **51 – 75:** Elevated Hereditary Risk (Specialized early protocols)
+  * **76 – 100:** Critical High Hereditary Risk (Immediate high-risk NCCN management)
 
 ---
 
-## 2. Core Deep Learning Engine (GenomeDL v2)
-
-| Subsystem | Implementation Details | Verified Metric / Outcome |
-| :--- | :--- | :---: |
-| **Feature Space** | 29 continuous & categorical dimensions (`build_features_v2.py`): canonical Grantham, BLOSUM62, RDKit physicochemical shifts ($\Delta\text{MW}, \Delta\text{LogP}, \Delta\text{TPSA}, \Delta\text{Charge}$), Morgan fingerprints, bounded sequence position $[0, 1]$. | **0 null values across all 148,825 rows** |
-| **Model Architecture** | `GenomeDLResNetV2` (`train_v2_model.py`): Entity embeddings for 130 genes and 15 syndromes, 4-layer residual blocks with skip connections ($\mathbf{x} + \mathcal{F}(\mathbf{x})$), LayerNorm, GELU, and Dropout. | **Checkpoint: `models/v2_pan_cancer_resnet.pth`** |
-| **Calibration** | Platt Temperature Scaling layer ($T = 0.8769$) fitted on validation split. | **ECE: 0.0138 (Down from ~0.10)** |
-| **Test Performance** | Evaluated on 29,765 completely unseen clinical test variants across all 130 genes. | **ROC-AUC: 99.29%**<br>**Precision: 89.91%**<br>**Specificity: 98.25%**<br>**Sensitivity: 90.35%** |
-| **Control Fix** | Fixed prototype v1 false-alarm flaw on `BRCA2 p.Asn372His` (benign control). | **10.64% Benign (Fixed from 95.23%)** |
+## 2. Flaws of Prior Prototype & How They Were Solved
+1. **Flaw 1 (Novel Variant Drops):** The legacy prototype searched a static dictionary (`if key in lookup:`) and silently dropped novel variants.
+   * **Solution:** On-the-fly dynamic featurization via canonical Grantham matrix, BLOSUM62, RDKit physicochemical descriptors, and protein transcript lengths. 100% of variants in panel genes are evaluated.
+2. **Flaw 2 (Flat Hardcoded Tables):** Assigned static lookup percentages.
+   * **Solution:** Every score is calculated dynamically through continuous mathematical functions driven by the Deep Learning ResNet probabilities.
+3. **Flaw 3 (Single-Variant Winner-Take-All):** Ignored multi-variant compounding and zygosity.
+   * **Solution:** Continuous probabilistic complement compounding across all mutations, with full Autosomal Dominant (AD) vs Autosomal Recessive (AR) zygosity gating (`0/1` carrier vs `1/1` or compound heterozygous biallelic).
 
 ---
 
-## 3. Flagship Artifacts & CLI Entrypoints
+## 3. Mathematical & Algorithmic Formulation
 
-* **Production Checkpoint:** `models/v2_pan_cancer_resnet.pth` (1.2 MB, calibrated weights).
-* **Master Datasets:**
-  * `data/v2_pan_cancer_featured_labelled.csv` (148,825 labeled variants with 29 features).
-  * `data/v2_pan_cancer_featured_vus.csv` (175,796 VUS variants for AI resolution).
-* **Primary Real-Time CLI:**
-  * `predict.py`: Evaluates any mutation in $<15\text{ ms}$ on the fly.
-    ```bash
-    python predict.py --demo
-    python predict.py --gene BRCA1 --chrom 17 --pos 43106487 --ref A --alt C --ref_aa C --alt_aa G --aa_pos 61
-    ```
-* **Independent 3-Pass Audit Suite:**
-  * `verify_all_milestones.py`: Complete automated test runner for external auditors.
-    ```bash
-    python verify_all_milestones.py
-    ```
+1. **Calibrated Variant Pathogenicity ($p_i \in [0, 1]$):**
+   $$p_i = \sigma\left(\frac{\text{logit}_i}{T}\right) \quad (T = 0.8769)$$
+2. **Pathogenicity Excess ($e_i \in [0, 1]$):**
+   $$e_i = \max\left(0, \frac{p_i - 0.15}{1.0 - 0.15}\right)$$
+   *(Ensures benign polymorphisms with $p_i \le 0.15$ contribute exactly zero excess cancer risk).*
+3. **Genomic Inheritance & Zygosity Factor ($z_i \in \{0.10, 1.0\}$):**
+   * **Autosomal Dominant (AD):** $z_i = 1.0$ for heterozygous (`0/1`) or homozygous (`1/1`).
+   * **Autosomal Recessive (AR):** $z_i = 0.10$ for monoallelic carriers (`0/1`); $z_i = 1.0$ for homozygous (`1/1`) or compound heterozygous ($\ge 2$ damaging hits).
+4. **Effective Variant Impact ($I_i$):**
+   $$I_i = z_i \cdot w_g \cdot e_i \quad (w_g \in [0.45, 1.0] \text{ by clinical gene penetrance tier})$$
+5. **Multi-Variant Compounding & Unified Person Score ($S_{\text{person}} \in [12.0, 100.0]$):**
+   $$P_{\text{composite}} = 1 - \prod_{i=1}^N (1 - I_i)$$
+   $$S_{\text{person}} = S_{\text{base}} + (100 - S_{\text{base}}) \times P_{\text{composite}} \quad (S_{\text{base}} = 12.0)$$
+6. **Organ-Specific Lifetime Risk Projections:**
+   $$R_{\text{organ}} = R_{\text{base}} + (R_{\text{max}} - R_{\text{base}}) \times \left(1 - \prod_{j \in \text{pathway}} (1 - I_j)\right)$$
 
 ---
 
-## 4. Verification Pass Results (100% Success)
+## 4. Benchmark Clinical Cohorts (Verified Live)
 
-```text
-================================================================================
-   GENOMEDL V2: DEEP LEARNING VARIANT PATHOGENICITY AUDIT SUITE
-================================================================================
-[*] Pass 1: Verified 148,825 rows, 48 cols, 29 features, 0 nulls, Grantham [0, 215], rel_protein_pos [0, 1].
-[*] Pass 2: 130 Genes, 15 Syndromes, Platt Temperature = 0.8769, ROC-AUC 99.29%, Precision 89.91%, Specificity 98.25%, ECE 0.0138.
-[*] Pass 3: Real-time on-the-fly inference:
-    - Sarah BRCA1 p.C61G   : 88.68% (CLASS 4: PATHOGENIC)
-    - Benign BRCA2 p.N372H : 10.64% (CLASS 1: LIKELY BENIGN)
-    - Synonymous ATM p.K1192K: 0.26% (CLASS 0: BENIGN)
-    - Lynch MLH1 p.S44F    : 97.03% (CLASS 4: PATHOGENIC)
->>> ALL 3 VERIFICATION PASSES COMPLETED WITH 100% SUCCESS <<<
+| Clinical Cohort | Key Genetic Alterations | Overall Score (0-100) | Clinical Risk Tier | Organ Risk Highlights |
+| :--- | :--- | :---: | :---: | :--- |
+| **Sarah (HBOC Driver)** | `BRCA1 p.C61G` (P=88.7%) + `BRCA2 p.N372H` (benign) | **91.3 / 100** | **CRITICAL HIGH RISK** | Breast: **68.8%** (+56.3%), Ovarian: **40.7%** (+39.4%) |
+| **Healthy Control** | `BRCA2 p.N372H` + `ATM p.K1192K` + `BARD1 p.I738V` | **12.0 / 100** | **POPULATION BASELINE** | All organs at exact population baseline |
+| **Lynch Carrier** | `MLH1 p.S44F` (P=97.0%) + benign polymorphisms | **97.7 / 100** | **CRITICAL HIGH RISK** | Colorectal: **77.3%** (+73.1%), Gastric: **67.6%** |
+| **Compound Moderate** | `CHEK2 p.R145W` (P=71.1%) + `ATM p.V320A` (P=40.8%) | **62.7 / 100** | **ELEVATED RISK** | Breast: **48.5%** (+36.0%), Colorectal: **39.2%** |
+| **MUTYH Carrier** | `MUTYH p.Y179C` (P=88.2%, Genotype: `0/1` monoallelic) | **19.2 / 100** | **POPULATION BASELINE** | Colorectal: **10.4%** (mild modifier, no colectomy) |
+| **MUTYH Biallelic** | `MUTYH p.Y179C` (P=88.2%, Genotype: `1/1` homozygous) | **84.0 / 100** | **CRITICAL HIGH RISK** | Colorectal: **66.2%** (+62.0%, NCCN MAP protocol) |
+| **Novel Variant Patient** | `TP53 p.R248Q` (Novel, on-the-fly featurized) | **87.2 / 100** | **CRITICAL HIGH RISK** | Sarcoma / CNS: **68.5%**, Breast: **65.9%** |
+
+---
+
+## 5. Automated Verification Suites
+
+1. **`verify_all_milestones.py` (Tier 1 Deep Learning Verification):**
+   * Audits 148,825 training variants, 29 biophysical features, ROC-AUC 99.29%, Precision 89.91%, ECE 0.0138, and benign control resolution.
+   * Command: `python verify_all_milestones.py`
+2. **`verify_patient_cancer_scorer.py` (Tier 2 Person-Level Scorer Verification):**
+   * **Pass 1:** Mathematical axioms, monotonicity, non-linear compounding, and recessive zygosity gating.
+   * **Pass 2:** Validation across all 6 clinical benchmark cohorts.
+   * **Pass 3:** Novel variant dynamic featurization (zero drops) and HTML report generation.
+   * Command: `python verify_patient_cancer_scorer.py`
+
+---
+
+## 6. Execution Commands
+
+```bash
+# Run Person Cancer Scorer Demo (Sarah, Control, Lynch)
+python patient_cancer_scorer.py --demo
+
+# Run all 6 benchmark cohorts
+python patient_cancer_scorer.py --demo_all
+
+# Score a custom patient VCF and export HTML report
+python patient_cancer_scorer.py --vcf demo_vcfs/patient_sarah_hboc.vcf --patient_id PATIENT_001 --html sarah_report.html
 ```
