@@ -1,0 +1,92 @@
+{
+  "test_auc": 0.9928726868175859,
+  "test_auprc": 0.981984199727781,
+  "ece_before": 0.027647334044118115,
+  "ece_after": 0.024925851673942963,
+  "temperature": 0.9357219338417053,
+  "seed_metrics": [
+    {
+      "best_epoch": 4,
+      "best_val_auprc": 0.9840048608149025,
+      "test_auc": 0.9926290769981476,
+      "test_auprc": 0.981188332052847
+    },
+    {
+      "best_epoch": 2,
+      "best_val_auprc": 0.9827595106960788,
+      "test_auc": 0.9926701380688789,
+      "test_auprc": 0.9806242868012672
+    },
+    {
+      "best_epoch": 3,
+      "best_val_auprc": 0.9830070625055289,
+      "test_auc": 0.9924581592626451,
+      "test_auprc": 0.9809844692423826
+    },
+    {
+      "best_epoch": 8,
+      "best_val_auprc": 0.9827218918652201,
+      "test_auc": 0.9921095762810188,
+      "test_auprc": 0.9800306027812975
+    },
+    {
+      "best_epoch": 5,
+      "best_val_auprc": 0.9831420620688939,
+      "test_auc": 0.992509522630081,
+      "test_auprc": 0.980970835165656
+    }
+  ],
+  "class_metrics": {
+    "synonymous": {
+      "n_samples": 11782,
+      "n_pos": 23,
+      "n_neg": 11759,
+      "auc": 0.7318945340664135,
+      "auprc": 0.00998221653831244
+    },
+    "missense": {
+      "n_samples": 1502,
+      "n_pos": 614,
+      "n_neg": 888,
+      "auc": 0.9556298969979752,
+      "auprc": 0.9391445387830962
+    },
+    "nonsense": {
+      "n_samples": 1562,
+      "n_pos": 1561,
+      "n_neg": 1,
+      "auc": 0.4170403587443946,
+      "auprc": 0.9994396288087428
+    },
+    "utr5": {
+      "n_samples": 1133,
+      "n_pos": 67,
+      "n_neg": 1066,
+      "auc": 0.7637422642883145,
+      "auprc": 0.15613627947446848
+    },
+    "utr3": {
+      "n_samples": 4963,
+      "n_pos": 36,
+      "n_neg": 4927,
+      "auc": 0.7410273323861714,
+      "auprc": 0.027944676481833935
+    },
+    "start_lost": {
+      "n_samples": 211,
+      "n_pos": 6,
+      "n_neg": 205,
+      "auc": 0.858130081300813,
+      "auprc": 0.3614471326164874
+    },
+    "stop_lost": {
+      "n_samples": 235,
+      "n_pos": 1,
+      "n_neg": 234,
+      "auc": 0.3717948717948718,
+      "auprc": 0.006756756756756757
+    }
+  },
+  "use_gene_embedding": false,
+  "num_seeds": 5
+}
