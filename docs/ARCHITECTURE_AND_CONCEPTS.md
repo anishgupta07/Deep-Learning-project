@@ -17,7 +17,8 @@
    - [D. Evolutionary Protein Language Modeling (ESM-2)](#d-evolutionary-protein-language-modeling-esm-2)
    - [E. Machine Learning, Training, Calibration & Evaluation](#e-machine-learning-training-calibration--evaluation)
    - [F. Clinical Genetics, Syndromes & Lifetime Penetrance](#f-clinical-genetics-syndromes--lifetime-penetrance)
-5. [Codebase Organization & File Guide](#5-codebase-organization--file-guide)
+5. [Cancer Spectrum: How Many Types of Cancer Can GenomeDL Detect?](#5-cancer-spectrum-how-many-types-of-cancer-can-genomedl-detect)
+6. [Codebase Organization & File Guide](#6-codebase-organization--file-guide)
 
 ---
 
@@ -439,7 +440,73 @@ Certain cancer predisposition genes cause prominent non-neoplastic physical symp
 
 ---
 
-## 5. Codebase Organization & File Guide
+## 5. Cancer Spectrum: How Many Types of Cancer Can GenomeDL Detect?
+
+GenomeDL v3 evaluates **130 curated hereditary cancer predisposition genes** organized across **15 distinct syndrome groups**.
+
+Through this comprehensive germline panel, GenomeDL v3 detects susceptibility to **26 primary cancer types / organs** and over **40 distinct histological subtypes**, spanning both adult-onset malignancies and childhood/pediatric embryonal tumors:
+
+```
+Total Scope:
+├── 130 Predisposition Genes
+├── 15 Clinical Syndrome Groups
+├── 26 Primary Cancer Anatomical Types / Organs
+└── 40+ Distinct Histological Cancer Manifestations
+```
+
+### Comprehensive Cancer Manifestation Matrix
+
+| Primary Cancer Type / Organ | Specific Histological Manifestations | Key Predisposition Genes | Clinical Syndrome Group | Typical Age Onset Pattern |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Breast Cancer** | Invasive Ductal Carcinoma, Triple-Negative Breast Cancer | `BRCA1`, `BRCA2`, `PALB2`, `ATM`, `CHEK2`, `BARD1`, `TP53`, `PTEN` | Breast_Ovarian_HR_repair, Li_Fraumeni, Polyposis_hamartoma | Adult-onset (peak 35–65 yrs; early onset <40 yrs in BRCA/TP53) |
+| **2. Lobular Breast Cancer** | Invasive Lobular Breast Carcinoma | `CDH1` | Hereditary_gastric | Adult-onset (30–60 yrs) |
+| **3. Ovarian Cancer** | High-Grade Serous Ovarian Carcinoma, Fallopian Tube, Peritoneal | `BRCA1`, `BRCA2`, `RAD51C`, `RAD51D`, `BRIP1`, `PALB2`, `MLH1`, `MSH2` | Breast_Ovarian_HR_repair, Lynch_MMR_polymerase | Adult-onset (peak 45–75 yrs) |
+| **4. Colorectal Cancer** | Hereditary Non-Polyposis Colorectal Carcinoma (Lynch Syndrome) | `MLH1`, `MSH2`, `MSH6`, `PMS2`, `EPCAM` | Lynch_MMR_polymerase | Early adult-onset (40–55 yrs vs 70 in sporadic) |
+| **5. Polyposis & Early Colorectal** | Adenomatous Polyposis (FAP), Attenuated FAP, MAP | `APC`, `MUTYH` (biallelic), `NTHL1`, `POLE`, `POLD1`, `AXIN2` | Polyposis_hamartoma | Adolescence to early adult (15–35 yrs in FAP) |
+| **6. Gastric (Stomach) Cancer** | Hereditary Diffuse Gastric Cancer (Signet Ring Cell) | `CDH1`, `CTNNA1`, `STK11`, `BMPR1A` | Hereditary_gastric, Polyposis_hamartoma | Young adult (peak 30–50 yrs) |
+| **7. Endometrial (Uterine) Cancer** | Endometrial Adenocarcinoma, Uterine Clear Cell Carcinoma | `MSH2`, `MLH1`, `MSH6`, `PMS2`, `PTEN` | Lynch_MMR_polymerase, Polyposis_hamartoma | Adult-onset (45–60 yrs) |
+| **8. Pancreatic Cancer** | Pancreatic Ductal Adenocarcinoma, Neuroendocrine Pancreatic | `BRCA2`, `PALB2`, `CDKN2A`, `ATM`, `MEN1`, `STK11` | Breast_Ovarian_HR_repair, Melanoma_skin_telomere, Endocrine_MEN | Adult-onset (50–70 yrs) |
+| **9. Prostate Cancer** | Aggressive, High-Gleason, Metastatic Prostate Carcinoma | `HOXB13`, `BRCA2`, `ATM`, `CHEK2` | Other_hereditary, Breast_Ovarian_HR_repair | Early adult (45–60 yrs) |
+| **10. Renal (Kidney) Cell Carcinoma** | Clear Cell RCC, Papillary RCC, Chromophobe RCC, Oncocytoma | `VHL`, `MET`, `FLCN`, `FH`, `TSC1`, `TSC2` | Renal, Paraganglioma_pheo | Young adult to middle age (30–55 yrs) |
+| **11. Wilms Tumor (Nephroblastoma)** | Pediatric Embryonal Kidney Tumor | `WT1`, `DIS3L2`, `REST` | Retinoblastoma_Wilms_overgrowth | Pediatric / Early Childhood (1–5 yrs) |
+| **12. Medullary Thyroid Carcinoma** | Calcitonin-producing Neuroendocrine C-Cell Carcinoma | `RET` | Endocrine_MEN | Childhood to early adult (MEN2A/MEN2B: 1–20 yrs) |
+| **13. Non-Medullary Thyroid Cancer** | Follicular Thyroid Carcinoma, Papillary Thyroid Carcinoma | `PTEN`, `DICER1`, `APC` | Polyposis_hamartoma, Neurocutaneous_rhabdoid_DICER1 | Adolescence to adult (15–45 yrs) |
+| **14. Pheochromocytoma** | Adrenal Medulla Catecholamine-secreting Tumor | `VHL`, `RET`, `MAX`, `TMEM127`, `NF1` | Paraganglioma_pheo, Endocrine_MEN | Young adult (20–45 yrs) |
+| **15. Paraganglioma** | Extra-adrenal Sympathetic / Parasympathetic Glomus Tumors | `SDHA`, `SDHB`, `SDHC`, `SDHD`, `SDHAF2` | Paraganglioma_pheo | Adolescence to adult (15–40 yrs; high metastatic risk in SDHB) |
+| **16. Adrenocortical Carcinoma (ACC)** | Adrenal Cortex Malignancy | `TP53` | Li_Fraumeni | Early childhood (<5 yrs) and adult |
+| **17. Soft Tissue Sarcomas** | Rhabdomyosarcoma, Leiomyosarcoma, Liposarcoma, Undifferentiated | `TP53` | Li_Fraumeni | Childhood, adolescence, and early adult |
+| **18. Bone Sarcoma (Osteosarcoma)** | Pediatric Primary Malignant Bone Tumor | `TP53`, `RB1`, `RECQL4` | Li_Fraumeni, Retinoblastoma_Wilms_overgrowth | Childhood and adolescence (10–25 yrs) |
+| **19. Chondrosarcoma** | Cartilaginous Malignancy (from Multiple Osteochondromas) | `EXT1`, `EXT2` | Other_hereditary | Adolescence to adult (15–40 yrs) |
+| **20. Brain / CNS Tumors** | Medulloblastoma, High-grade Glioblastoma, Astrocytoma | `SUFU`, `PTCH1`, `TP53`, `APC` | Neurocutaneous_rhabdoid_DICER1, Li_Fraumeni | Childhood to young adult (2–25 yrs) |
+| **21. Peripheral Nerve Sheath Tumors** | Malignant Peripheral Nerve Sheath Tumor (MPNST), Schwannoma | `NF1`, `NF2`, `SMARCB1`, `LZTR1` | Neurocutaneous_rhabdoid_DICER1 | Adolescence to early adult |
+| **22. Rhabdoid Tumors (ATRT)** | Atypical Teratoid / Rhabdoid Tumor (Brain & Renal) | `SMARCB1`, `SMARCA4` | Neurocutaneous_rhabdoid_DICER1 | Infancy & Early Childhood (<3 yrs) |
+| **23. Retinoblastoma** | Pediatric Retinal Malignancy (Eye Cancer) | `RB1` | Retinoblastoma_Wilms_overgrowth | Infancy and toddlers (<2 yrs) |
+| **24. Cutaneous Malignant Melanoma** | Invasive Skin Melanoma | `CDKN2A`, `CDK4`, `BAP1`, `MITF`, `POT1` | Melanoma_skin_telomere | Young adult to middle age (25–50 yrs) |
+| **25. Uveal (Ocular) Melanoma** | Intraocular Eye Melanoma | `BAP1` | Melanoma_skin_telomere | Adult-onset (35–65 yrs) |
+| **26. Leukemias & MDS** | Acute Myeloid Leukemia (AML), Myelodysplastic Syndrome, ALL | `RUNX1`, `GATA2`, `CEBPA`, `DDX41`, `ETV6`, `TP53`, `FANCA-G` | Hematologic_predisposition, Fanconi_DNA_repair | Childhood to adult (AML peak 10–50 yrs depending on gene) |
+
+---
+
+### Pediatric vs. Adult-Onset Screening Duality
+
+The 26 cancer types span two fundamentally distinct clinical management paradigms:
+
+1. **Childhood / Pediatric-Onset Cancers (Actionable in Infants & Children)**:
+   - *Retinoblastoma* (`RB1`): Requires immediate infant ophthalmological exams under anesthesia from birth to age 4.
+   - *Wilms Tumor* (`WT1`, `DIS3L2`): Requires renal ultrasound every 3 months until age 8.
+   - *Pleuropulmonary Blastoma* (`DICER1`): Requires chest CT / chest X-rays in early childhood.
+   - *Medullary Thyroid Carcinoma* in MEN2B (`RET` M918T): Requires prophylactic total thyroidectomy in the first year of life.
+   - *Adrenocortical Carcinoma & Rhabdomyosarcoma* (`TP53` in Li-Fraumeni): Requires whole-body MRI and abdominal ultrasounds starting at birth.
+
+2. **Adult-Onset Cancer Predisposition (Ethical & Counselling Consideration)**:
+   - *Breast & Ovarian Cancer* (`BRCA1`, `BRCA2`, `PALB2`): Cancer risk typically begins around age 25–30 (annual breast MRI starting at 25, mammograms at 30, salpingo-oophorectomy at 35–40).
+   - *Colorectal Cancer* in Lynch Syndrome (`MLH1`, `MSH2`): Colonoscopies begin at age 20–25 (or 2–5 years before earliest family diagnosis).
+   - *Prostate Cancer* (`HOXB13`, `BRCA2`): Annual PSA and digital exam starting at age 40.
+   - **Mandatory Ethical Guideline**: When evaluating pediatric samples (babies/minors), reporting adult-onset conditions requires dedicated pre-test and post-test genetic counselling according to ACMG and European Society of Human Genetics (ESHG) guidelines.
+
+---
+
+## 6. Codebase Organization & File Guide
 
 ```
 d:/Dl_project/
