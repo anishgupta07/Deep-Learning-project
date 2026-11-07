@@ -34,3 +34,8 @@ HG002*.vcf.gz
 
 # Local unused files archive
 unused_files/*
+
+# Large binary embeddings (>100MB cannot be pushed to standard GitHub)
+data/*.pt
+data/esm_embeddings.pt
+
