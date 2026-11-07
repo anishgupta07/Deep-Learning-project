@@ -31,3 +31,6 @@ variant_summary.txt.gz
 HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
+
+# Local unused files archive
+unused_files/*
