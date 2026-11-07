@@ -1,0 +1,166 @@
+{
+  "total_variants": 5,
+  "actionable_count": 3,
+  "cancer_risk_summary": [
+    {
+      "cancer_type": "All cancers combined",
+      "lifetime_risk_range": "70% - 90%",
+      "genes": [
+        "TP53"
+      ],
+      "up_to_age": 70
+    },
+    {
+      "cancer_type": "Breast cancer",
+      "lifetime_risk_range": "65% - 72%",
+      "genes": [
+        "BRCA1",
+        "PALB2"
+      ],
+      "up_to_age": 80
+    },
+    {
+      "cancer_type": "Breast cancer (female)",
+      "lifetime_risk_range": "50% - 60%",
+      "genes": [
+        "TP53"
+      ],
+      "up_to_age": 60
+    },
+    {
+      "cancer_type": "Ovarian cancer",
+      "lifetime_risk_range": "39% - 44%",
+      "genes": [
+        "BRCA1"
+      ],
+      "up_to_age": 80
+    },
+    {
+      "cancer_type": "Soft tissue sarcoma",
+      "lifetime_risk_range": "15% - 20%",
+      "genes": [
+        "TP53"
+      ],
+      "up_to_age": 60
+    }
+  ],
+  "verdicts": [
+    {
+      "gene": "BRCA1",
+      "chrom": "17",
+      "pos": 43106487,
+      "ref": "A",
+      "alt": "C",
+      "tier": "Pathogenic",
+      "evidence_source": "ClinVar lookup (3 stars: reviewed by expert panel)",
+      "calibrated_score": 0.999,
+      "cancer_risks": [
+        {
+          "outcome": "Breast cancer",
+          "risk_low_pct": 65.0,
+          "risk_high_pct": 72.0,
+          "up_to_age": 80,
+          "source": "Kuchenbaecker et al. JAMA 2017",
+          "evidence_level": "high"
+        },
+        {
+          "outcome": "Ovarian cancer",
+          "risk_low_pct": 39.0,
+          "risk_high_pct": 44.0,
+          "up_to_age": 80,
+          "source": "Kuchenbaecker et al. JAMA 2017",
+          "evidence_level": "high"
+        }
+      ],
+      "other_syndrome_features": [],
+      "notes": "Curated clinical consensus from ClinVar submission (Variation ID 17661)."
+    },
+    {
+      "gene": "TP53",
+      "chrom": "17",
+      "pos": 7675088,
+      "ref": "C",
+      "alt": "T",
+      "tier": "Pathogenic",
+      "evidence_source": "ClinVar lookup (3 stars: reviewed by expert panel)",
+      "calibrated_score": 0.999,
+      "cancer_risks": [
+        {
+          "outcome": "All cancers combined",
+          "risk_low_pct": 70.0,
+          "risk_high_pct": 90.0,
+          "up_to_age": 70,
+          "source": "Chompret et al. / NCCN 2024",
+          "evidence_level": "high"
+        },
+        {
+          "outcome": "Breast cancer (female)",
+          "risk_low_pct": 50.0,
+          "risk_high_pct": 60.0,
+          "up_to_age": 60,
+          "source": "Olivier et al. 2010",
+          "evidence_level": "high"
+        },
+        {
+          "outcome": "Soft tissue sarcoma",
+          "risk_low_pct": 15.0,
+          "risk_high_pct": 20.0,
+          "up_to_age": 60,
+          "source": "Olivier et al. 2010",
+          "evidence_level": "high"
+        }
+      ],
+      "other_syndrome_features": [],
+      "notes": "Curated clinical consensus from ClinVar submission (Variation ID 12374)."
+    },
+    {
+      "gene": "BRCA2",
+      "chrom": "13",
+      "pos": 32338780,
+      "ref": "A",
+      "alt": "G",
+      "tier": "Benign",
+      "evidence_source": "Common polymorphism (gnomAD AF = 4.50% > 1.0%)",
+      "calibrated_score": 0.001,
+      "cancer_risks": [],
+      "other_syndrome_features": [],
+      "notes": "High population frequency in gnomAD indicates benign polymorphism."
+    },
+    {
+      "gene": "MUTYH",
+      "chrom": "1",
+      "pos": 45798000,
+      "ref": "C",
+      "alt": "T",
+      "tier": "Carrier (Recessive)",
+      "evidence_source": "GenomeDL v3 ESM-Augmented Fusion ResNet",
+      "calibrated_score": 0.1492540714558653,
+      "cancer_risks": [],
+      "other_syndrome_features": [],
+      "notes": "Calibrated probability P(pathogenic) = 0.1493. Single heterozygous allele in autosomal recessive gene MUTYH. Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
+    },
+    {
+      "gene": "PALB2",
+      "chrom": "16",
+      "pos": 23635338,
+      "ref": "C",
+      "alt": "T",
+      "tier": "Likely Pathogenic",
+      "evidence_source": "GenomeDL v3 ESM-Augmented Fusion ResNet",
+      "calibrated_score": 0.8506548471147596,
+      "cancer_risks": [
+        {
+          "outcome": "Breast cancer",
+          "risk_low_pct": 40.0,
+          "risk_high_pct": 60.0,
+          "up_to_age": 80,
+          "source": "Antoniou et al. NEJM 2014",
+          "evidence_level": "high"
+        }
+      ],
+      "other_syndrome_features": [],
+      "notes": "Calibrated probability P(pathogenic) = 0.8507."
+    }
+  ],
+  "disclaimer": "Research prototype, not a diagnosis. Confirm in a clinical lab with genetic counselling. Testing children for adult-onset conditions needs counselling."
+}

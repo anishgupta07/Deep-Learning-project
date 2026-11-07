@@ -602,11 +602,57 @@ class VCFPipeline:
         lines.append("GENOMEDL v3: CLINICAL GENOMICS INFERENCE REPORT")
         lines.append("=" * 80)
         lines.append(f"TOTAL PANEL VARIANTS EVALUATED: {len(verdicts)}")
-        lines.append("")
 
         actionable_verdicts = [v for v in verdicts if v.tier in ["Pathogenic", "Likely Pathogenic"]]
         lines.append(f"ACTIONABLE (PATHOGENIC / LIKELY PATHOGENIC): {len(actionable_verdicts)}")
         lines.append("-" * 80)
+
+        # Aggregate cumulative cancer risks by organ / cancer type
+        cancer_risk_map = {}
+        for v in actionable_verdicts:
+            gene = v.variant.gene
+            for r in v.cancer_risks:
+                outcome = r["outcome"]
+                if outcome not in cancer_risk_map:
+                    cancer_risk_map[outcome] = {
+                        "genes": set(),
+                        "lows": [],
+                        "highs": [],
+                        "ages": [],
+                        "sources": [],
+                    }
+                cancer_risk_map[outcome]["genes"].add(gene)
+                cancer_risk_map[outcome]["lows"].append(r["risk_low_pct"])
+                cancer_risk_map[outcome]["highs"].append(r["risk_high_pct"])
+                cancer_risk_map[outcome]["ages"].append(r["up_to_age"])
+                cancer_risk_map[outcome]["sources"].append(f"{r['source']} ({gene})")
+
+        # Top-level executive risk table
+        cancer_summary_list = []
+        if cancer_risk_map:
+            lines.append("")
+            lines.append("=" * 80)
+            lines.append("EXECUTIVE SUMMARY: PREDICTED LIFETIME CANCER RISKS BY ORGAN / TYPE")
+            lines.append("=" * 80)
+            lines.append(f"{'CANCER TYPE':<32} | {'ESTIMATED LIFETIME RISK':<23} | {'GENE(S) INVOLVED':<16} | {'HORIZON'}")
+            lines.append("-" * 80)
+            
+            # Sort by highest upper bound risk descending
+            sorted_outcomes = sorted(cancer_risk_map.items(), key=lambda x: max(x[1]["highs"]), reverse=True)
+            for outcome, data in sorted_outcomes:
+                genes_str = ", ".join(sorted(data["genes"]))
+                # Primary carrier risk range from dominant driver gene
+                risk_str = f"{max(data['lows']):.0f}% - {max(data['highs']):.0f}%"
+                age_str = f"Up to age {max(data['ages'])}"
+                lines.append(f"{outcome:<32} | {risk_str:<23} | {genes_str:<16} | {age_str}")
+                cancer_summary_list.append({
+                    "cancer_type": outcome,
+                    "lifetime_risk_range": risk_str,
+                    "genes": sorted(list(data["genes"])),
+                    "up_to_age": max(data["ages"]),
+                })
+            lines.append("-" * 80)
+            lines.append("")
 
         for i, v in enumerate(verdicts, 1):
             var = v.variant
@@ -650,6 +696,7 @@ class VCFPipeline:
             json_data = {
                 "total_variants": len(verdicts),
                 "actionable_count": len(actionable_verdicts),
+                "cancer_risk_summary": cancer_summary_list,
                 "verdicts": [
                     {
                         "gene": v.variant.gene,
@@ -681,6 +728,8 @@ def parse_args():
     parser.add_argument("vcf_path", type=Path, help="Path to input VCF (.vcf or .vcf.gz)")
     parser.add_argument("--out_report", type=Path, default=Path("reports/vcf_report.txt"))
     parser.add_argument("--out_json", type=Path, default=Path("reports/vcf_report.json"))
+    parser.add_argument("--out_pdf", type=Path, default=Path("reports/vcf_report.pdf"))
+    parser.add_argument("--no_pdf", action="store_true", help="Disable automatic PDF generation")
     parser.add_argument("--min_dp", type=int, default=10)
     parser.add_argument("--min_gq", type=int, default=20)
     return parser.parse_args()
@@ -696,3 +745,12 @@ if __name__ == "__main__":
     with open(args.out_report, "w", encoding="utf-8") as f:
         f.write(rep)
     print(rep)
+
+    if not args.no_pdf and args.out_pdf:
+        try:
+            from src.v3.generate_pdf_report import generate_pdf_report
+            sample_name = args.vcf_path.stem.upper()
+            pdf_path = generate_pdf_report(args.out_json, args.out_pdf, sample_id=sample_name)
+            logger.info(f"Clinical PDF report successfully generated: {pdf_path}")
+        except Exception as e:
+            logger.warning(f"Could not generate PDF report: {e}")
