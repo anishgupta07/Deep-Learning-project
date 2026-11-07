@@ -1,0 +1,782 @@
+{
+  "BRCA1": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 1863,
+    "mane_transcript": "NM_007294.4"
+  },
+  "BRCA2": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "+",
+    "protein_length": 3418,
+    "mane_transcript": "NM_000059.4"
+  },
+  "PALB2": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 1186,
+    "mane_transcript": "NM_024675.4"
+  },
+  "ATM": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "+",
+    "protein_length": 3056,
+    "mane_transcript": "NM_000051.4"
+  },
+  "CHEK2": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 543,
+    "mane_transcript": "NM_007194.4"
+  },
+  "BARD1": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 777,
+    "mane_transcript": "NM_000465.4"
+  },
+  "BRIP1": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 1249,
+    "mane_transcript": "NM_032043.3"
+  },
+  "RAD51C": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "+",
+    "protein_length": 376,
+    "mane_transcript": "NM_058216.3"
+  },
+  "RAD51D": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 328,
+    "mane_transcript": "NM_002878.4"
+  },
+  "RAD51B": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "+",
+    "protein_length": 350,
+    "mane_transcript": "NM_133510.4"
+  },
+  "NBN": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 754,
+    "mane_transcript": "NM_002485.5"
+  },
+  "MRE11": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 708,
+    "mane_transcript": "NM_005591.4"
+  },
+  "RAD50": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "+",
+    "protein_length": 1312,
+    "mane_transcript": "NM_005732.4"
+  },
+  "XRCC2": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 280,
+    "mane_transcript": "NM_005431.2"
+  },
+  "RECQL": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 649,
+    "mane_transcript": "NM_002907.4"
+  },
+  "ABRAXAS1": {
+    "syndrome_group": "Breast_Ovarian_HR_repair",
+    "strand": "-",
+    "protein_length": 409,
+    "mane_transcript": "NM_139076.3"
+  },
+  "TP53": {
+    "syndrome_group": "Li_Fraumeni",
+    "strand": "-",
+    "protein_length": 393,
+    "mane_transcript": "NM_000546.6"
+  },
+  "MLH1": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 756,
+    "mane_transcript": "NM_000249.4"
+  },
+  "MSH2": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 934,
+    "mane_transcript": "NM_000251.3"
+  },
+  "MSH6": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 1360,
+    "mane_transcript": "NM_000179.3"
+  },
+  "PMS2": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "-",
+    "protein_length": 862,
+    "mane_transcript": "NM_000535.7"
+  },
+  "EPCAM": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 314,
+    "mane_transcript": "NM_002354.3"
+  },
+  "MSH3": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 1137,
+    "mane_transcript": "NM_002439.5"
+  },
+  "MLH3": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "-",
+    "protein_length": 1453,
+    "mane_transcript": "NM_001040108.2"
+  },
+  "PMS1": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 932,
+    "mane_transcript": "NM_000534.5"
+  },
+  "POLE": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "-",
+    "protein_length": 2286,
+    "mane_transcript": "NM_006231.4"
+  },
+  "POLD1": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "+",
+    "protein_length": 1107,
+    "mane_transcript": "NM_002691.4"
+  },
+  "MBD4": {
+    "syndrome_group": "Lynch_MMR_polymerase",
+    "strand": "-",
+    "protein_length": 580,
+    "mane_transcript": "NM_001276270.2"
+  },
+  "APC": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 2843,
+    "mane_transcript": "NM_000038.6"
+  },
+  "MUTYH": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "-",
+    "protein_length": 546,
+    "mane_transcript": "NM_001048174.2"
+  },
+  "NTHL1": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "-",
+    "protein_length": 312,
+    "mane_transcript": "NM_002528.7"
+  },
+  "AXIN2": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "-",
+    "protein_length": 843,
+    "mane_transcript": "NM_004655.4"
+  },
+  "GREM1": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 184,
+    "mane_transcript": "NM_013372.7"
+  },
+  "BMPR1A": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 532,
+    "mane_transcript": "NM_004329.3"
+  },
+  "SMAD4": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 552,
+    "mane_transcript": "NM_005359.6"
+  },
+  "STK11": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 433,
+    "mane_transcript": "NM_000455.5"
+  },
+  "PTEN": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 403,
+    "mane_transcript": "NM_000314.8"
+  },
+  "RNF43": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "-",
+    "protein_length": 783,
+    "mane_transcript": "NM_017763.6"
+  },
+  "FAN1": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "+",
+    "protein_length": 1017,
+    "mane_transcript": "NM_014967.5"
+  },
+  "RPS20": {
+    "syndrome_group": "Polyposis_hamartoma",
+    "strand": "-",
+    "protein_length": 119,
+    "mane_transcript": "NM_001023.4"
+  },
+  "CDH1": {
+    "syndrome_group": "Hereditary_gastric",
+    "strand": "+",
+    "protein_length": 882,
+    "mane_transcript": "NM_004360.5"
+  },
+  "CTNNA1": {
+    "syndrome_group": "Hereditary_gastric",
+    "strand": "+",
+    "protein_length": 906,
+    "mane_transcript": "NM_001903.5"
+  },
+  "CDKN2A": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 156,
+    "mane_transcript": "NM_000077.5"
+  },
+  "CDK4": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 303,
+    "mane_transcript": "NM_000075.4"
+  },
+  "BAP1": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 729,
+    "mane_transcript": "NM_004656.4"
+  },
+  "MITF": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "+",
+    "protein_length": 526,
+    "mane_transcript": "NM_001354604.2"
+  },
+  "POT1": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 634,
+    "mane_transcript": "NM_015450.3"
+  },
+  "ACD": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 568,
+    "mane_transcript": "NM_001082486.2"
+  },
+  "TERF2IP": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "+",
+    "protein_length": 455,
+    "mane_transcript": "NM_018975.4"
+  },
+  "TERT": {
+    "syndrome_group": "Melanoma_skin_telomere",
+    "strand": "-",
+    "protein_length": 1132,
+    "mane_transcript": "NM_198253.3"
+  },
+  "MEN1": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "-",
+    "protein_length": 610,
+    "mane_transcript": "NM_001370259.2"
+  },
+  "RET": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "+",
+    "protein_length": 1114,
+    "mane_transcript": "NM_020975.6"
+  },
+  "CDKN1B": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "+",
+    "protein_length": 198,
+    "mane_transcript": "NM_004064.5"
+  },
+  "CDC73": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "+",
+    "protein_length": 531,
+    "mane_transcript": "NM_024529.5"
+  },
+  "AIP": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "+",
+    "protein_length": 330,
+    "mane_transcript": "NM_003977.4"
+  },
+  "PRKAR1A": {
+    "syndrome_group": "Endocrine_MEN",
+    "strand": "+",
+    "protein_length": 381,
+    "mane_transcript": "NM_002734.5"
+  },
+  "SDHA": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "+",
+    "protein_length": 664,
+    "mane_transcript": "NM_004168.4"
+  },
+  "SDHB": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "-",
+    "protein_length": 280,
+    "mane_transcript": "NM_003000.3"
+  },
+  "SDHC": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "+",
+    "protein_length": 169,
+    "mane_transcript": "NM_003001.5"
+  },
+  "SDHD": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "+",
+    "protein_length": 159,
+    "mane_transcript": "NM_003002.4"
+  },
+  "SDHAF2": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "+",
+    "protein_length": 166,
+    "mane_transcript": "NM_017841.4"
+  },
+  "TMEM127": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "-",
+    "protein_length": 238,
+    "mane_transcript": "NM_017849.4"
+  },
+  "MAX": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "-",
+    "protein_length": 160,
+    "mane_transcript": "NM_002382.5"
+  },
+  "VHL": {
+    "syndrome_group": "Paraganglioma_pheo",
+    "strand": "+",
+    "protein_length": 213,
+    "mane_transcript": "NM_000551.4"
+  },
+  "FH": {
+    "syndrome_group": "Renal",
+    "strand": "-",
+    "protein_length": 510,
+    "mane_transcript": "NM_000143.4"
+  },
+  "FLCN": {
+    "syndrome_group": "Renal",
+    "strand": "-",
+    "protein_length": 579,
+    "mane_transcript": "NM_144997.7"
+  },
+  "MET": {
+    "syndrome_group": "Renal",
+    "strand": "+",
+    "protein_length": 1390,
+    "mane_transcript": "NM_000245.4"
+  },
+  "TSC1": {
+    "syndrome_group": "Renal",
+    "strand": "-",
+    "protein_length": 1164,
+    "mane_transcript": "NM_000368.5"
+  },
+  "TSC2": {
+    "syndrome_group": "Renal",
+    "strand": "+",
+    "protein_length": 1807,
+    "mane_transcript": "NM_000548.5"
+  },
+  "NF1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 2839,
+    "mane_transcript": "NM_001042492.3"
+  },
+  "NF2": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 595,
+    "mane_transcript": "NM_000268.4"
+  },
+  "SMARCB1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 385,
+    "mane_transcript": "NM_003073.5"
+  },
+  "LZTR1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 834,
+    "mane_transcript": "NM_006767.4"
+  },
+  "SUFU": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 484,
+    "mane_transcript": "NM_016169.4"
+  },
+  "PTCH1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "-",
+    "protein_length": 1447,
+    "mane_transcript": "NM_000264.5"
+  },
+  "PTCH2": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "-",
+    "protein_length": 1203,
+    "mane_transcript": "NM_003738.5"
+  },
+  "SMARCA4": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 1647,
+    "mane_transcript": "NM_003072.5"
+  },
+  "SMARCE1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "-",
+    "protein_length": 411,
+    "mane_transcript": "NM_003079.5"
+  },
+  "DICER1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "-",
+    "protein_length": 1922,
+    "mane_transcript": "NM_177438.3"
+  },
+  "SPRED1": {
+    "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
+    "strand": "+",
+    "protein_length": 444,
+    "mane_transcript": "NM_152594.3"
+  },
+  "RB1": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "+",
+    "protein_length": 928,
+    "mane_transcript": "NM_000321.3"
+  },
+  "WT1": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "-",
+    "protein_length": 449,
+    "mane_transcript": "NM_024426.6"
+  },
+  "DIS3L2": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "+",
+    "protein_length": 987,
+    "mane_transcript": "NM_152383.5"
+  },
+  "CDKN1C": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "-",
+    "protein_length": 316,
+    "mane_transcript": "NM_001122630.2"
+  },
+  "REST": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "+",
+    "protein_length": 1097,
+    "mane_transcript": "NM_005612.5"
+  },
+  "NSD1": {
+    "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
+    "strand": "+",
+    "protein_length": 2696,
+    "mane_transcript": "NM_022455.5"
+  },
+  "RUNX1": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 480,
+    "mane_transcript": "NM_001754.5"
+  },
+  "GATA2": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 480,
+    "mane_transcript": "NM_032638.5"
+  },
+  "CEBPA": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 358,
+    "mane_transcript": "NM_004364.5"
+  },
+  "DDX41": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 622,
+    "mane_transcript": "NM_016222.4"
+  },
+  "ETV6": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "+",
+    "protein_length": 452,
+    "mane_transcript": "NM_001987.5"
+  },
+  "ANKRD26": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 1710,
+    "mane_transcript": "NM_014915.3"
+  },
+  "TINF2": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 451,
+    "mane_transcript": "NM_001099274.3"
+  },
+  "DKC1": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "+",
+    "protein_length": 514,
+    "mane_transcript": "NM_001363.5"
+  },
+  "RTEL1": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "+",
+    "protein_length": 1300,
+    "mane_transcript": "NM_001283009.2"
+  },
+  "PARN": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 691,
+    "mane_transcript": "NM_002582.4"
+  },
+  "SAMD9": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 1589,
+    "mane_transcript": "NM_017654.4"
+  },
+  "SAMD9L": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 1590,
+    "mane_transcript": "NM_152703.5"
+  },
+  "SBDS": {
+    "syndrome_group": "Hematologic_predisposition",
+    "strand": "-",
+    "protein_length": 250,
+    "mane_transcript": "NM_016038.4"
+  },
+  "FANCA": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 1455,
+    "mane_transcript": "NM_000135.4"
+  },
+  "FANCB": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 859,
+    "mane_transcript": "NM_001018113.3"
+  },
+  "FANCC": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 558,
+    "mane_transcript": "NM_000136.3"
+  },
+  "FANCD2": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 1451,
+    "mane_transcript": "NM_001018115.3"
+  },
+  "FANCE": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 536,
+    "mane_transcript": "NM_021922.3"
+  },
+  "FANCF": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 374,
+    "mane_transcript": "NM_022725.4"
+  },
+  "FANCG": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 622,
+    "mane_transcript": "NM_004629.2"
+  },
+  "FANCI": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 1328,
+    "mane_transcript": "NM_001113378.2"
+  },
+  "FANCL": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 375,
+    "mane_transcript": "NM_018062.4"
+  },
+  "FANCM": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 2048,
+    "mane_transcript": "NM_020937.4"
+  },
+  "SLX4": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 1834,
+    "mane_transcript": "NM_032444.4"
+  },
+  "BLM": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 1417,
+    "mane_transcript": "NM_000057.4"
+  },
+  "WRN": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "+",
+    "protein_length": 1432,
+    "mane_transcript": "NM_000553.6"
+  },
+  "RECQL4": {
+    "syndrome_group": "Fanconi_DNA_repair_chromosome_instability",
+    "strand": "-",
+    "protein_length": 1208,
+    "mane_transcript": "NM_004260.4"
+  },
+  "XPA": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "-",
+    "protein_length": 273,
+    "mane_transcript": "NM_000380.4"
+  },
+  "XPC": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "-",
+    "protein_length": 940,
+    "mane_transcript": "NM_004628.5"
+  },
+  "ERCC2": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "-",
+    "protein_length": 760,
+    "mane_transcript": "NM_000400.4"
+  },
+  "ERCC3": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "-",
+    "protein_length": 782,
+    "mane_transcript": "NM_000122.2"
+  },
+  "ERCC4": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "+",
+    "protein_length": 916,
+    "mane_transcript": "NM_005236.3"
+  },
+  "ERCC5": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "+",
+    "protein_length": 1186,
+    "mane_transcript": "NM_000123.4"
+  },
+  "POLH": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "+",
+    "protein_length": 713,
+    "mane_transcript": "NM_006502.3"
+  },
+  "DDB2": {
+    "syndrome_group": "Xeroderma_NER",
+    "strand": "+",
+    "protein_length": 428,
+    "mane_transcript": "NM_000107.3"
+  },
+  "HOXB13": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "-",
+    "protein_length": 284,
+    "mane_transcript": "NM_006361.6"
+  },
+  "EXT1": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "-",
+    "protein_length": 746,
+    "mane_transcript": "NM_000127.3"
+  },
+  "EXT2": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 718,
+    "mane_transcript": "NM_207122.2"
+  },
+  "PHOX2B": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "-",
+    "protein_length": 314,
+    "mane_transcript": "NM_003924.4"
+  },
+  "BUB1B": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 1012,
+    "mane_transcript": "NM_001211.6"
+  },
+  "PTPN11": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 593,
+    "mane_transcript": "NM_002834.5"
+  },
+  "CEP57": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 500,
+    "mane_transcript": "NM_014679.5"
+  },
+  "TRIP13": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 432,
+    "mane_transcript": "NM_004237.4"
+  },
+  "CBL": {
+    "syndrome_group": "Other_hereditary",
+    "strand": "+",
+    "protein_length": 906,
+    "mane_transcript": "NM_005188.4"
+  }
+}
