@@ -1,0 +1,33 @@
+gene,outcome,risk_low_pct,risk_high_pct,up_to_age,source,evidence_level
+BRCA1,Breast cancer,65,72,80,Kuchenbaecker et al. JAMA 2017,high
+BRCA1,Ovarian cancer,39,44,80,Kuchenbaecker et al. JAMA 2017,high
+BRCA2,Breast cancer,61,69,80,Kuchenbaecker et al. JAMA 2017,high
+BRCA2,Ovarian cancer,11,17,80,Kuchenbaecker et al. JAMA 2017,high
+BRCA2,Prostate cancer,20,25,80,Page et al. 2019,high
+TP53,All cancers combined,70,90,70,Chompret et al. / NCCN 2024,high
+TP53,Breast cancer (female),50,60,60,Olivier et al. 2010,high
+TP53,Soft tissue sarcoma,15,20,60,Olivier et al. 2010,high
+MLH1,Colorectal cancer,40,60,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+MLH1,Endometrial cancer,30,40,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+MSH2,Colorectal cancer,40,60,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+MSH2,Endometrial cancer,30,45,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+MSH6,Colorectal cancer,15,22,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+MSH6,Endometrial cancer,20,40,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
+PMS2,Colorectal cancer,10,20,75,Ten Broeke et al. JCO 2018,moderate
+APC,Colorectal cancer (FAP),95,100,50,NCCN 2024 Guidelines,high
+PALB2,Breast cancer,40,60,80,Antoniou et al. NEJM 2014,high
+CDH1,Diffuse gastric cancer,56,70,80,Hansford et al. Lancet Oncol 2015,high
+CDH1,Lobular breast cancer,39,52,80,Hansford et al. Lancet Oncol 2015,high
+PTEN,Breast cancer,67,85,70,Tan et al. Clin Cancer Res 2012,high
+PTEN,Thyroid cancer,20,35,70,Tan et al. Clin Cancer Res 2012,high
+STK11,All cancers combined,70,85,70,Giardiello et al. Clin Cancer Res 2000,high
+MUTYH,Colorectal cancer (biallelic),43,63,70,Nielsen et al. 2012,high
+RET,Medullary thyroid carcinoma,90,100,70,Wells et al. Thyroid 2015,high
+VHL,Renal cell carcinoma,40,70,70,Maher et al. Eur J Hum Genet 2011,high
+VHL,Pheochromocytoma,10,20,70,Maher et al. Eur J Hum Genet 2011,high
+FLCN,Renal cancer,25,35,70,Toro et al. J Med Genet 2008,moderate
+FLCN,Spontaneous pneumothorax,30,50,50,Birt-Hogg-Dube syndrome feature,high
+FH,Renal cell carcinoma,10,16,70,Menko et al. 2014,moderate
+FH,Cutaneous and uterine leiomyomatosis,80,95,50,HLRCC syndrome feature,high
+ANKRD26,Inherited thrombocytopenia,90,100,30,Non-cancer syndrome feature,high
+DKC1,Aplastic anemia / Bone marrow failure,80,90,40,Dyskeratosis congenita feature,high
