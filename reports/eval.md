@@ -6,6 +6,44 @@
 > 3. Tree baselines (*HistGradientBoosting*) and ESM-only baselines are directly compared side-by-side.
 > 4. Claims of superiority are strictly constrained by whether the confidence intervals overlap.
 
+---
+
+## Detailed Data Split Explanations
+
+Understanding how genomic data is split is essential for reliable evaluation. A model that achieves high accuracy when evaluated naively can completely fail in a real clinical diagnostic setting if it simply memorized gene names. We therefore benchmark across three distinct data splitting protocols:
+
+### 1. Random Split (70% Train / 15% Validation / 15% Test)
+- **What it is**: The entire dataset of 148,747 variants is randomly partitioned into 70% training, 15% validation, and 15% testing, stratified by the binary pathogenicity label (`is_pathogenic`) so that all subsets preserve the ~14% positive class prevalence.
+- **What it measures**: Standard within-distribution generalization. It evaluates how well the model predicts new variants in genes that were also present in the training set.
+- **Clinical Caveat**: Variants from the *same gene* (e.g., two different missense mutations in *BRCA1*) appear in both training and test sets. This allows models to rely on gene-level priors rather than learning true molecular mechanisms. It is included here for reference and comparison with legacy literature.
+
+### 2. Time Split (Oldest 80% Train / Newest 20% Test)
+- **What it is**: Variants are chronologically sorted using ClinVar's official `last_evaluated` submission date. The oldest 80% of variants form the training set, while the most recent 20% form the prospective test set.
+- **What it measures**: Prospective clinical deployment. It rigorously tests whether a model trained on historical genomic data (e.g., variants curated before 2021) can accurately predict newly discovered and reclassified variants submitted in recent years without data staleness.
+
+### 3. Gene-Held-Out 5-Fold GroupKFold (HEADLINE Split)
+- **What it is**: Variants are strictly grouped by gene symbol (`gene`). The 130 panel genes are partitioned into 5 folds such that all variants of any given gene reside exclusively in either the training folds or the test fold — zero gene overlap.
+- **What it measures**: True out-of-gene generalization. It evaluates whether the model can accurately classify mutations in a newly discovered disease gene or a rare gene that was *never seen during training*. This directly tests genuine biochemical, structural, and evolutionary understanding.
+
+---
+
+## Column & Metric Explanations
+
+Here is what each column in the evaluation tables and its values represent:
+
+| Column Name | Meaning & Formulation | Range & Baseline | Clinical Interpretation |
+| :--- | :--- | :--- | :--- |
+| **Split** | The validation data partitioning strategy applied to the dataset. | `Random (70/15/15)`, `Time Split (80/20)`, or `Gene-Held-Out (Headline)`. | Defines what form of generalization is being tested (within-gene vs prospective vs across unseen genes). |
+| **Model** | The algorithm architecture or benchmark evaluated. | Baseline (`Class-Prior`, `ESM-Only`), Tree Ensembles (`HistGradientBoosting`), or Deep Neural Networks (`Tabular-Only ResNet`, `Tabular+ESM Fusion ResNet`). | Allows direct side-by-side comparison between tree ensembles and multimodal deep learning. |
+| **Test AUC (95% CI)** | Area Under the Receiver Operating Characteristic Curve (ROC-AUC) evaluated on held-out test data, with 95% bootstrap confidence intervals across 100 iterations. | Range: `0.0` to `1.0`.<br/>`0.5000` = Random guessing (no discriminative ability).<br/>`1.0000` = Perfect ranking. | Represents the probability that a randomly chosen pathogenic variant will be assigned a higher risk score than a randomly chosen benign variant across all possible classification thresholds. |
+| **Test AUPRC (95% CI)** | Area Under the Precision-Recall Curve (PR-AUC) with 95% bootstrap confidence intervals across 100 iterations. | Range: `0.0` to `1.0`.<br/>Random Baseline = `~0.13`–`0.14` (dataset positive class prevalence).<br/>`1.0000` = Perfect precision and recall. | The gold-standard metric for imbalanced genomic data (~14% pathogenic). Unlike ROC-AUC, AUPRC heavily penalizes false-positive alarms; high AUPRC guarantees that high-scoring variants are genuinely pathogenic. |
+| **Shuffled-Label Sanity AUC** | ROC-AUC measured after randomly permuting the true labels while keeping features identical. | Must strictly fall in `[0.4500, 0.5500]` (~`0.5000`). | A critical negative-control test. Confirms the evaluation code has zero data leakage, target contamination, or pipelining artifacts. |
+| **Out-of-Gene AUC (95% CI)** | ROC-AUC evaluated exclusively on held-out genes that the model was never trained on. | `0.5000` to `1.0000`. Higher is better. | Directly measures how effectively the model transfers biophysical knowledge to unfamiliar proteins without gene-identity clues. |
+| **Out-of-Gene AUPRC (95% CI)** | PR-AUC evaluated exclusively on held-out genes that the model was never trained on. | Dataset prevalence to `1.0000`. Higher is better. | Direct measure of precision and clinical diagnostic utility when encountering mutations in novel genes. |
+| **Variant Class: `missense` (N = 2057 held-out test variants)** | Sub-cohort evaluation restricted to amino-acid substituting single nucleotide variants. | `N = 2057` variants in held-out test folds. | Missense variants are the most clinically ambiguous and difficult to interpret (unlike nonsense/frameshift variants which are easily flagged by rules). Sample size `N=2057` provides high statistical power. |
+
+---
+
 ## 1. Overall Performance Across Splits
 
 | Split | Model | Test AUC (95% CI) | Test AUPRC (95% CI) | Shuffled-Label Sanity AUC |
