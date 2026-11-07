@@ -481,7 +481,18 @@ def generate_pdf_report(
     ]
     var_rows = [var_headers]
 
-    for v in data.get("verdicts", []):
+    all_verdicts = data.get("verdicts", [])
+    # If a large callset (like whole-genome HG002 with >1000 benign SNPs), prioritize actionable variants
+    if len(all_verdicts) > 20:
+        actionable_subset = [v for v in all_verdicts if v["tier"] not in ["Benign", "Likely Benign"]]
+        benign_subset = [v for v in all_verdicts if v["tier"] in ["Benign", "Likely Benign"]]
+        display_verdicts = actionable_subset + benign_subset[:10]
+        omitted_benign_count = len(benign_subset) - 10 if len(benign_subset) > 10 else 0
+    else:
+        display_verdicts = all_verdicts
+        omitted_benign_count = 0
+
+    for v in display_verdicts:
         gene = v["gene"]
         coords = f"{v['chrom']}:{v['pos']}"
         ref_alt = f"{v['ref']}>{v['alt']}"
@@ -511,6 +522,13 @@ def generate_pdf_report(
         ("RIGHTPADDING", (0, 0), (-1, -1), 4),
     ]))
     story.append(var_table)
+    if omitted_benign_count > 0:
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            f"<i>*Note: {omitted_benign_count:,} additional benign polymorphisms are omitted from this summary "
+            f"table for clinical conciseness. Full records are archived in the structured JSON report.</i>",
+            body_style,
+        ))
     story.append(Spacer(1, 6))
 
     # 7. Actionable Variant Deep Dives

@@ -1,0 +1,782 @@
+{
+  "ABRAXAS1": {
+    "chrom": "4",
+    "start": 83460475,
+    "end": 83487158,
+    "observed_variants": 317
+  },
+  "ACD": {
+    "chrom": "16",
+    "start": 67655337,
+    "end": 67662909,
+    "observed_variants": 562
+  },
+  "AIP": {
+    "chrom": "11",
+    "start": 67480897,
+    "end": 67493057,
+    "observed_variants": 440
+  },
+  "ANKRD26": {
+    "chrom": "10",
+    "start": 27002157,
+    "end": 27102619,
+    "observed_variants": 949
+  },
+  "APC": {
+    "chrom": "5",
+    "start": 112694987,
+    "end": 112848131,
+    "observed_variants": 4010
+  },
+  "ATM": {
+    "chrom": "11",
+    "start": 108220889,
+    "end": 108370921,
+    "observed_variants": 6016
+  },
+  "AXIN2": {
+    "chrom": "17",
+    "start": 65526964,
+    "end": 65563721,
+    "observed_variants": 1405
+  },
+  "BAP1": {
+    "chrom": "3",
+    "start": 52399124,
+    "end": 52412205,
+    "observed_variants": 1443
+  },
+  "BARD1": {
+    "chrom": "2",
+    "start": 214726360,
+    "end": 214811895,
+    "observed_variants": 1360
+  },
+  "BLM": {
+    "chrom": "15",
+    "start": 90715122,
+    "end": 90817387,
+    "observed_variants": 1761
+  },
+  "BMPR1A": {
+    "chrom": "10",
+    "start": 86754209,
+    "end": 86927061,
+    "observed_variants": 974
+  },
+  "BRCA1": {
+    "chrom": "17",
+    "start": 43037471,
+    "end": 43129865,
+    "observed_variants": 4379
+  },
+  "BRCA2": {
+    "chrom": "13",
+    "start": 32312943,
+    "end": 32401625,
+    "observed_variants": 6842
+  },
+  "BRIP1": {
+    "chrom": "17",
+    "start": 61677296,
+    "end": 61865458,
+    "observed_variants": 1896
+  },
+  "BUB1B": {
+    "chrom": "15",
+    "start": 40158761,
+    "end": 40222870,
+    "observed_variants": 868
+  },
+  "CBL": {
+    "chrom": "11",
+    "start": 119204253,
+    "end": 119309930,
+    "observed_variants": 852
+  },
+  "CDC73": {
+    "chrom": "1",
+    "start": 193119735,
+    "end": 193256498,
+    "observed_variants": 871
+  },
+  "CDH1": {
+    "chrom": "16",
+    "start": 68720497,
+    "end": 68837549,
+    "observed_variants": 1749
+  },
+  "CDK4": {
+    "chrom": "12",
+    "start": 57745774,
+    "end": 57754476,
+    "observed_variants": 460
+  },
+  "CDKN1B": {
+    "chrom": "12",
+    "start": 12715002,
+    "end": 12723983,
+    "observed_variants": 313
+  },
+  "CDKN1C": {
+    "chrom": "11",
+    "start": 2881810,
+    "end": 2887574,
+    "observed_variants": 393
+  },
+  "CDKN2A": {
+    "chrom": "9",
+    "start": 21965856,
+    "end": 21996537,
+    "observed_variants": 445
+  },
+  "CEBPA": {
+    "chrom": "19",
+    "start": 33299036,
+    "end": 33304524,
+    "observed_variants": 403
+  },
+  "CEP57": {
+    "chrom": "11",
+    "start": 95788684,
+    "end": 95833255,
+    "observed_variants": 311
+  },
+  "CHEK2": {
+    "chrom": "22",
+    "start": 28685878,
+    "end": 28743956,
+    "observed_variants": 1236
+  },
+  "CTNNA1": {
+    "chrom": "5",
+    "start": 138751397,
+    "end": 138936469,
+    "observed_variants": 1338
+  },
+  "DDB2": {
+    "chrom": "11",
+    "start": 47212743,
+    "end": 47241000,
+    "observed_variants": 79
+  },
+  "DDX41": {
+    "chrom": "5",
+    "start": 177509694,
+    "end": 177518945,
+    "observed_variants": 619
+  },
+  "DICER1": {
+    "chrom": "14",
+    "start": 95084459,
+    "end": 95159475,
+    "observed_variants": 2790
+  },
+  "DIS3L2": {
+    "chrom": "2",
+    "start": 232012850,
+    "end": 232345824,
+    "observed_variants": 891
+  },
+  "DKC1": {
+    "chrom": "X",
+    "start": 154760460,
+    "end": 154778964,
+    "observed_variants": 289
+  },
+  "EPCAM": {
+    "chrom": "2",
+    "start": 47367005,
+    "end": 47388975,
+    "observed_variants": 368
+  },
+  "ERCC2": {
+    "chrom": "19",
+    "start": 45349413,
+    "end": 45372730,
+    "observed_variants": 1128
+  },
+  "ERCC3": {
+    "chrom": "2",
+    "start": 127255337,
+    "end": 127296421,
+    "observed_variants": 319
+  },
+  "ERCC4": {
+    "chrom": "16",
+    "start": 13917809,
+    "end": 13954260,
+    "observed_variants": 381
+  },
+  "ERCC5": {
+    "chrom": "13",
+    "start": 102843499,
+    "end": 102877992,
+    "observed_variants": 244
+  },
+  "ETV6": {
+    "chrom": "12",
+    "start": 11648108,
+    "end": 11896684,
+    "observed_variants": 406
+  },
+  "EXT1": {
+    "chrom": "8",
+    "start": 117797704,
+    "end": 118114051,
+    "observed_variants": 510
+  },
+  "EXT2": {
+    "chrom": "11",
+    "start": 44093552,
+    "end": 44247089,
+    "observed_variants": 423
+  },
+  "FAN1": {
+    "chrom": "15",
+    "start": 30799393,
+    "end": 30939319,
+    "observed_variants": 198
+  },
+  "FANCA": {
+    "chrom": "16",
+    "start": 89735590,
+    "end": 89818927,
+    "observed_variants": 2950
+  },
+  "FANCB": {
+    "chrom": "X",
+    "start": 14794297,
+    "end": 14875026,
+    "observed_variants": 303
+  },
+  "FANCC": {
+    "chrom": "9",
+    "start": 95097155,
+    "end": 95319856,
+    "observed_variants": 876
+  },
+  "FANCD2": {
+    "chrom": "3",
+    "start": 10026652,
+    "end": 10103265,
+    "observed_variants": 1030
+  },
+  "FANCE": {
+    "chrom": "6",
+    "start": 35450490,
+    "end": 35468496,
+    "observed_variants": 355
+  },
+  "FANCF": {
+    "chrom": "11",
+    "start": 22620563,
+    "end": 22628004,
+    "observed_variants": 146
+  },
+  "FANCG": {
+    "chrom": "9",
+    "start": 35072113,
+    "end": 35082213,
+    "observed_variants": 689
+  },
+  "FANCI": {
+    "chrom": "15",
+    "start": 89245480,
+    "end": 89319316,
+    "observed_variants": 1106
+  },
+  "FANCL": {
+    "chrom": "2",
+    "start": 58157670,
+    "end": 58243625,
+    "observed_variants": 395
+  },
+  "FANCM": {
+    "chrom": "14",
+    "start": 45133819,
+    "end": 45202240,
+    "observed_variants": 1231
+  },
+  "FH": {
+    "chrom": "1",
+    "start": 241495360,
+    "end": 241521838,
+    "observed_variants": 968
+  },
+  "FLCN": {
+    "chrom": "17",
+    "start": 17210252,
+    "end": 17239164,
+    "observed_variants": 1070
+  },
+  "GATA2": {
+    "chrom": "3",
+    "start": 128477261,
+    "end": 128495129,
+    "observed_variants": 686
+  },
+  "GREM1": {
+    "chrom": "15",
+    "start": 32715579,
+    "end": 32733484,
+    "observed_variants": 221
+  },
+  "HOXB13": {
+    "chrom": "17",
+    "start": 48724733,
+    "end": 48730640,
+    "observed_variants": 337
+  },
+  "LZTR1": {
+    "chrom": "22",
+    "start": 20980073,
+    "end": 20999530,
+    "observed_variants": 1576
+  },
+  "MAX": {
+    "chrom": "14",
+    "start": 65004289,
+    "end": 65104743,
+    "observed_variants": 272
+  },
+  "MBD4": {
+    "chrom": "3",
+    "start": 129429507,
+    "end": 129441831,
+    "observed_variants": 441
+  },
+  "MEN1": {
+    "chrom": "11",
+    "start": 64801263,
+    "end": 64813551,
+    "observed_variants": 1193
+  },
+  "MET": {
+    "chrom": "7",
+    "start": 116670385,
+    "end": 116800364,
+    "observed_variants": 1665
+  },
+  "MITF": {
+    "chrom": "3",
+    "start": 69737170,
+    "end": 69970281,
+    "observed_variants": 492
+  },
+  "MLH1": {
+    "chrom": "3",
+    "start": 36986684,
+    "end": 37067639,
+    "observed_variants": 1942
+  },
+  "MLH3": {
+    "chrom": "14",
+    "start": 75011934,
+    "end": 75053627,
+    "observed_variants": 1017
+  },
+  "MRE11": {
+    "chrom": "11",
+    "start": 94415426,
+    "end": 94500091,
+    "observed_variants": 826
+  },
+  "MSH2": {
+    "chrom": "2",
+    "start": 47400579,
+    "end": 47514439,
+    "observed_variants": 2498
+  },
+  "MSH3": {
+    "chrom": "5",
+    "start": 80652584,
+    "end": 80877910,
+    "observed_variants": 1769
+  },
+  "MSH6": {
+    "chrom": "2",
+    "start": 47780677,
+    "end": 47813905,
+    "observed_variants": 2563
+  },
+  "MUTYH": {
+    "chrom": "1",
+    "start": 45327280,
+    "end": 45342760,
+    "observed_variants": 1333
+  },
+  "NBN": {
+    "chrom": "8",
+    "start": 89931370,
+    "end": 89986953,
+    "observed_variants": 1247
+  },
+  "NF1": {
+    "chrom": "17",
+    "start": 31093037,
+    "end": 31381024,
+    "observed_variants": 5910
+  },
+  "NF2": {
+    "chrom": "22",
+    "start": 29601247,
+    "end": 29700377,
+    "observed_variants": 976
+  },
+  "NSD1": {
+    "chrom": "5",
+    "start": 177132112,
+    "end": 177297418,
+    "observed_variants": 1141
+  },
+  "NTHL1": {
+    "chrom": "16",
+    "start": 2033679,
+    "end": 2049865,
+    "observed_variants": 576
+  },
+  "PALB2": {
+    "chrom": "16",
+    "start": 23601313,
+    "end": 23643699,
+    "observed_variants": 1819
+  },
+  "PARN": {
+    "chrom": "16",
+    "start": 14434723,
+    "end": 14632206,
+    "observed_variants": 426
+  },
+  "PHOX2B": {
+    "chrom": "4",
+    "start": 41742145,
+    "end": 41751306,
+    "observed_variants": 473
+  },
+  "PMS1": {
+    "chrom": "2",
+    "start": 189781950,
+    "end": 189879446,
+    "observed_variants": 69
+  },
+  "PMS2": {
+    "chrom": "7",
+    "start": 5971253,
+    "end": 6013578,
+    "observed_variants": 1787
+  },
+  "POLD1": {
+    "chrom": "19",
+    "start": 50382100,
+    "end": 50420015,
+    "observed_variants": 2255
+  },
+  "POLE": {
+    "chrom": "12",
+    "start": 132622607,
+    "end": 132689678,
+    "observed_variants": 4140
+  },
+  "POLH": {
+    "chrom": "6",
+    "start": 43574328,
+    "end": 43622491,
+    "observed_variants": 326
+  },
+  "POT1": {
+    "chrom": "7",
+    "start": 124820964,
+    "end": 124931601,
+    "observed_variants": 952
+  },
+  "PRKAR1A": {
+    "chrom": "17",
+    "start": 68510102,
+    "end": 68553099,
+    "observed_variants": 602
+  },
+  "PTCH1": {
+    "chrom": "9",
+    "start": 95441052,
+    "end": 95519248,
+    "observed_variants": 2481
+  },
+  "PTCH2": {
+    "chrom": "1",
+    "start": 44819874,
+    "end": 44845239,
+    "observed_variants": 443
+  },
+  "PTEN": {
+    "chrom": "10",
+    "start": 87860430,
+    "end": 87969887,
+    "observed_variants": 1179
+  },
+  "PTPN11": {
+    "chrom": "12",
+    "start": 112416795,
+    "end": 112511173,
+    "observed_variants": 655
+  },
+  "RAD50": {
+    "chrom": "5",
+    "start": 132554665,
+    "end": 132644648,
+    "observed_variants": 1604
+  },
+  "RAD51B": {
+    "chrom": "14",
+    "start": 67821547,
+    "end": 68597619,
+    "observed_variants": 239
+  },
+  "RAD51C": {
+    "chrom": "17",
+    "start": 58690375,
+    "end": 58736271,
+    "observed_variants": 782
+  },
+  "RAD51D": {
+    "chrom": "17",
+    "start": 35098823,
+    "end": 35122008,
+    "observed_variants": 698
+  },
+  "RB1": {
+    "chrom": "13",
+    "start": 48301679,
+    "end": 48483842,
+    "observed_variants": 1746
+  },
+  "RECQL": {
+    "chrom": "12",
+    "start": 21467761,
+    "end": 21503800,
+    "observed_variants": 519
+  },
+  "RECQL4": {
+    "chrom": "8",
+    "start": 144509420,
+    "end": 144521798,
+    "observed_variants": 2031
+  },
+  "REST": {
+    "chrom": "4",
+    "start": 56908349,
+    "end": 56934444,
+    "observed_variants": 256
+  },
+  "RET": {
+    "chrom": "10",
+    "start": 43074732,
+    "end": 43132238,
+    "observed_variants": 1731
+  },
+  "RNF43": {
+    "chrom": "17",
+    "start": 58352727,
+    "end": 58418013,
+    "observed_variants": 442
+  },
+  "RPS20": {
+    "chrom": "8",
+    "start": 56067456,
+    "end": 56076895,
+    "observed_variants": 204
+  },
+  "RTEL1": {
+    "chrom": "20",
+    "start": 63657310,
+    "end": 63698081,
+    "observed_variants": 2265
+  },
+  "RUNX1": {
+    "chrom": "21",
+    "start": 34785766,
+    "end": 35051243,
+    "observed_variants": 752
+  },
+  "SAMD9": {
+    "chrom": "7",
+    "start": 93099325,
+    "end": 93108083,
+    "observed_variants": 846
+  },
+  "SAMD9L": {
+    "chrom": "7",
+    "start": 93129118,
+    "end": 93148872,
+    "observed_variants": 741
+  },
+  "SBDS": {
+    "chrom": "7",
+    "start": 66986302,
+    "end": 66997415,
+    "observed_variants": 158
+  },
+  "SDHA": {
+    "chrom": "5",
+    "start": 216352,
+    "end": 265399,
+    "observed_variants": 1194
+  },
+  "SDHAF2": {
+    "chrom": "11",
+    "start": 61428097,
+    "end": 61448728,
+    "observed_variants": 238
+  },
+  "SDHB": {
+    "chrom": "1",
+    "start": 17016618,
+    "end": 17056463,
+    "observed_variants": 616
+  },
+  "SDHC": {
+    "chrom": "1",
+    "start": 161312368,
+    "end": 161366589,
+    "observed_variants": 377
+  },
+  "SDHD": {
+    "chrom": "11",
+    "start": 112084881,
+    "end": 112097773,
+    "observed_variants": 320
+  },
+  "SLX4": {
+    "chrom": "16",
+    "start": 3579247,
+    "end": 3611794,
+    "observed_variants": 941
+  },
+  "SMAD4": {
+    "chrom": "18",
+    "start": 51028350,
+    "end": 51086980,
+    "observed_variants": 926
+  },
+  "SMARCA4": {
+    "chrom": "19",
+    "start": 10958884,
+    "end": 11064217,
+    "observed_variants": 3066
+  },
+  "SMARCB1": {
+    "chrom": "22",
+    "start": 23784685,
+    "end": 23838979,
+    "observed_variants": 648
+  },
+  "SMARCE1": {
+    "chrom": "17",
+    "start": 40626675,
+    "end": 40647854,
+    "observed_variants": 490
+  },
+  "SPRED1": {
+    "chrom": "15",
+    "start": 38250630,
+    "end": 38359062,
+    "observed_variants": 430
+  },
+  "STK11": {
+    "chrom": "19",
+    "start": 1199917,
+    "end": 1230261,
+    "observed_variants": 1102
+  },
+  "SUFU": {
+    "chrom": "10",
+    "start": 102501825,
+    "end": 102635445,
+    "observed_variants": 775
+  },
+  "TERF2IP": {
+    "chrom": "16",
+    "start": 75645705,
+    "end": 75762921,
+    "observed_variants": 316
+  },
+  "TERT": {
+    "chrom": "5",
+    "start": 1251575,
+    "end": 1301535,
+    "observed_variants": 1723
+  },
+  "TINF2": {
+    "chrom": "14",
+    "start": 24237706,
+    "end": 24244888,
+    "observed_variants": 324
+  },
+  "TMEM127": {
+    "chrom": "2",
+    "start": 96248224,
+    "end": 96268108,
+    "observed_variants": 367
+  },
+  "TP53": {
+    "chrom": "17",
+    "start": 7577817,
+    "end": 7689376,
+    "observed_variants": 1406
+  },
+  "TRIP13": {
+    "chrom": "5",
+    "start": 890722,
+    "end": 919098,
+    "observed_variants": 129
+  },
+  "TSC1": {
+    "chrom": "9",
+    "start": 132889447,
+    "end": 132946772,
+    "observed_variants": 1890
+  },
+  "TSC2": {
+    "chrom": "16",
+    "start": 2045954,
+    "end": 2090885,
+    "observed_variants": 4597
+  },
+  "VHL": {
+    "chrom": "3",
+    "start": 10139318,
+    "end": 10155582,
+    "observed_variants": 746
+  },
+  "WRN": {
+    "chrom": "8",
+    "start": 31031419,
+    "end": 31175672,
+    "observed_variants": 1451
+  },
+  "WT1": {
+    "chrom": "11",
+    "start": 32364241,
+    "end": 32440918,
+    "observed_variants": 816
+  },
+  "XPA": {
+    "chrom": "9",
+    "start": 97673161,
+    "end": 97699297,
+    "observed_variants": 216
+  },
+  "XPC": {
+    "chrom": "3",
+    "start": 14143257,
+    "end": 14181017,
+    "observed_variants": 747
+  },
+  "XRCC2": {
+    "chrom": "7",
+    "start": 152646459,
+    "end": 152678331,
+    "observed_variants": 237
+  }
+}
