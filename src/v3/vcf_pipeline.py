@@ -88,6 +88,7 @@ class VariantRecord:
     dp: int = 30
     gq: int = 99
     is_biallelic: bool = False
+    spliceai_max: float = 0.0
 
 
 @dataclass
@@ -302,6 +303,7 @@ class VCFPipeline:
                         dp=dp,
                         gq=gq,
                         is_biallelic=is_hom_alt,
+                        spliceai_max=float(parsed_ann.get("spliceai_max", 0.0)),
                     )
                     records.append(vr)
 
@@ -324,6 +326,7 @@ class VCFPipeline:
             "gene": "", "transcript": "", "consequence": "",
             "ref_aa": "", "alt_aa": "", "aa_pos": -1,
             "hgvs_c": "", "hgvs_p": "", "af": 0.0,
+            "spliceai_max": 0.0,
         }
 
         # Check gnomAD / AF in INFO
@@ -331,6 +334,26 @@ class VCFPipeline:
         if m_af:
             try:
                 ann["af"] = float(m_af.group(1))
+            except ValueError:
+                pass
+
+        # Check SpliceAI delta scores in INFO (Standard: SpliceAI=ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|...)
+        m_sp = re.search(r"SpliceAI=([^;]+)", info_str)
+        if m_sp:
+            for entry in m_sp.group(1).split(","):
+                sp_parts = entry.split("|")
+                if len(sp_parts) >= 6:
+                    try:
+                        scores = [float(sp_parts[2]), float(sp_parts[3]), float(sp_parts[4]), float(sp_parts[5])]
+                        ann["spliceai_max"] = max(ann["spliceai_max"], max(scores))
+                    except (ValueError, IndexError):
+                        pass
+
+        # Standalone SpliceAI tags (e.g. DS_MAX=0.85, SpliceAI_max=0.85)
+        m_sp_max = re.search(r"(?:DS_MAX|SpliceAI_DS_max|SpliceAI_max)=([0-9.]+)", info_str, re.IGNORECASE)
+        if m_sp_max:
+            try:
+                ann["spliceai_max"] = max(ann["spliceai_max"], float(m_sp_max.group(1)))
             except ValueError:
                 pass
 
@@ -408,15 +431,58 @@ class VCFPipeline:
                 self._attach_risk_estimates(verdict)
                 return verdict
 
-        # 3. Rule-based Loss-of-Function
+        # 3. Rule-based Loss-of-Function & Splicing Safeguards
         csq = var.consequence.lower()
+
+        # 3A. Canonical Loss-of-Function (Frameshift, canonical splice donor/acceptor +/-1,2)
         if any(term in csq for term in ["frameshift", "splice_acceptor", "splice_donor", "splice_canonical"]):
             verdict = VariantVerdict(
                 variant=var,
                 tier="Likely Pathogenic",
-                evidence_source="Rule-based (predicted loss-of-function truncation/splice disruption)",
+                evidence_source="Rule-based (predicted loss-of-function truncation/canonical splice disruption)",
                 calibrated_score=0.950,
                 clinical_notes="Canonical splice-site disruption or frameshift truncation in established tumor suppressor.",
+            )
+            self._attach_risk_estimates(verdict)
+            return verdict
+
+        # 3B. SpliceAI Deep Splicing Safeguard (Novel deep-intronic / synonymous splice disruptors)
+        # Bypasses protein ResNet model to avoid false-negative classification of RNA-altering variants
+        if var.spliceai_max >= 0.50:
+            verdict = VariantVerdict(
+                variant=var,
+                tier="Likely Pathogenic",
+                evidence_source=f"Rule-based (SpliceAI high-confidence splice alteration, DS_MAX = {var.spliceai_max:.3f} >= 0.50)",
+                calibrated_score=0.950,
+                clinical_notes=(
+                    f"High-confidence cryptic splice alteration predicted by SpliceAI (DS_MAX={var.spliceai_max:.3f}). "
+                    "Bypasses protein-folding model to prevent false-negative misclassification of non-coding/synonymous splice disruptor."
+                ),
+            )
+            self._attach_risk_estimates(verdict)
+            return verdict
+        elif var.spliceai_max >= 0.20:
+            verdict = VariantVerdict(
+                variant=var,
+                tier="VUS",
+                evidence_source=f"SpliceAI moderate splice disruption (DS_MAX = {var.spliceai_max:.3f} >= 0.20)",
+                calibrated_score=0.500,
+                clinical_notes=(
+                    f"Moderate splice alteration predicted by SpliceAI (DS_MAX={var.spliceai_max:.3f}). "
+                    "Functional RNA assay or RT-PCR transcript analysis recommended to confirm aberrant splicing."
+                ),
+            )
+            self._attach_risk_estimates(verdict)
+            return verdict
+
+        # 3C. Extended Splice Region Boundary Warning (Unclassified non-canonical splice variant without SpliceAI)
+        if "splice_region" in csq and not var.ref_aa and not var.alt_aa:
+            verdict = VariantVerdict(
+                variant=var,
+                tier="VUS",
+                evidence_source="Splice region boundary (unclassified non-canonical splice variant)",
+                calibrated_score=0.400,
+                clinical_notes="Located in non-canonical splice region (-3 to +8 bp / polypyrimidine tract). Requires RNA sequencing or SpliceAI annotation to confirm splicing impact.",
             )
             self._attach_risk_estimates(verdict)
             return verdict

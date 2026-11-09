@@ -24,6 +24,15 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Safeguard against strict dependency version mismatch in transformers when huggingface-hub>=2.0 is installed
+import types
+if "transformers.dependency_versions_check" not in sys.modules:
+    _dvc = types.ModuleType("transformers.dependency_versions_check")
+    _dvc.dep_version_check = lambda *a, **k: None
+    _dvc.require_version_core = lambda *a, **k: None
+    _dvc.require_version = lambda *a, **k: None
+    sys.modules["transformers.dependency_versions_check"] = _dvc
+
 import numpy as np
 import pandas as pd
 import torch

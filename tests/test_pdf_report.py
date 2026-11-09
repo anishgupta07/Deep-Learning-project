@@ -2,7 +2,8 @@
 
 from pathlib import Path
 import pytest
-import pypdf
+
+pypdf = pytest.importorskip("pypdf")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 from src.v3.generate_pdf_report import generate_pdf_report

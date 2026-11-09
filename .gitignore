@@ -32,8 +32,14 @@ HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
 
-# Local unused files archive
-unused_files/*
+# Local archived files (>100MB cannot be pushed to standard GitHub)
+others/data/*.gz
+others/data/*.vcf.gz
+others/data/*.txt.gz
+
+# Cache files
+reports/fontlist*.json
+.pytest_cache/
 
 # Large binary embeddings (>100MB cannot be pushed to standard GitHub)
 data/*.pt

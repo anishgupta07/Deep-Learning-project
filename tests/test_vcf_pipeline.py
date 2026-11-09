@@ -163,3 +163,42 @@ def test_rule_based_frameshift(pipeline):
     verdict = pipeline.evaluate_variant(frameshift_var)
     assert verdict.tier == "Likely Pathogenic"
     assert "Rule-based" in verdict.evidence_source
+
+
+def test_spliceai_deep_intronic_safeguard(pipeline):
+    """Novel deep-intronic variant with SpliceAI >= 0.50 must be classified as Likely Pathogenic."""
+    deep_intronic = VariantRecord(
+        chrom="17",
+        pos=43080000,
+        id=".",
+        ref="G",
+        alt="A",
+        qual=100.0,
+        filter_status="PASS",
+        gene="BRCA1",
+        consequence="intron_variant",
+        spliceai_max=0.82,
+    )
+    verdict = pipeline.evaluate_variant(deep_intronic)
+    assert verdict.tier == "Likely Pathogenic"
+    assert "SpliceAI" in verdict.evidence_source
+    assert verdict.calibrated_score >= 0.90
+
+
+def test_spliceai_synonymous_splice_disruptor(pipeline):
+    """Novel synonymous mutation with moderate SpliceAI delta score must be flagged as VUS."""
+    synonymous_splice = VariantRecord(
+        chrom="13",
+        pos=32340000,
+        id=".",
+        ref="C",
+        alt="T",
+        qual=100.0,
+        filter_status="PASS",
+        gene="BRCA2",
+        consequence="synonymous_variant",
+        spliceai_max=0.35,
+    )
+    verdict = pipeline.evaluate_variant(synonymous_splice)
+    assert verdict.tier == "VUS"
+    assert "SpliceAI" in verdict.evidence_source
