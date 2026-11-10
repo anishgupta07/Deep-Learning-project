@@ -22,7 +22,11 @@ from extract_v3 import GENE2SYN, VARIANT_CLASSES, classify
 HGVS_GENE_RE = re.compile(r"\(([A-Z][A-Z0-9]+)\):c\.")
 
 def main():
-    src  = os.path.join(ROOT, "data", "clinvar_labelled_snv.csv")
+    src = (
+        os.path.join(ROOT, "others", "data", "clinvar_labelled_snv.csv")
+        if os.path.exists(os.path.join(ROOT, "others", "data", "clinvar_labelled_snv.csv"))
+        else os.path.join(ROOT, "data", "clinvar_labelled_snv.csv")
+    )
     dest = os.path.join(ROOT, "data", "clinvar_labelled_v3.csv")
     print(f"Loading {src} ...")
     df = pd.read_csv(src, dtype={"chrom": str})

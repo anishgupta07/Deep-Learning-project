@@ -1,20 +1,25 @@
 # ==============================================================================
-# GenomeDL: AI-Driven 80-Gene Hereditary Cancer Interpretation Engine
+# GenomeDL v3: AI-Driven 130-Gene Hereditary Cancer Interpretation Engine
 # Python Dependencies
 # ==============================================================================
 
-# Core Deep Learning (CUDA 12.4 supported)
+# Core Deep Learning & NLP
 torch>=2.4.0
+transformers>=4.40.0
 
 # Cheminformatics & Molecular Biophysics
 rdkit>=2024.03.1
 
-# Tabular Data Processing & Machine Learning
+# Tabular Data Processing, Parquet & ML
 pandas>=2.0.0
 numpy>=1.24.0
+pyarrow>=14.0.0
 scikit-learn>=1.3.0
-scipy>=1.10.0
 
-# Visualization & Telemetry
+# Clinical Report Generation & PDF Processing
+reportlab>=4.0.0
+pypdf>=4.0.0
 matplotlib>=3.7.0
-seaborn>=0.12.0
+
+# Automated Testing
+pytest>=8.0.0

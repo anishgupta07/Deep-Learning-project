@@ -33,6 +33,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
 from reportlab.platypus import (
     HRFlowable,
     Image,
@@ -66,6 +67,7 @@ TIER_COLORS = {
 POPULATION_BASELINES = {
     "Breast cancer": 12.9,
     "Breast cancer (female)": 12.9,
+    "Lobular breast cancer": 1.5,
     "Ovarian cancer": 1.3,
     "Colorectal cancer": 4.1,
     "Colorectal cancer (FAP)": 4.1,
@@ -75,8 +77,15 @@ POPULATION_BASELINES = {
     "Thyroid cancer": 1.2,
     "Medullary thyroid carcinoma": 0.1,
     "Renal cell carcinoma": 1.7,
-    "Soft tissue sarcoma": 0.4,
+    "Renal cancer": 1.7,
+    "Pheochromocytoma": 0.1,
+    "Pancreatic cancer": 1.7,
+    "Pancreatic adenocarcinoma": 1.7,
+    "Gastric cancer": 0.9,
     "Diffuse gastric cancer": 0.8,
+    "Melanoma": 2.2,
+    "Cutaneous melanoma": 2.2,
+    "Soft tissue sarcoma": 0.4,
     "All cancers combined": 40.0,
 }
 
@@ -193,53 +202,52 @@ def create_risk_chart(cancer_risks: List[Dict[str, Any]]) -> Optional[io.BytesIO
     return buf
 
 
-class NumberedCanvas:
-    """Adds professional header and footer with dynamic page count."""
-    def __init__(self, canvas, doc):
-        self.canvas = canvas
-        self.doc = doc
-        self.pages = []
+class NumberedCanvas(canvas.Canvas):
+    """Two-pass canvas that accumulates pages and renders exact total page count and header/footer."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._saved_page_states = []
 
     def showPage(self):
-        self.pages.append(dict(self.canvas.__dict__))
+        self._saved_page_states.append(dict(self.__dict__))
         self._startPage()
 
     def save(self):
-        num_pages = len(self.pages)
-        for page in self.pages:
-            self.canvas.__dict__.update(page)
+        num_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
             self.draw_header_footer(num_pages)
-            self.canvas.showPage()
-        self.canvas.save()
+            super().showPage()
+        super().save()
 
     def draw_header_footer(self, total_pages):
-        c = self.canvas
-        c.saveState()
+        self.saveState()
 
         # Header (pages > 1)
-        if c._pageNumber > 1:
-            c.setFont("Helvetica-Bold", 8)
-            c.setFillColor(colors.HexColor("#4A5568"))
-            c.drawString(40, letter[1] - 30, "GENOMEDL v3: CLINICAL GENOMICS INFERENCE REPORT")
-            c.setFont("Helvetica", 8)
-            c.drawRightString(letter[0] - 40, letter[1] - 30, f"Sample: DEMO-SAMPLE-001 | GRCh38")
-            c.setStrokeColor(BORDER_COLOR)
-            c.setLineWidth(0.5)
-            c.line(40, letter[1] - 34, letter[0] - 40, letter[1] - 34)
+        if self._pageNumber > 1:
+            self.setFont("Helvetica-Bold", 8)
+            self.setFillColor(colors.HexColor("#4A5568"))
+            self.drawString(40, letter[1] - 30, "GENOMEDL v3: CLINICAL GENOMICS INFERENCE REPORT")
+            self.setFont("Helvetica", 8)
+            sid = getattr(self, "sample_id", "DEMO-SAMPLE-001")
+            self.drawRightString(letter[0] - 40, letter[1] - 30, f"Sample: {sid} | GRCh38")
+            self.setStrokeColor(BORDER_COLOR)
+            self.setLineWidth(0.5)
+            self.line(40, letter[1] - 34, letter[0] - 40, letter[1] - 34)
 
         # Footer (all pages)
-        c.setFont("Helvetica-Bold", 7.5)
-        c.setFillColor(colors.HexColor("#DC2626"))
-        c.drawString(40, 26, "RESEARCH PROTOTYPE — NOT A DIRECT CLINICAL DIAGNOSIS. CONFIRM IN ACCREDITED LAB.")
-        c.setFont("Helvetica", 7.5)
-        c.setFillColor(colors.HexColor("#718096"))
-        page_str = f"Page {c._pageNumber} of {total_pages}"
-        c.drawRightString(letter[0] - 40, 26, page_str)
-        c.setStrokeColor(BORDER_COLOR)
-        c.setLineWidth(0.5)
-        c.line(40, 36, letter[0] - 40, 36)
+        self.setFont("Helvetica-Bold", 7.5)
+        self.setFillColor(colors.HexColor("#DC2626"))
+        self.drawString(40, 26, "RESEARCH PROTOTYPE — NOT A DIRECT CLINICAL DIAGNOSIS. CONFIRM IN ACCREDITED LAB.")
+        self.setFont("Helvetica", 7.5)
+        self.setFillColor(colors.HexColor("#718096"))
+        page_str = f"Page {self._pageNumber} of {total_pages}"
+        self.drawRightString(letter[0] - 40, 26, page_str)
+        self.setStrokeColor(BORDER_COLOR)
+        self.setLineWidth(0.5)
+        self.line(40, 36, letter[0] - 40, 36)
 
-        c.restoreState()
+        self.restoreState()
 
 
 def generate_pdf_report(
@@ -501,10 +509,29 @@ def generate_pdf_report(
 
         score_str = f"{v['calibrated_score']:.3f}" if v.get("calibrated_score") is not None else "—"
 
+        # Format HGVS or protein change:
+        hgvs_p = v.get("hgvs_p", "")
+        hgvs_c = v.get("hgvs_c", "")
+        csq = v.get("consequence", "")
+        if hgvs_p and hgvs_p != ".":
+            annot_str = hgvs_p
+        elif hgvs_c and hgvs_c != ".":
+            annot_str = hgvs_c
+        elif csq and csq != ".":
+            annot_str = csq
+        else:
+            annot_str = "—"
+
+        # Format Genotype and Depth:
+        gt = v.get("genotype", "0/1")
+        dp = v.get("dp", 30)
+        gt_desc = "Hom" if gt in ["1/1", "1|1"] else "Het"
+        gt_str = f"{gt} ({gt_desc}, DP={dp})" if dp else f"{gt} ({gt_desc})"
+
         var_rows.append([
             Paragraph(f"<b>{gene}</b><br/>{coords} {ref_alt}", table_cell),
-            Paragraph(v.get("notes", "").split(".")[0] or "p.Unknown", table_cell),
-            Paragraph("0/1 (Het)", table_cell),
+            Paragraph(annot_str, table_cell),
+            Paragraph(gt_str, table_cell),
             Paragraph(f"<font color='{tier_col}'><b>{tier}</b></font>", table_cell),
             Paragraph(v.get("evidence_source", ""), table_cell),
             Paragraph(score_str, table_cell),
@@ -600,9 +627,13 @@ def generate_pdf_report(
     ]))
     story.append(disc_table)
 
-    # Build PDF with dynamic header/footer
-    canvas_maker = lambda c, d: NumberedCanvas(c, d)
-    doc.build(story)
+    # Build PDF with dynamic two-pass header/footer
+    class CustomNumberedCanvas(NumberedCanvas):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.sample_id = sample_id
+
+    doc.build(story, canvasmaker=CustomNumberedCanvas)
     return pdf_path
 
 

@@ -1,0 +1,13 @@
+##fileformat=VCFv4.2
+##reference=GRCh38
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency from gnomAD">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+17	43106487	rs28897672	A	C	100	PASS	CSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654||||c.181T>G|p.Cys61Gly|||61|C/G||||;AF=0.00001	GT:DP:GQ	0/1:50:99
+17	7675088	rs28934578	C	T	100	PASS	CSQ=T|missense_variant|MODERATE|TP53|||ENST00000269305||||c.524G>A|p.Arg175His|||175|R/H||||;AF=0.00002	GT:DP:GQ	0/1:60:99
+13	32338780	rs11571833	A	G	100	PASS	CSQ=G|synonymous_variant|LOW|BRCA2|||ENST00000380152||||c.4035A>G|p.Lys1345Lys|||1345|K/K||||;AF=0.045	GT:DP:GQ	0/1:45:99
+1	45332803	rs34612342	T	C	100	PASS	CSQ=C|missense_variant|MODERATE|MUTYH|||ENST00000445405||||c.452A>G|p.Tyr151Cys|||151|Y/C||||;AF=0.0001	GT:DP:GQ	0/1:40:99
+16	23635338	.	C	T	100	PASS	CSQ=T|missense_variant|MODERATE|PALB2|||ENST00000261584||||c.1010C>T|p.Pro337Leu|||337|P/L||||;AF=0.00005	GT:DP:GQ	0/1:55:99

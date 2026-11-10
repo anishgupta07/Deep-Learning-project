@@ -129,10 +129,10 @@ def test_recessive_zygosity_carrier(pipeline):
     """Single heterozygous allele in recessive gene MUTYH must be reported as Carrier, not affected."""
     mutyh_var = VariantRecord(
         chrom="1",
-        pos=45798000,
+        pos=45332803,
         id="rs34612342",
-        ref="C",
-        alt="T",
+        ref="T",
+        alt="C",
         qual=100.0,
         filter_status="PASS",
         gene="MUTYH",

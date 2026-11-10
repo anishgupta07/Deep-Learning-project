@@ -56,6 +56,7 @@ DEFAULT_CHECKPOINT = MODELS_DIR / "genome_dl_fusion_v3.pth"
 DEFAULT_PENETRANCE = DATA_DIR / "penetrance.csv"
 DEFAULT_CLINVAR_CSV = DATA_DIR / "clinvar_labelled_v3.csv"
 DEFAULT_PANEL_JSON = DATA_DIR / "panel.json"
+DEFAULT_PANEL_COORDS = DATA_DIR / "panel_coordinates.json"
 DEFAULT_ESM_CACHE = DATA_DIR / "esm_cache.parquet"
 DEFAULT_FASTA = DATA_DIR / "panel_proteins.fasta"
 
@@ -111,6 +112,7 @@ class VCFPipeline:
         penetrance_csv: Path = DEFAULT_PENETRANCE,
         clinvar_csv: Path = DEFAULT_CLINVAR_CSV,
         panel_json_path: Path = DEFAULT_PANEL_JSON,
+        panel_coords_path: Path = DEFAULT_PANEL_COORDS,
         esm_cache_path: Path = DEFAULT_ESM_CACHE,
         protein_fasta_path: Path = DEFAULT_FASTA,
         device: Optional[str] = None,
@@ -123,6 +125,12 @@ class VCFPipeline:
         self.syndromes = sorted(list(set(info["syndrome_group"] for info in self.panel.values())))
         self.syndrome_to_id = {s: i for i, s in enumerate(self.syndromes)}
         logger.info(f"Loaded panel with {len(self.panel)} genes and {len(self.syndromes)} syndrome groups.")
+
+        # 1b. Panel genomic coordinate intervals
+        self.panel_coords = {}
+        if panel_coords_path.exists():
+            self.panel_coords = json.load(open(panel_coords_path, "r", encoding="utf-8"))
+            logger.info(f"Loaded genomic coordinate intervals for {len(self.panel_coords)} panel genes.")
 
         # 2. ClinVar Lookup Index
         self.clinvar_index = {}
@@ -181,7 +189,9 @@ class VCFPipeline:
         self.binary_cols = ckpt["binary_cols"]
         self.scaler_mean = np.array(ckpt["scaler_mean"], dtype=np.float32)
         self.scaler_scale = np.array(ckpt["scaler_scale"], dtype=np.float32)
-        self.temperature = float(ckpt["calibration_temperature"])
+        self.temperature = float(ckpt.get("calibration_temperature", 1.0))
+        self.calibration_scale = float(ckpt.get("calibration_scale", 1.0 / self.temperature if self.temperature > 0 else 1.0))
+        self.calibration_bias = float(ckpt.get("calibration_bias", 0.0))
 
         tabular_dim = len(self.continuous_cols) + len(self.binary_cols)
         self.model = FusionResNet(
@@ -196,7 +206,26 @@ class VCFPipeline:
         ).to(self.device)
         self.model.load_state_dict(ckpt["model_state_dict"])
         self.model.eval()
-        logger.info(f"Model ready (T={self.temperature:.4f}). Pipeline fully initialized.")
+
+        self.ensemble_models = []
+        if "ensemble_state_dicts" in ckpt and ckpt["ensemble_state_dicts"]:
+            for s_dict in ckpt["ensemble_state_dicts"]:
+                m = FusionResNet(
+                    tabular_dim=tabular_dim,
+                    num_variant_classes=12,
+                    num_syndromes=15,
+                    use_gene_embedding=False,
+                    esm_emb_dim=480,
+                    esm_proj_dim=64,
+                    hidden_dim=256,
+                    dropout=0.0,
+                ).to(self.device)
+                m.load_state_dict(s_dict)
+                m.eval()
+                self.ensemble_models.append(m)
+            logger.info(f"Loaded ensemble of {len(self.ensemble_models)} FusionResNet seeds.")
+
+        logger.info(f"Model ready (T={self.temperature:.4f}, scale={self.calibration_scale:.4f}, bias={self.calibration_bias:.4f}). Pipeline fully initialized.")
 
     def parse_vcf(
         self,
@@ -272,11 +301,11 @@ class VCFPipeline:
                 if dp < min_dp or gq < min_gq:
                     continue
 
-                is_hom_alt = gt in ["1/1", "1|1"]
+                is_hom_alt = gt in ["1/1", "1|1", "2/2", "2|2"]
 
                 # Parse annotations (CSQ or ANN or local panel coordinate match)
-                for alt in alts:
-                    parsed_ann = self._parse_annotations(info_str, chrom, pos, ref, alt)
+                for alt_idx, alt in enumerate(alts):
+                    parsed_ann = self._parse_annotations(info_str, chrom, pos, ref, alt, alt_idx=alt_idx)
                     gene = parsed_ann.get("gene", "")
                     if gene not in self.panel:
                         # Skip variants not in our 130 panel genes
@@ -307,20 +336,22 @@ class VCFPipeline:
                     )
                     records.append(vr)
 
-        # Check for compound heterozygosity in recessive genes
         gene_variants: Dict[str, List[VariantRecord]] = {}
         for r in records:
             gene_variants.setdefault(r.gene, []).append(r)
 
-        for gene, v_list in gene_variants.items():
-            if gene in RECESSIVE_GENES and len(v_list) >= 2:
-                for v in v_list:
-                    v.is_biallelic = True
-
         logger.info(f"Extracted {len(records)} candidate panel variants across {len(gene_variants)} genes.")
         return records
 
-    def _parse_annotations(self, info_str: str, chrom: str, pos: int, ref: str, alt: str) -> Dict[str, Union[str, int, float]]:
+    def _parse_annotations(
+        self,
+        info_str: str,
+        chrom: str,
+        pos: int,
+        ref: str,
+        alt: str,
+        alt_idx: int = 0,
+    ) -> Dict[str, Union[str, int, float]]:
         """Extracts gene, consequence, protein change, and AF from INFO string."""
         ann = {
             "gene": "", "transcript": "", "consequence": "",
@@ -329,11 +360,15 @@ class VCFPipeline:
             "spliceai_max": 0.0,
         }
 
-        # Check gnomAD / AF in INFO
-        m_af = re.search(r"(?:AF|gnomAD_AF|AF_raw)=([0-9.eE-]+)", info_str)
+        # Check gnomAD / AF in INFO (handling multi-allelic comma-separated values)
+        m_af = re.search(r"(?:AF|gnomAD_AF|AF_raw)=([0-9.eE,-]+)", info_str)
         if m_af:
             try:
-                ann["af"] = float(m_af.group(1))
+                af_vals = m_af.group(1).split(",")
+                if alt_idx < len(af_vals):
+                    ann["af"] = float(af_vals[alt_idx])
+                else:
+                    ann["af"] = float(af_vals[0])
             except ValueError:
                 pass
 
@@ -381,12 +416,22 @@ class VCFPipeline:
                             ann["aa_pos"] = int(csq_parts[14])
                         break
 
-        # Fallback: check ClinVar lookup table for this exact (chrom, pos, ref, alt)
+        # Fallback 1: check ClinVar lookup table for this exact (chrom, pos, ref, alt)
         key = (chrom, pos, ref, alt)
         if not ann["gene"] and key in self.clinvar_index:
             c_info = self.clinvar_index[key]
             ann["gene"] = c_info["gene"]
             ann["consequence"] = c_info["variant_class"]
+
+        # Fallback 2: genomic coordinate interval match against 130 panel genes
+        if not ann["gene"] and self.panel_coords:
+            chrom_clean = chrom.replace("chr", "")
+            for g_sym, coord in self.panel_coords.items():
+                if str(coord.get("chrom", "")).replace("chr", "") == chrom_clean:
+                    if coord.get("start", 0) <= pos <= coord.get("end", 0):
+                        ann["gene"] = g_sym
+                        ann["consequence"] = "intronic"
+                        break
 
         return ann
 
@@ -544,9 +589,9 @@ class VCFPipeline:
             vclass = "other_noncoding"
         vclass_id = CLASS_TO_ID.get(vclass, 10)
 
-        # Continuous biochemical features
-        has_prot = 1 if vclass in ["missense", "nonsense", "start_lost", "stop_lost"] else 0
-        rel_pos = float(var.aa_pos) / float(prot_len) if prot_len > 0 and var.aa_pos > 0 else 0.5
+        # Continuous biochemical features (exact parity with build_v3_features.py)
+        has_prot = 1 if vclass in ["synonymous", "missense", "nonsense", "start_lost", "stop_lost"] else 0
+        rel_pos = min(1.0, max(0.0, float(var.aa_pos) / float(prot_len))) if prot_len > 0 and var.aa_pos > 0 else 0.0
 
         from rdkit.Chem import DataStructs
 
@@ -554,30 +599,43 @@ class VCFPipeline:
         alt_1 = var.alt_aa
 
         if vclass == "start_lost":
+            rel_pos = 0.0
             grantham = 215.0
             tanimoto = 1.0
-            if alt_1 in AA_PROPS:
-                dmw = abs(AA_PROPS["M"]["mw"] - AA_PROPS[alt_1]["mw"])
-                dcharge = abs(AA_PROPS["M"]["charge"] - AA_PROPS[alt_1]["charge"])
-                dlogp = abs(AA_PROPS["M"]["logp"] - AA_PROPS[alt_1]["logp"])
-                dtpsa = abs(AA_PROPS["M"]["tpsa"] - AA_PROPS[alt_1]["tpsa"])
-            else:
-                dmw, dcharge, dlogp, dtpsa = 50.0, 0.0, 1.0, 20.0
-        elif ref_1 in AA_PROPS and alt_1 in AA_PROPS:
-            grantham = float(GRANTHAM.get((ref_1, alt_1), 0.0))
-            sim = float(DataStructs.TanimotoSimilarity(AA_PROPS[ref_1]["fp"], AA_PROPS[alt_1]["fp"]))
-            tanimoto = 1.0 - sim
-            dmw = abs(AA_PROPS[ref_1]["mw"] - AA_PROPS[alt_1]["mw"])
-            dcharge = abs(AA_PROPS[ref_1]["charge"] - AA_PROPS[alt_1]["charge"])
-            dlogp = abs(AA_PROPS[ref_1]["logp"] - AA_PROPS[alt_1]["logp"])
-            dtpsa = abs(AA_PROPS[ref_1]["tpsa"] - AA_PROPS[alt_1]["tpsa"])
-        else:
-            grantham = 0.0
-            tanimoto = 0.0
-            dmw = 0.0
+            dmw = -131.2
             dcharge = 0.0
             dlogp = 0.0
             dtpsa = 0.0
+        elif vclass == "nonsense":
+            grantham = 200.0
+            tanimoto = 1.0
+            if ref_1 in AA_PROPS:
+                dmw = -AA_PROPS[ref_1]["mw"]
+                dcharge = -AA_PROPS[ref_1]["charge"]
+                dlogp = -AA_PROPS[ref_1]["logp"]
+                dtpsa = -AA_PROPS[ref_1]["tpsa"]
+            else:
+                dmw, dcharge, dlogp, dtpsa = 0.0, 0.0, 0.0, 0.0
+        elif vclass == "stop_lost":
+            grantham = 200.0
+            tanimoto = 1.0
+            if alt_1 in AA_PROPS:
+                dmw = AA_PROPS[alt_1]["mw"]
+                dcharge = AA_PROPS[alt_1]["charge"]
+                dlogp = AA_PROPS[alt_1]["logp"]
+                dtpsa = AA_PROPS[alt_1]["tpsa"]
+            else:
+                dmw, dcharge, dlogp, dtpsa = 0.0, 0.0, 0.0, 0.0
+        elif ref_1 in AA_PROPS and alt_1 in AA_PROPS:
+            grantham = float(GRANTHAM.get((ref_1, alt_1), 100.0))
+            p_ref, p_alt = AA_PROPS[ref_1], AA_PROPS[alt_1]
+            dmw = round(p_alt["mw"] - p_ref["mw"], 3)
+            dcharge = round(p_alt["charge"] - p_ref["charge"], 3)
+            dlogp = round(p_alt["logp"] - p_ref["logp"], 3)
+            dtpsa = round(p_alt["tpsa"] - p_ref["tpsa"], 3)
+            tanimoto = 0.0 if ref_1 == alt_1 else round(1.0 - float(DataStructs.TanimotoSimilarity(p_ref["fp"], p_alt["fp"])), 4)
+        else:
+            grantham, tanimoto, dmw, dcharge, dlogp, dtpsa = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
         raw_cont = np.array([rel_pos, grantham, dmw, dcharge, dlogp, dtpsa, tanimoto], dtype=np.float32)
         scaled_cont = (raw_cont - self.scaler_mean) / self.scaler_scale
@@ -622,8 +680,13 @@ class VCFPipeline:
             t_avail = torch.tensor([[avail]], device=self.device, dtype=torch.float32)
             t_emb = torch.tensor(emb, device=self.device, dtype=torch.float32).unsqueeze(0)
 
-            raw_logit = self.model(t_tab, t_vc, t_sy, t_llr, t_avail, t_emb).item()
-            calibrated_logit = raw_logit / self.temperature
+            if self.ensemble_models:
+                logits = [m(t_tab, t_vc, t_sy, t_llr, t_avail, t_emb).item() for m in self.ensemble_models]
+                raw_logit = float(np.mean(logits))
+            else:
+                raw_logit = self.model(t_tab, t_vc, t_sy, t_llr, t_avail, t_emb).item()
+
+            calibrated_logit = self.calibration_scale * raw_logit + self.calibration_bias
             calibrated_prob = float(1.0 / (1.0 + np.exp(-calibrated_logit)))
 
         return calibrated_prob
@@ -631,6 +694,10 @@ class VCFPipeline:
     def _attach_risk_estimates(self, verdict: VariantVerdict):
         """Attaches published penetrance ranges and handles recessive zygosity."""
         gene = verdict.variant.gene
+
+        # Only pathogenic or likely pathogenic variants convey carrier or disease risk
+        if verdict.tier not in ["Pathogenic", "Likely Pathogenic"]:
+            return
 
         # Handle recessive zygosity (MUTYH, NTHL1)
         if gene in RECESSIVE_GENES:
@@ -768,8 +835,16 @@ class VCFPipeline:
                         "gene": v.variant.gene,
                         "chrom": v.variant.chrom,
                         "pos": v.variant.pos,
+                        "id": v.variant.id,
                         "ref": v.variant.ref,
                         "alt": v.variant.alt,
+                        "hgvs_c": v.variant.hgvs_c,
+                        "hgvs_p": v.variant.hgvs_p,
+                        "consequence": v.variant.consequence,
+                        "genotype": v.variant.genotype,
+                        "dp": v.variant.dp,
+                        "gq": v.variant.gq,
+                        "af": v.variant.af,
                         "tier": v.tier,
                         "evidence_source": v.evidence_source,
                         "calibrated_score": v.calibrated_score,
@@ -798,12 +873,13 @@ def parse_args():
     parser.add_argument("--no_pdf", action="store_true", help="Disable automatic PDF generation")
     parser.add_argument("--min_dp", type=int, default=10)
     parser.add_argument("--min_gq", type=int, default=20)
+    parser.add_argument("--device", type=str, default=None, help="Inference device (cpu or cuda)")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    pipeline = VCFPipeline()
+    pipeline = VCFPipeline(device=args.device)
     variants = pipeline.parse_vcf(args.vcf_path, min_dp=args.min_dp, min_gq=args.min_gq)
     verdicts = [pipeline.evaluate_variant(v) for v in variants]
     rep = pipeline.generate_report(verdicts, output_json=args.out_json)

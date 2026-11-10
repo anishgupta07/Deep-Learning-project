@@ -25,12 +25,17 @@ class_*/*.fastq.gz
 # VCF and large genomic archives (>100MB cannot be pushed to standard GitHub)
 *.vcf
 *.vcf.gz
+*.vcf.gz.tbi
+*.tbi
 *.txt.gz
 raw_data/
+data/patient_vcf_test/
 variant_summary.txt.gz
 HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
+!data/sample_demo.vcf
+!sample_demo.vcf
 
 # Local archived files (>100MB cannot be pushed to standard GitHub)
 others/data/*.gz

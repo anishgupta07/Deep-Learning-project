@@ -230,19 +230,31 @@ class FusionResNet(nn.Module):
 
 
 class TemperatureScaler(nn.Module):
-    """Calibrates model logits with a learnable temperature parameter T."""
+    """Calibrates model logits with Platt scaling: scale * logit + bias.
+    
+    Under class imbalance with pos_weight > 1, raw uncalibrated logits are shifted
+    by approximately +log(pos_weight). Platt scaling fits both scale (1/T) and bias (offset),
+    centering calibrated probabilities to match empirical prevalence and minimizing
+    Expected Calibration Error (ECE).
+    """
 
     def __init__(self):
         super().__init__()
-        self.temperature = nn.Parameter(torch.ones(1) * 1.5)
+        self.scale = nn.Parameter(torch.ones(1) * 0.8)
+        self.bias = nn.Parameter(torch.zeros(1))
 
     def forward(self, logits: torch.Tensor) -> torch.Tensor:
-        return logits / self.temperature
+        return self.scale * logits + self.bias
 
-    def fit(self, logits: torch.Tensor, labels: torch.Tensor, lr: float = 0.01, max_iter: int = 100) -> float:
-        """Fit temperature on validation logits and labels via BCE."""
+    @property
+    def temperature(self) -> float:
+        s = self.scale.item()
+        return 1.0 / s if abs(s) > 1e-6 else 1.0
+
+    def fit(self, logits: torch.Tensor, labels: torch.Tensor, lr: float = 0.05, max_iter: int = 200) -> Tuple[float, float]:
+        """Fit Platt scaling parameters (scale, bias) on validation logits and labels via BCE."""
         self.train()
-        optimizer = torch.optim.LBFGS([self.temperature], lr=lr, max_iter=max_iter)
+        optimizer = torch.optim.LBFGS([self.scale, self.bias], lr=lr, max_iter=max_iter)
         criterion = nn.BCEWithLogitsLoss()
 
         def eval_loss():
@@ -253,9 +265,11 @@ class TemperatureScaler(nn.Module):
 
         optimizer.step(eval_loss)
         self.eval()
-        t_val = self.temperature.item()
-        logger.info(f"Fitted calibration temperature: T = {t_val:.4f}")
-        return t_val
+        scale_val = float(self.scale.item())
+        bias_val = float(self.bias.item())
+        t_val = self.temperature
+        logger.info(f"Fitted Platt calibration: scale = {scale_val:.4f} (equiv T = {t_val:.4f}), bias = {bias_val:.4f}")
+        return scale_val, bias_val
 
 
 def compute_ece(probs: np.ndarray, labels: np.ndarray, n_bins: int = 10) -> float:
@@ -429,11 +443,15 @@ def run_training_pipeline(
 
     # Load embeddings tensor
     logger.info(f"Loading embeddings tensor from {embeddings_path}...")
-    if embeddings_path.exists():
-        esm_embeddings = torch.load(embeddings_path, weights_only=True)
-    else:
-        logger.warning("Embeddings file not found. Initializing zero embeddings.")
-        esm_embeddings = torch.zeros((len(df), 480), dtype=torch.float16)
+    try:
+        from src.v3.esm_features import load_or_reconstruct_embeddings
+    except ImportError:
+        from esm_features import load_or_reconstruct_embeddings
+    esm_embeddings = load_or_reconstruct_embeddings(
+        featured_csv=csv_path,
+        cache_parquet=DATA_DIR / "esm_cache.parquet",
+        embeddings_pt=embeddings_path,
+    )
 
     # Prepare tabular features
     cont_feats = df[CONTINUOUS_COLS].fillna(0.0).values.astype(np.float32)
@@ -527,12 +545,13 @@ def run_training_pipeline(
     val_logits, val_probs, val_labels = ensemble_predict(trained_models, val_loader)
     test_logits, test_probs, test_labels = ensemble_predict(trained_models, test_loader)
 
-    # Calibration via Temperature Scaling
-    logger.info("\n--- Temperature Scaling Calibration ---")
+    # Calibration via Platt Scaling
+    logger.info("\n--- Platt Scaling Calibration ---")
     scaler_temp = TemperatureScaler().to(device)
     val_logits_t = torch.tensor(val_logits, device=device, dtype=torch.float32).unsqueeze(-1)
     val_labels_t = torch.tensor(val_labels, device=device, dtype=torch.float32).unsqueeze(-1)
-    fitted_temp = scaler_temp.fit(val_logits_t, val_labels_t)
+    fitted_scale, fitted_bias = scaler_temp.fit(val_logits_t, val_labels_t)
+    fitted_temp = scaler_temp.temperature
 
     # Calibrate test set
     test_logits_t = torch.tensor(test_logits, device=device, dtype=torch.float32).unsqueeze(-1)
@@ -551,12 +570,13 @@ def run_training_pipeline(
     logger.info(f"Final Calibrated Test AUC:   {test_auc:.4f}")
     logger.info(f"Final Calibrated Test AUPRC: {test_auprc:.4f}")
 
-    # Per-class AUC / AUPRC on test set
+    # Per-class AUC / AUPRC on test set (canonical order from build_v3_features.py)
     test_vclass = vclass_ids[test_idx]
     class_metrics = {}
     class_names = [
-        "synonymous", "missense", "nonsense", "splice_canonical", "splice_region",
-        "intronic", "utr5", "utr3", "start_lost", "stop_lost", "other_noncoding", "coding_no_protein_annot"
+        "synonymous", "missense", "nonsense", "start_lost", "stop_lost",
+        "splice_canonical", "splice_region", "intronic", "utr5", "utr3",
+        "other_noncoding", "coding_no_protein_annot"
     ]
     for cid, cname in enumerate(class_names):
         c_mask = test_vclass == cid
@@ -589,6 +609,8 @@ def run_training_pipeline(
         "panel_json": panel_dict,
         "esm_model_name": "facebook/esm2_t12_35M_UR50D",
         "calibration_temperature": float(fitted_temp),
+        "calibration_scale": float(fitted_scale),
+        "calibration_bias": float(fitted_bias),
         "ece_before": float(ece_before),
         "ece_after": float(ece_after),
         "test_auc": float(test_auc),
@@ -606,6 +628,8 @@ def run_training_pipeline(
         "ece_before": float(ece_before),
         "ece_after": float(ece_after),
         "temperature": float(fitted_temp),
+        "calibration_scale": float(fitted_scale),
+        "calibration_bias": float(fitted_bias),
         "seed_metrics": seed_metrics,
         "class_metrics": class_metrics,
         "use_gene_embedding": use_gene_embedding,

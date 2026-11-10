@@ -1,6 +1,6 @@
 {
   "total_variants": 5,
-  "actionable_count": 3,
+  "actionable_count": 2,
   "cancer_risk_summary": [
     {
       "cancer_type": "All cancers combined",
@@ -15,17 +15,9 @@
       "lifetime_risk_range": "65% - 72%",
       "genes": [
         "BRCA1",
-        "PALB2"
-      ],
-      "up_to_age": 80
-    },
-    {
-      "cancer_type": "Breast cancer (female)",
-      "lifetime_risk_range": "50% - 60%",
-      "genes": [
         "TP53"
       ],
-      "up_to_age": 60
+      "up_to_age": 80
     },
     {
       "cancer_type": "Ovarian cancer",
@@ -49,8 +41,16 @@
       "gene": "BRCA1",
       "chrom": "17",
       "pos": 43106487,
+      "id": "rs28897672",
       "ref": "A",
       "alt": "C",
+      "hgvs_c": "c.181T>G",
+      "hgvs_p": "p.Cys61Gly",
+      "consequence": "missense_variant",
+      "genotype": "0/1",
+      "dp": 50,
+      "gq": 99,
+      "af": 1e-05,
       "tier": "Pathogenic",
       "evidence_source": "ClinVar lookup (3 stars: reviewed by expert panel)",
       "calibrated_score": 0.999,
@@ -79,8 +79,16 @@
       "gene": "TP53",
       "chrom": "17",
       "pos": 7675088,
+      "id": "rs28934578",
       "ref": "C",
       "alt": "T",
+      "hgvs_c": "c.524G>A",
+      "hgvs_p": "p.Arg175His",
+      "consequence": "missense_variant",
+      "genotype": "0/1",
+      "dp": 60,
+      "gq": 99,
+      "af": 2e-05,
       "tier": "Pathogenic",
       "evidence_source": "ClinVar lookup (3 stars: reviewed by expert panel)",
       "calibrated_score": 0.999,
@@ -94,7 +102,7 @@
           "evidence_level": "high"
         },
         {
-          "outcome": "Breast cancer (female)",
+          "outcome": "Breast cancer",
           "risk_low_pct": 50.0,
           "risk_high_pct": 60.0,
           "up_to_age": 60,
@@ -117,8 +125,16 @@
       "gene": "BRCA2",
       "chrom": "13",
       "pos": 32338780,
+      "id": "rs11571833",
       "ref": "A",
       "alt": "G",
+      "hgvs_c": "c.4035A>G",
+      "hgvs_p": "p.Lys1345Lys",
+      "consequence": "synonymous_variant",
+      "genotype": "0/1",
+      "dp": 45,
+      "gq": 99,
+      "af": 0.045,
       "tier": "Benign",
       "evidence_source": "Common polymorphism (gnomAD AF = 4.50% > 1.0%)",
       "calibrated_score": 0.001,
@@ -129,37 +145,44 @@
     {
       "gene": "MUTYH",
       "chrom": "1",
-      "pos": 45798000,
-      "ref": "C",
-      "alt": "T",
+      "pos": 45332803,
+      "id": "rs34612342",
+      "ref": "T",
+      "alt": "C",
+      "hgvs_c": "c.452A>G",
+      "hgvs_p": "p.Tyr151Cys",
+      "consequence": "missense_variant",
+      "genotype": "0/1",
+      "dp": 40,
+      "gq": 99,
+      "af": 0.0001,
       "tier": "Carrier (Recessive)",
-      "evidence_source": "GenomeDL v3 ESM-Augmented Fusion ResNet",
-      "calibrated_score": 0.1492540714558653,
+      "evidence_source": "ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)",
+      "calibrated_score": 0.5,
       "cancer_risks": [],
       "other_syndrome_features": [],
-      "notes": "Calibrated probability P(pathogenic) = 0.1493. Single heterozygous allele in autosomal recessive gene MUTYH. Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
+      "notes": "Curated clinical consensus from ClinVar submission (Variation ID 5293). Single heterozygous allele in autosomal recessive gene MUTYH. Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
     },
     {
       "gene": "PALB2",
       "chrom": "16",
       "pos": 23635338,
+      "id": ".",
       "ref": "C",
       "alt": "T",
-      "tier": "Likely Pathogenic",
+      "hgvs_c": "c.1010C>T",
+      "hgvs_p": "p.Pro337Leu",
+      "consequence": "missense_variant",
+      "genotype": "0/1",
+      "dp": 55,
+      "gq": 99,
+      "af": 5e-05,
+      "tier": "Likely Benign",
       "evidence_source": "GenomeDL v3 ESM-Augmented Fusion ResNet",
-      "calibrated_score": 0.8506548471147596,
-      "cancer_risks": [
-        {
-          "outcome": "Breast cancer",
-          "risk_low_pct": 40.0,
-          "risk_high_pct": 60.0,
-          "up_to_age": 80,
-          "source": "Antoniou et al. NEJM 2014",
-          "evidence_level": "high"
-        }
-      ],
+      "calibrated_score": 0.12008030290468262,
+      "cancer_risks": [],
       "other_syndrome_features": [],
-      "notes": "Calibrated probability P(pathogenic) = 0.8507."
+      "notes": "Calibrated probability P(pathogenic) = 0.1201."
     }
   ],
   "disclaimer": "Research prototype, not a diagnosis. Confirm in a clinical lab with genetic counselling. Testing children for adult-onset conditions needs counselling."

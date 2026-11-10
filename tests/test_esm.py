@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.v3.esm_features import get_centered_window, load_fasta
+from src.v3.esm_features import get_centered_window, load_fasta, load_or_reconstruct_embeddings
 
 
 DATA_DIR = PROJECT_ROOT / "data"
@@ -100,9 +100,8 @@ def test_known_pathogenic_missense():
 
 
 def test_embeddings_file():
-    """Verify esm_embeddings.pt shape and alignment."""
-    assert EMBEDDINGS_PT.exists(), f"Embeddings tensor not found at {EMBEDDINGS_PT}"
-    emb = torch.load(EMBEDDINGS_PT, weights_only=True)
+    """Verify esm_embeddings tensor shape, dtype, and reconstruction from parquet."""
+    emb = load_or_reconstruct_embeddings(FEATURED_CSV, CACHE_PARQUET, EMBEDDINGS_PT)
     assert emb.shape == (148747, 480), f"Expected shape (148747, 480), got {emb.shape}"
     assert emb.dtype == torch.float16, f"Expected float16 dtype, got {emb.dtype}"
 

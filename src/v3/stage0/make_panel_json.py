@@ -214,8 +214,17 @@ def derive_strand(df_gene):
     return "ambiguous"
 
 def main():
+    default_csv = (
+        "data/clinvar_labelled_v3.csv"
+        if os.path.exists("data/clinvar_labelled_v3.csv")
+        else (
+            "others/data/clinvar_labelled_snv.csv"
+            if os.path.exists("others/data/clinvar_labelled_snv.csv")
+            else "data/clinvar_labelled_snv.csv"
+        )
+    )
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv",    default="data/clinvar_labelled_snv.csv")
+    ap.add_argument("--csv", default=default_csv)
     ap.add_argument("--outdir", default="data")
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)

@@ -546,8 +546,7 @@ d:/Dl_project/
 │   └── test_pdf_report.py             # Tests for 2-page clinical PDF report generation (1 test)
 └── docs/
     ├── ARCHITECTURE_AND_CONCEPTS.md   # THIS COMPREHENSIVE ARCHITECTURAL & GLOSSARY GUIDE
-    ├── README_V3.md                   # Quickstart operational instructions
-    └── Project Explainer.md           # High-level overview
+    └── Project Explainer.md           # High-level overview and beginner notes
 ```
 
 ---

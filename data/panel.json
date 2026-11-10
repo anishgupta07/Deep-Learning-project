@@ -176,13 +176,13 @@
   "MUTYH": {
     "syndrome_group": "Polyposis_hamartoma",
     "strand": "-",
-    "protein_length": 546,
+    "protein_length": 521,
     "mane_transcript": "NM_001048174.2"
   },
   "NTHL1": {
     "syndrome_group": "Polyposis_hamartoma",
     "strand": "-",
-    "protein_length": 312,
+    "protein_length": 304,
     "mane_transcript": "NM_002528.7"
   },
   "AXIN2": {
@@ -284,13 +284,13 @@
   "ACD": {
     "syndrome_group": "Melanoma_skin_telomere",
     "strand": "-",
-    "protein_length": 568,
+    "protein_length": 458,
     "mane_transcript": "NM_001082486.2"
   },
   "TERF2IP": {
     "syndrome_group": "Melanoma_skin_telomere",
     "strand": "+",
-    "protein_length": 455,
+    "protein_length": 399,
     "mane_transcript": "NM_018975.4"
   },
   "TERT": {
@@ -434,7 +434,7 @@
   "LZTR1": {
     "syndrome_group": "Neurocutaneous_rhabdoid_DICER1",
     "strand": "+",
-    "protein_length": 834,
+    "protein_length": 840,
     "mane_transcript": "NM_006767.4"
   },
   "SUFU": {
@@ -488,19 +488,19 @@
   "WT1": {
     "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
     "strand": "-",
-    "protein_length": 449,
+    "protein_length": 522,
     "mane_transcript": "NM_024426.6"
   },
   "DIS3L2": {
     "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
     "strand": "+",
-    "protein_length": 987,
+    "protein_length": 885,
     "mane_transcript": "NM_152383.5"
   },
   "CDKN1C": {
     "syndrome_group": "Retinoblastoma_Wilms_overgrowth",
     "strand": "-",
-    "protein_length": 316,
+    "protein_length": 305,
     "mane_transcript": "NM_001122630.2"
   },
   "REST": {
@@ -572,7 +572,7 @@
   "PARN": {
     "syndrome_group": "Hematologic_predisposition",
     "strand": "-",
-    "protein_length": 691,
+    "protein_length": 639,
     "mane_transcript": "NM_002582.4"
   },
   "SAMD9": {
@@ -584,7 +584,7 @@
   "SAMD9L": {
     "syndrome_group": "Hematologic_predisposition",
     "strand": "-",
-    "protein_length": 1590,
+    "protein_length": 1584,
     "mane_transcript": "NM_152703.5"
   },
   "SBDS": {
@@ -722,7 +722,7 @@
   "DDB2": {
     "syndrome_group": "Xeroderma_NER",
     "strand": "+",
-    "protein_length": 428,
+    "protein_length": 427,
     "mane_transcript": "NM_000107.3"
   },
   "HOXB13": {
@@ -752,7 +752,7 @@
   "BUB1B": {
     "syndrome_group": "Other_hereditary",
     "strand": "+",
-    "protein_length": 1012,
+    "protein_length": 1050,
     "mane_transcript": "NM_001211.6"
   },
   "PTPN11": {

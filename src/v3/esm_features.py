@@ -92,6 +92,56 @@ def load_fasta(fasta_path: Path) -> Dict[str, str]:
     return gene_seqs
 
 
+def load_or_reconstruct_embeddings(
+    featured_csv: Path,
+    cache_parquet: Path,
+    embeddings_pt: Optional[Path] = None,
+) -> torch.Tensor:
+    """Load precomputed embeddings or reconstruct from esm_cache.parquet.
+
+    Avoids silent fallbacks to dummy zeros on fresh clones where data/*.pt
+    is excluded by .gitignore (>100MB limit).
+    """
+    if embeddings_pt is not None and embeddings_pt.exists():
+        logger.info(f"Loading cached embeddings tensor from {embeddings_pt}...")
+        return torch.load(embeddings_pt, map_location="cpu", weights_only=True)
+
+    if not featured_csv.exists() or not cache_parquet.exists():
+        raise FileNotFoundError(
+            f"Cannot load or reconstruct embeddings: {featured_csv} or {cache_parquet} is missing."
+        )
+
+    logger.info(f"Reconstructing embeddings matrix from {cache_parquet} for {featured_csv}...")
+    featured_df = pd.read_csv(featured_csv, usecols=["gene", "aa_pos", "esm_available"])
+    cache_df = pd.read_parquet(cache_parquet, columns=["gene", "aa_pos", "embedding"])
+
+    cache_map = {
+        (r.gene, int(r.aa_pos)): r.embedding for r in cache_df.itertuples(index=False)
+    }
+
+    matrix = np.zeros((len(featured_df), 480), dtype=np.float16)
+    for i, (g, p, av) in enumerate(
+        zip(featured_df["gene"], featured_df["aa_pos"], featured_df["esm_available"])
+    ):
+        if av == 1 and pd.notna(p) and p > 0:
+            key = (g, int(p))
+            if key in cache_map:
+                matrix[i] = cache_map[key].astype(np.float16)
+
+    emb_tensor = torch.from_numpy(matrix)
+    logger.info(f"Reconstructed embeddings tensor shape {emb_tensor.shape} ({emb_tensor.dtype}).")
+
+    if embeddings_pt is not None:
+        try:
+            embeddings_pt.parent.mkdir(parents=True, exist_ok=True)
+            torch.save(emb_tensor, embeddings_pt)
+            logger.info(f"Cached reconstructed tensor to {embeddings_pt}.")
+        except Exception as e:
+            logger.warning(f"Could not cache reconstructed tensor to {embeddings_pt}: {e}")
+
+    return emb_tensor
+
+
 def run_esm_inference_for_positions(
     unique_positions: List[Tuple[str, str, int, str]],  # (gene, transcript, aa_pos, ref_aa)
     gene_seqs: Dict[str, str],
@@ -275,12 +325,24 @@ def generate_v3_esm_features(
             continue
 
         seq = gene_seqs[gene]
+        if vclass == "stop_lost":
+            # stop_lost occurs at termination codon position len(seq) + 1 with ref_aa in ['*', 'Ter']
+            if aa_pos == len(seq) + 1 and ref_aa in ["*", "Ter"]:
+                matched_residues += 1
+                # Stop lost is a definitive translation extension; ESM tokenizer maps '*' to <unk>,
+                # so downstream pipeline treats it with rule-based LoF and high biochemical penalties.
+                continue
+            elif aa_pos <= len(seq) and ref_aa in ["*", "Ter"]:
+                matched_residues += 1
+                continue
+
         if aa_pos > len(seq):
+            mismatched_residues += 1
             continue
 
         actual_seq_aa = seq[aa_pos - 1]
         # Verify sequence match
-        if actual_seq_aa != ref_aa and ref_aa != "Ter":
+        if actual_seq_aa != ref_aa and ref_aa not in ["Ter", "*"]:
             mismatched_residues += 1
             continue
 

@@ -9,7 +9,7 @@ Fixed defects vs v2 extractor:
       misclassified as missense). Now 12 variant classes total.
 
 Usage (run from repo root, needs the raw ClinVar gz):
-    python src/v3/stage0/extract_v3.py unused_files/variant_summary.txt.gz \\
+    python src/v3/stage0/extract_v3.py others/data/variant_summary.txt.gz \\
            --outdir data --min-stars 1
 """
 import argparse, csv, gzip, hashlib, json, os, re, sys, time

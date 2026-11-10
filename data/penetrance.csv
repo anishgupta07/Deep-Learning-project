@@ -5,7 +5,7 @@ BRCA2,Breast cancer,61,69,80,Kuchenbaecker et al. JAMA 2017,high
 BRCA2,Ovarian cancer,11,17,80,Kuchenbaecker et al. JAMA 2017,high
 BRCA2,Prostate cancer,20,25,80,Page et al. 2019,high
 TP53,All cancers combined,70,90,70,Chompret et al. / NCCN 2024,high
-TP53,Breast cancer (female),50,60,60,Olivier et al. 2010,high
+TP53,Breast cancer,50,60,60,Olivier et al. 2010,high
 TP53,Soft tissue sarcoma,15,20,60,Olivier et al. 2010,high
 MLH1,Colorectal cancer,40,60,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
 MLH1,Endometrial cancer,30,40,75,Dominguez-Valentin et al. Lancet Oncol 2020,high
