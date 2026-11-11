@@ -153,9 +153,16 @@ def create_risk_chart(cancer_risks: List[Dict[str, Any]]) -> Optional[io.BytesIO
     genes = []
     baselines: List[Optional[float]] = []
 
+    outcome_counts: Dict[str, int] = {}
+    for item in cancer_risks:
+        out_name = item["cancer_type"]
+        outcome_counts[out_name] = outcome_counts.get(out_name, 0) + 1
+
     for item in cancer_risks:
         outcome = item["cancer_type"]
-        outcomes.append(outcome)
+        genes_str = ", ".join(item.get("genes", []))
+        display_outcome = f"{outcome} ({genes_str})" if outcome_counts.get(outcome, 1) > 1 and genes_str else outcome
+        outcomes.append(display_outcome)
         # Parse risk string e.g. "65% - 72%"
         risk_str = item["lifetime_risk_range"].replace("%", "").strip()
         if "-" in risk_str:
@@ -167,7 +174,7 @@ def create_risk_chart(cancer_risks: List[Dict[str, Any]]) -> Optional[io.BytesIO
             high = low
         lows.append(low)
         highs.append(high)
-        genes.append(", ".join(item.get("genes", [])))
+        genes.append(genes_str)
         baselines.append(POPULATION_BASELINES.get(outcome))
 
     # Reverse so top risk appears at top of horizontal chart
@@ -484,7 +491,7 @@ def generate_pdf_report(
         risk_headers = [
             Paragraph("CANCER TYPE / ORGAN", table_header),
             Paragraph("CARRIER RISK RANGE", table_header),
-            Paragraph("GENE(S) INVOLVED", table_header),
+            Paragraph("GENE", table_header),
             Paragraph("AGE HORIZON", table_header),
             Paragraph("POPULATION BASELINE", table_header),
         ]

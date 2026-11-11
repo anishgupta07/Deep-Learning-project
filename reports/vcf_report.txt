@@ -8,10 +8,11 @@ ACTIONABLE (PATHOGENIC / LIKELY PATHOGENIC): 2
 ================================================================================
 EXECUTIVE SUMMARY: PREDICTED LIFETIME CANCER RISKS BY ORGAN / TYPE
 ================================================================================
-CANCER TYPE                      | ESTIMATED LIFETIME RISK | GENE(S) INVOLVED | HORIZON
+CANCER TYPE                      | ESTIMATED LIFETIME RISK | GENE             | HORIZON
 --------------------------------------------------------------------------------
 All cancers combined             | 70% - 90%               | TP53             | Up to age 70
-Breast cancer                    | 65% - 72%               | BRCA1, TP53      | Up to age 80
+Breast cancer                    | 65% - 72%               | BRCA1            | Up to age 80
+Breast cancer                    | 50% - 60%               | TP53             | Up to age 60
 Ovarian cancer                   | 39% - 44%               | BRCA1            | Up to age 80
 Soft tissue sarcoma              | 15% - 20%               | TP53             | Up to age 60
 --------------------------------------------------------------------------------

@@ -330,7 +330,7 @@ def test_compound_het_resolution_trans_cis_and_unphased(pipeline):
     assert all(v.cancer_risks == [] for v in verdicts_cis)
     assert "in cis" in verdicts_cis[0].clinical_notes.lower()
 
-    # Unphased double het also flags putative compound heterozygosity with biallelic risk
+    # Unphased double het must NOT be treated as confirmed biallelic until trans phase is established
     v1_unphased = VariantRecord(
         chrom="1", pos=45332803, id="v1u", ref="T", alt="C", qual=100.0, filter_status="PASS",
         gene="MUTYH", consequence="missense_variant", genotype="0/1", dp=40, gq=99, is_biallelic=False,
@@ -340,13 +340,14 @@ def test_compound_het_resolution_trans_cis_and_unphased(pipeline):
         gene="MUTYH", consequence="frameshift_variant", genotype="0/1", dp=40, gq=99, is_biallelic=False,
     )
     verdicts_unphased = pipeline.evaluate_variants([v1_unphased, v2_unphased])
-    assert all(v.tier in ("Pathogenic", "Likely Pathogenic") for v in verdicts_unphased)
-    assert all(len(v.cancer_risks) > 0 for v in verdicts_unphased)
-    assert "compound heterozygous" in verdicts_unphased[0].clinical_notes.lower()
+    assert all(v.tier == "Carrier (Recessive)" for v in verdicts_unphased)
+    assert all(v.cancer_risks == [] for v in verdicts_unphased)
+    assert "unphased" in verdicts_unphased[0].clinical_notes.lower()
+    assert "phasing" in verdicts_unphased[0].clinical_notes.lower()
 
 
-def test_risk_range_aggregation_does_not_mix_genes(pipeline, tmp_path):
-    """Aggregating shared cancer outcomes must preserve a single gene's range rather than mixing bounds."""
+def test_risk_range_aggregation_preserves_per_gene_attribution(pipeline, tmp_path):
+    """Summary risk entries must preserve per-gene range, horizon, and gene attribution without conflation."""
     from src.v3.vcf_pipeline import VariantVerdict
 
     v_a = VariantVerdict(
@@ -366,6 +367,10 @@ def test_risk_range_aggregation_does_not_mix_genes(pipeline, tmp_path):
 
     import json
     payload = json.loads(out_json.read_text(encoding="utf-8"))
-    summary = payload["cancer_risk_summary"][0]
-    assert summary["lifetime_risk_range"] == "40% - 75%"
-    assert summary["up_to_age"] == 80
+    summaries = payload["cancer_risk_summary"]
+    assert len(summaries) == 2
+    by_gene = {tuple(s["genes"]): s for s in summaries}
+    assert by_gene[("BRCA1",)]["lifetime_risk_range"] == "40% - 75%"
+    assert by_gene[("BRCA1",)]["up_to_age"] == 80
+    assert by_gene[("BRCA2",)]["lifetime_risk_range"] == "55% - 65%"
+    assert by_gene[("BRCA2",)]["up_to_age"] == 70

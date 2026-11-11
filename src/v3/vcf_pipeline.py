@@ -770,11 +770,11 @@ class VCFPipeline:
                     self._attach_risk_estimates(verdict, biallelic_confirmed=True)
                 elif state == "unphased":
                     verdict.clinical_notes += (
-                        f" Putative compound heterozygous in autosomal recessive gene {gene} "
-                        "(two distinct heterozygous pathogenic/likely pathogenic variants detected without phasing; "
-                        "parental or long-read phasing confirmation recommended to confirm trans configuration)."
+                        f" Multiple distinct heterozygous pathogenic/likely pathogenic variants detected in autosomal recessive gene {gene} "
+                        "(unphased — phase unknown). Cannot confirm biallelic trans configuration without parental or long-read phasing; "
+                        "not assigned confirmed biallelic cancer risk."
                     )
-                    self._attach_risk_estimates(verdict, biallelic_confirmed=True)
+                    self._attach_risk_estimates(verdict, biallelic_confirmed=False)
                 elif state == "cis":
                     verdict.clinical_notes += (
                         f" Phased on the same haplotype (in cis) in {gene}; does not establish biallelic inactivation."
@@ -935,7 +935,7 @@ class VCFPipeline:
         if gene in RECESSIVE_GENES:
             if not verdict.variant.is_biallelic and not biallelic_confirmed:
                 verdict.tier = "Carrier (Recessive)"
-                if "in cis" not in verdict.clinical_notes:
+                if "in cis" not in verdict.clinical_notes and "unphased" not in verdict.clinical_notes:
                     verdict.clinical_notes += (
                         f" Single heterozygous allele in autosomal recessive gene {gene}. "
                         "Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
@@ -973,57 +973,50 @@ class VCFPipeline:
         lines.append(f"ACTIONABLE (PATHOGENIC / LIKELY PATHOGENIC): {len(actionable_verdicts)}")
         lines.append("-" * 80)
 
-        # Aggregate cumulative cancer risks by organ / cancer type, keeping each source range coupled to its gene
-        cancer_risk_map = {}
+        # Aggregate lifetime cancer risks per (outcome, gene) so each estimate is strictly attributed to its source gene
+        cancer_risk_by_gene_outcome = {}
         for v in actionable_verdicts:
             gene = v.variant.gene
             for r in v.cancer_risks:
                 outcome = r["outcome"]
-                if outcome not in cancer_risk_map:
-                    cancer_risk_map[outcome] = {
-                        "genes": set(),
-                        "entries": [],
-                    }
-                cancer_risk_map[outcome]["genes"].add(gene)
-                cancer_risk_map[outcome]["entries"].append({
+                key = (outcome, gene)
+                entry = {
+                    "outcome": outcome,
                     "gene": gene,
                     "low": float(r["risk_low_pct"]),
                     "high": float(r["risk_high_pct"]),
                     "up_to_age": int(r["up_to_age"]),
                     "source": str(r["source"]),
-                })
+                }
+                existing = cancer_risk_by_gene_outcome.get(key)
+                if existing is None or (entry["high"], entry["low"]) > (existing["high"], existing["low"]):
+                    cancer_risk_by_gene_outcome[key] = entry
 
         # Top-level executive risk table
         cancer_summary_list = []
-        if cancer_risk_map:
+        if cancer_risk_by_gene_outcome:
             lines.append("")
             lines.append("=" * 80)
             lines.append("EXECUTIVE SUMMARY: PREDICTED LIFETIME CANCER RISKS BY ORGAN / TYPE")
             lines.append("=" * 80)
-            lines.append(f"{'CANCER TYPE':<32} | {'ESTIMATED LIFETIME RISK':<23} | {'GENE(S) INVOLVED':<16} | {'HORIZON'}")
+            lines.append(f"{'CANCER TYPE':<32} | {'ESTIMATED LIFETIME RISK':<23} | {'GENE':<16} | {'HORIZON'}")
             lines.append("-" * 80)
-            
-            # Sort by dominant estimate's upper bound risk descending
-            def _dominant_entry(entries):
-                return max(entries, key=lambda e: (e["high"], e["low"]))
 
-            sorted_outcomes = sorted(
-                cancer_risk_map.items(),
-                key=lambda x: (_dominant_entry(x[1]["entries"])["high"], _dominant_entry(x[1]["entries"])["low"]),
+            sorted_entries = sorted(
+                cancer_risk_by_gene_outcome.values(),
+                key=lambda e: (e["high"], e["low"], e["outcome"], e["gene"]),
                 reverse=True,
             )
-            for outcome, data in sorted_outcomes:
-                genes_str = ", ".join(sorted(data["genes"]))
-                dominant = _dominant_entry(data["entries"])
-                risk_str = f"{dominant['low']:.0f}% - {dominant['high']:.0f}%"
-                age_val = dominant["up_to_age"]
-                age_str = f"Up to age {age_val}"
-                lines.append(f"{outcome:<32} | {risk_str:<23} | {genes_str:<16} | {age_str}")
+            for entry in sorted_entries:
+                risk_str = f"{entry['low']:.0f}% - {entry['high']:.0f}%"
+                age_str = f"Up to age {entry['up_to_age']}"
+                lines.append(f"{entry['outcome']:<32} | {risk_str:<23} | {entry['gene']:<16} | {age_str}")
                 cancer_summary_list.append({
-                    "cancer_type": outcome,
+                    "cancer_type": entry["outcome"],
                     "lifetime_risk_range": risk_str,
-                    "genes": sorted(list(data["genes"])),
-                    "up_to_age": age_val,
+                    "genes": [entry["gene"]],
+                    "up_to_age": entry["up_to_age"],
+                    "source": entry["source"],
                 })
             lines.append("-" * 80)
             lines.append("")

@@ -8,16 +8,26 @@
       "genes": [
         "TP53"
       ],
-      "up_to_age": 70
+      "up_to_age": 70,
+      "source": "Chompret et al. / NCCN 2024"
     },
     {
       "cancer_type": "Breast cancer",
       "lifetime_risk_range": "65% - 72%",
       "genes": [
-        "BRCA1",
+        "BRCA1"
+      ],
+      "up_to_age": 80,
+      "source": "Kuchenbaecker et al. JAMA 2017"
+    },
+    {
+      "cancer_type": "Breast cancer",
+      "lifetime_risk_range": "50% - 60%",
+      "genes": [
         "TP53"
       ],
-      "up_to_age": 80
+      "up_to_age": 60,
+      "source": "Olivier et al. 2010"
     },
     {
       "cancer_type": "Ovarian cancer",
@@ -25,7 +35,8 @@
       "genes": [
         "BRCA1"
       ],
-      "up_to_age": 80
+      "up_to_age": 80,
+      "source": "Kuchenbaecker et al. JAMA 2017"
     },
     {
       "cancer_type": "Soft tissue sarcoma",
@@ -33,7 +44,8 @@
       "genes": [
         "TP53"
       ],
-      "up_to_age": 60
+      "up_to_age": 60,
+      "source": "Olivier et al. 2010"
     }
   ],
   "verdicts": [

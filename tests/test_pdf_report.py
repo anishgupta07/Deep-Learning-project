@@ -27,6 +27,8 @@ def test_pdf_report_generation(tmp_path):
     p1_text = reader.pages[0].extract_text()
     assert "GENOMEDL CLINICAL GENOMICS PIPELINE" in p1_text
     assert "Executive Summary: Lifetime Cancer Risk" in p1_text
+    assert "65% - 72%" in p1_text
+    assert "50% - 60%" in p1_text
     utc_date = datetime.now(timezone.utc).strftime("%B %d, %Y")
     assert utc_date in p1_text
 
