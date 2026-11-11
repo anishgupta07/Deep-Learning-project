@@ -123,3 +123,19 @@ def test_windowing_long_proteins():
     w3, p3 = get_centered_window(seq, 1709)
     assert len(w3) == 1022
     assert p3 == 1022 // 2
+
+
+def test_portability_and_incomplete_panel_failure(monkeypatch):
+    """Default CLI/module paths must be PROJECT_ROOT-anchored, and incomplete protein fetches must fail loudly."""
+    import inspect
+    import urllib.request
+    from src.v3 import esm_features, fetch_proteins
+
+    sig = inspect.signature(esm_features.generate_v3_esm_features)
+    assert sig.parameters["input_csv"].default.is_absolute()
+    assert fetch_proteins.PANEL_JSON.is_absolute()
+
+    monkeypatch.setattr(fetch_proteins, "fetch_uniprot_batch", lambda batch: ">sp|P38398|BRCA1_HUMAN GN=BRCA1\nMDLSALR\n")
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("offline test")))
+    with pytest.raises(RuntimeError, match="Incomplete protein panel"):
+        fetch_proteins.fetch_all_panel_sequences(force_download=True)

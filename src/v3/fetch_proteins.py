@@ -15,10 +15,12 @@ from pathlib import Path
 import pandas as pd
 
 
-PANEL_JSON = Path("data/panel.json")
-LENGTHS_JSON = Path("data/protein_lengths.json")
-OUTPUT_FASTA = Path("data/panel_proteins.fasta")
-CLINVAR_CSV = Path("data/clinvar_labelled_v3.csv")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+PANEL_JSON = DATA_DIR / "panel.json"
+LENGTHS_JSON = DATA_DIR / "protein_lengths.json"
+OUTPUT_FASTA = DATA_DIR / "panel_proteins.fasta"
+CLINVAR_CSV = DATA_DIR / "clinvar_labelled_v3.csv"
 
 
 def parse_fasta(fasta_text: str) -> list[tuple[str, str, str, str]]:
@@ -65,12 +67,16 @@ def fetch_uniprot_batch(genes: list[str]) -> str:
         return resp.read().decode("utf-8")
 
 
-def fetch_all_panel_sequences(force_download: bool = False) -> dict[str, str]:
+def fetch_all_panel_sequences(force_download: bool = False, allow_partial: bool = False) -> dict[str, str]:
     """Fetch canonical protein sequences for all 130 panel genes.
     
     Returns:
         dict: gene_symbol -> amino_acid_sequence
     """
+    panel = json.load(open(PANEL_JSON, "r", encoding="utf-8"))
+    lengths = json.load(open(LENGTHS_JSON, "r", encoding="utf-8"))
+    genes = sorted(list(panel.keys()))
+
     if OUTPUT_FASTA.exists() and not force_download:
         print(f"Loading existing FASTA from {OUTPUT_FASTA}...")
         gene_seqs = {}
@@ -88,13 +94,10 @@ def fetch_all_panel_sequences(force_download: bool = False) -> dict[str, str]:
                     curr_seq.append(line)
             if curr_gene:
                 gene_seqs[curr_gene] = "".join(curr_seq)
-        if len(gene_seqs) == 130:
+        missing_cached = [g for g in genes if g not in gene_seqs]
+        if not missing_cached:
             print(f"Loaded all {len(gene_seqs)} sequences from cache.")
             return gene_seqs
-
-    panel = json.load(open(PANEL_JSON, "r", encoding="utf-8"))
-    lengths = json.load(open(LENGTHS_JSON, "r", encoding="utf-8"))
-    genes = sorted(list(panel.keys()))
 
     print(f"Fetching sequences for {len(genes)} genes from UniProt...")
     batch_size = 20
@@ -166,7 +169,12 @@ def fetch_all_panel_sequences(force_download: bool = False) -> dict[str, str]:
             except Exception as e:
                 print(f"  Could not recover {g}: {e}")
 
+    still_missing = [g for g in genes if g not in gene_to_seq]
     print(f"Successfully retrieved sequences for {len(gene_to_seq)}/{len(genes)} genes.")
+    if still_missing and not allow_partial:
+        raise RuntimeError(
+            f"Incomplete protein panel: failed to retrieve {len(still_missing)}/{len(genes)} sequences: {still_missing}"
+        )
 
     # Save to FASTA
     OUTPUT_FASTA.parent.mkdir(parents=True, exist_ok=True)

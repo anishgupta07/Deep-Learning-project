@@ -2578,7 +2578,7 @@ VARIANT #322: CDC73 chr1:193232828 A>G
   Genotype:           0/1 (DP=1095, GQ=557)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 677563).
 
 VARIANT #323: CDC73 chr1:193232902 CA>C
@@ -2978,7 +2978,7 @@ VARIANT #372: FH chr1:241505956 C>T
   Genotype:           0/1 (DP=1769, GQ=585)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 496849).
 
 VARIANT #373: FH chr1:241506542 C>T
@@ -3170,7 +3170,7 @@ VARIANT #396: EPCAM chr2:47373967 T>C
   Genotype:           0/1 (DP=2271, GQ=663)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183700).
 
 VARIANT #397: EPCAM chr2:47375707 A>AT
@@ -3242,7 +3242,7 @@ VARIANT #405: EPCAM chr2:47386560 T>C
   Genotype:           0/1 (DP=1448, GQ=652)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 258645).
 
 VARIANT #406: EPCAM chr2:47388003 C>G
@@ -4578,7 +4578,7 @@ VARIANT #572: MSH2 chr2:47512412 A>G
   Genotype:           0/1 (DP=929, GQ=541)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 41867).
 
 VARIANT #573: MSH2 chr2:47513059 G>T
@@ -5362,7 +5362,7 @@ VARIANT #670: ERCC3 chr2:127279157 A>C
   Genotype:           0/1 (DP=1073, GQ=482)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1548549).
 
 VARIANT #671: ERCC3 chr2:127279759 T>TA
@@ -6898,7 +6898,7 @@ VARIANT #862: BARD1 chr2:214767468 G>A
   Genotype:           0/1 (DP=1220, GQ=571)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 256214).
 
 VARIANT #863: BARD1 chr2:214767531 C>T
@@ -6906,7 +6906,7 @@ VARIANT #863: BARD1 chr2:214767531 C>T
   Genotype:           0/1 (DP=2249, GQ=654)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 140757).
 
 VARIANT #864: BARD1 chr2:214767532 A>G
@@ -7034,7 +7034,7 @@ VARIANT #879: BARD1 chr2:214769331 C>T
   Genotype:           0/1 (DP=1684, GQ=812)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 256213).
 
 VARIANT #880: BARD1 chr2:214769508 A>G
@@ -7202,7 +7202,7 @@ VARIANT #900: BARD1 chr2:214780740 C>G
   Genotype:           1/1 (DP=1840, GQ=500)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 142769).
 
 VARIANT #901: BARD1 chr2:214782662 C>A
@@ -7562,7 +7562,7 @@ VARIANT #945: BARD1 chr2:214809500 G>A
   Genotype:           0/1 (DP=1148, GQ=623)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183698).
 
 VARIANT #946: BARD1 chr2:214809599 C>G
@@ -9570,7 +9570,7 @@ VARIANT #1196: FANCD2 chr3:10101265 C>T
   Genotype:           1/1 (DP=2780, GQ=597)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257063).
 
 VARIANT #1197: VHL chr3:10139556 A>G
@@ -9986,7 +9986,7 @@ VARIANT #1248: XPC chr3:14145257 C>G
   Genotype:           1/1 (DP=1109, GQ=503)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 343550).
 
 VARIANT #1249: XPC chr3:14145949 G>T
@@ -9994,7 +9994,7 @@ VARIANT #1249: XPC chr3:14145949 G>T
   Genotype:           0/1 (DP=1826, GQ=715)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 190215).
 
 VARIANT #1250: XPC chr3:14146199 T>C
@@ -10018,7 +10018,7 @@ VARIANT #1252: XPC chr3:14148737 T>G
   Genotype:           0/1 (DP=2060, GQ=759)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 190214).
 
 VARIANT #1253: XPC chr3:14151004 A>G
@@ -13354,7 +13354,7 @@ VARIANT #1669: GATA2 chr3:128481229 C>T
   Genotype:           0/1 (DP=3090, GQ=756)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257562).
 
 VARIANT #1670: GATA2 chr3:128481616 T>C
@@ -16690,7 +16690,7 @@ VARIANT #2086: SDHA chr5:251354 G>A
   Genotype:           0/1 (DP=834, GQ=449)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 130276).
 
 VARIANT #2087: SDHA chr5:251426 A>G
@@ -16810,7 +16810,7 @@ VARIANT #2101: SDHA chr5:254484 A>T
   Genotype:           0/1 (DP=731, GQ=430)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 224949).
 
 VARIANT #2102: SDHA chr5:254521 C>T
@@ -16818,7 +16818,7 @@ VARIANT #2102: SDHA chr5:254521 C>T
   Genotype:           0/1 (DP=701, GQ=462)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 259245).
 
 VARIANT #2103: SDHA chr5:254591 G>A
@@ -17098,7 +17098,7 @@ VARIANT #2137: TERT chr5:1293971 C>T
   Genotype:           0/1 (DP=1512, GQ=589)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 39126).
 
 VARIANT #2138: TERT chr5:1295234 A>G
@@ -20474,7 +20474,7 @@ VARIANT #2559: APC chr5:112707687 T>G
   Genotype:           0/1 (DP=1697, GQ=652)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 439405).
 
 VARIANT #2560: APC chr5:112709890 A>G
@@ -20626,7 +20626,7 @@ VARIANT #2578: APC chr5:112737096 A>G
   Genotype:           0/1 (DP=1222, GQ=647)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 386418).
 
 VARIANT #2579: APC chr5:112737192 C>T
@@ -20634,7 +20634,7 @@ VARIANT #2579: APC chr5:112737192 C>T
   Genotype:           0/1 (DP=995, GQ=516)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 386419).
 
 VARIANT #2580: APC chr5:112738095 A>G
@@ -21338,7 +21338,7 @@ VARIANT #2667: APC chr5:112842795 C>T
   Genotype:           0/1 (DP=1791, GQ=660)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 42249).
 
 VARIANT #2668: APC chr5:112844531 C>CA
@@ -23122,7 +23122,7 @@ VARIANT #2890: CTNNA1 chr5:138925290 C>T
   Genotype:           0/1 (DP=3124, GQ=818)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 239060).
 
 VARIANT #2891: CTNNA1 chr5:138927439 T>C
@@ -23314,7 +23314,7 @@ VARIANT #2914: NSD1 chr5:177210191 T>C
   Genotype:           0/1 (DP=4028, GQ=751)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 96040).
 
 VARIANT #2915: NSD1 chr5:177212303 C>G
@@ -23882,7 +23882,7 @@ VARIANT #2985: DDX41 chr5:177513383 G>A
   Genotype:           0/1 (DP=2409, GQ=656)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1278531).
 
 VARIANT #2986: DDX41 chr5:177513870 G>C
@@ -23986,7 +23986,7 @@ VARIANT #2998: FANCE chr6:35455885 A>C
   Genotype:           1/1 (DP=903, GQ=560)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 261435).
 
 VARIANT #2999: FANCE chr6:35456411 A>G
@@ -24042,7 +24042,7 @@ VARIANT #3005: FANCE chr6:35459779 G>A
   Genotype:           0/1 (DP=955, GQ=660)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 261433).
 
 VARIANT #3006: FANCE chr6:35460568 C>T
@@ -24122,7 +24122,7 @@ VARIANT #3015: FANCE chr6:35462909 G>A
   Genotype:           0/1 (DP=1878, GQ=706)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 134345).
 
 VARIANT #3016: FANCE chr6:35463612 G>A
@@ -24354,7 +24354,7 @@ VARIANT #3044: PMS2 chr7:5987144 T>C
   Genotype:           1/1 (DP=4361, GQ=577)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 135065).
 
 VARIANT #3045: PMS2 chr7:5987357 G>A
@@ -24698,7 +24698,7 @@ VARIANT #3087: SAMD9 chr7:93104662 G>A
   Genotype:           0/1 (DP=1523, GQ=794)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1167361).
 
 VARIANT #3088: SAMD9 chr7:93104738 C>T
@@ -24706,7 +24706,7 @@ VARIANT #3088: SAMD9 chr7:93104738 C>T
   Genotype:           0/1 (DP=1463, GQ=753)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1167362).
 
 VARIANT #3089: SAMD9 chr7:93105138 A>G
@@ -24714,7 +24714,7 @@ VARIANT #3089: SAMD9 chr7:93105138 A>G
   Genotype:           1/1 (DP=1031, GQ=557)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1170230).
 
 VARIANT #3090: SAMD9 chr7:93106641 A>G
@@ -24762,7 +24762,7 @@ VARIANT #3095: SAMD9L chr7:93133368 A>G
   Genotype:           0/1 (DP=1335, GQ=651)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1170231).
 
 VARIANT #3096: SAMD9L chr7:93135176 C>T
@@ -24770,7 +24770,7 @@ VARIANT #3096: SAMD9L chr7:93135176 C>T
   Genotype:           0/1 (DP=1159, GQ=555)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1166832).
 
 VARIANT #3097: SAMD9L chr7:93135669 C>T
@@ -24778,7 +24778,7 @@ VARIANT #3097: SAMD9L chr7:93135669 C>T
   Genotype:           0/1 (DP=1337, GQ=537)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1170232).
 
 VARIANT #3098: SAMD9L chr7:93137734 GTT>G
@@ -26194,7 +26194,7 @@ VARIANT #3274: POT1 chr7:124841191 G>A
   Genotype:           0/1 (DP=1381, GQ=708)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 516586).
 
 VARIANT #3275: POT1 chr7:124841349 T>A
@@ -26330,7 +26330,7 @@ VARIANT #3291: POT1 chr7:124846926 T>C
   Genotype:           0/1 (DP=1127, GQ=559)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 516585).
 
 VARIANT #3292: POT1 chr7:124847255 A>G
@@ -26506,7 +26506,7 @@ VARIANT #3313: POT1 chr7:124858948 A>C
   Genotype:           0/1 (DP=1212, GQ=555)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 516584).
 
 VARIANT #3314: POT1 chr7:124858949 T>A
@@ -26514,7 +26514,7 @@ VARIANT #3314: POT1 chr7:124858949 T>A
   Genotype:           0/1 (DP=1210, GQ=556)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 516583).
 
 VARIANT #3315: POT1 chr7:124859348 C>G
@@ -29538,7 +29538,7 @@ VARIANT #3692: WRN chr8:31167122 C>T
   Genotype:           0/1 (DP=1889, GQ=628)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 130761).
 
 VARIANT #3693: WRN chr8:31167138 T>C
@@ -29546,7 +29546,7 @@ VARIANT #3693: WRN chr8:31167138 T>C
   Genotype:           0/1 (DP=1865, GQ=663)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 130762).
 
 VARIANT #3694: WRN chr8:31167541 G>A
@@ -30074,7 +30074,7 @@ VARIANT #3759: NBN chr8:89946194 T>C
   Genotype:           0/1 (DP=1516, GQ=748)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183696).
 
 VARIANT #3760: NBN chr8:89946302 T>C
@@ -30082,7 +30082,7 @@ VARIANT #3760: NBN chr8:89946302 T>C
   Genotype:           0/1 (DP=1483, GQ=568)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 258768).
 
 VARIANT #3761: NBN chr8:89948282 G>A
@@ -30170,7 +30170,7 @@ VARIANT #3771: NBN chr8:89955483 A>G
   Genotype:           0/1 (DP=2067, GQ=747)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183701).
 
 VARIANT #3772: NBN chr8:89955634 G>T
@@ -30258,7 +30258,7 @@ VARIANT #3782: NBN chr8:89958707 G>A
   Genotype:           0/1 (DP=1932, GQ=755)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 199080).
 
 VARIANT #3783: NBN chr8:89959460 A>T
@@ -30402,7 +30402,7 @@ VARIANT #3800: NBN chr8:89970586 G>A
   Genotype:           0/1 (DP=1277, GQ=546)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 127011).
 
 VARIANT #3801: NBN chr8:89972575 G>C
@@ -30466,7 +30466,7 @@ VARIANT #3808: NBN chr8:89978251 C>G
   Genotype:           0/1 (DP=2461, GQ=712)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 134876).
 
 VARIANT #3809: NBN chr8:89979040 T>C
@@ -30514,7 +30514,7 @@ VARIANT #3814: NBN chr8:89982791 C>T
   Genotype:           0/1 (DP=3132, GQ=750)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183697).
 
 VARIANT #3815: NBN chr8:89983138 C>T
@@ -35090,7 +35090,7 @@ VARIANT #4386: RECQL4 chr8:144515746 C>T
   Genotype:           0/1 (DP=2863, GQ=646)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 94884).
 
 VARIANT #4387: RECQL4 chr8:144516318 C>G
@@ -35370,7 +35370,7 @@ VARIANT #4421: FANCG chr9:35080028 T>A
   Genotype:           0/1 (DP=969, GQ=553)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 369629).
 
 VARIANT #4422: FANCG chr9:35080385 C>A
@@ -36962,7 +36962,7 @@ VARIANT #4620: XPA chr9:97697296 T>C
   Genotype:           1/1 (DP=1002, GQ=497)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 190206).
 
 VARIANT #4621: TSC1 chr9:132890177 G>A
@@ -37034,7 +37034,7 @@ VARIANT #4629: TSC1 chr9:132897330 G>A
   Genotype:           0/1 (DP=1009, GQ=658)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 49006).
 
 VARIANT #4630: TSC1 chr9:132898672 T>C
@@ -37474,7 +37474,7 @@ VARIANT #4684: ANKRD26 chr10:27014676 A>T
   Genotype:           0/1 (DP=2241, GQ=656)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260470).
 
 VARIANT #4685: ANKRD26 chr10:27014765 T>C
@@ -37818,7 +37818,7 @@ VARIANT #4727: ANKRD26 chr10:27028911 C>T
   Genotype:           0/1 (DP=1542, GQ=657)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260467).
 
 VARIANT #4728: ANKRD26 chr10:27029441 C>T
@@ -37986,7 +37986,7 @@ VARIANT #4748: ANKRD26 chr10:27038070 T>C
   Genotype:           1/1 (DP=1304, GQ=707)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260461).
 
 VARIANT #4749: ANKRD26 chr10:27039739 C>A
@@ -38402,7 +38402,7 @@ VARIANT #4800: ANKRD26 chr10:27061127 G>T
   Genotype:           0/1 (DP=1291, GQ=652)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260458).
 
 VARIANT #4801: ANKRD26 chr10:27061272 T>C
@@ -38474,7 +38474,7 @@ VARIANT #4809: ANKRD26 chr10:27064078 T>C
   Genotype:           0/1 (DP=1198, GQ=669)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260457).
 
 VARIANT #4810: ANKRD26 chr10:27064321 A>G
@@ -38938,7 +38938,7 @@ VARIANT #4867: ANKRD26 chr10:27092420 T>C
   Genotype:           0/1 (DP=2108, GQ=721)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260473).
 
 VARIANT #4868: ANKRD26 chr10:27093008 G>A
@@ -39122,7 +39122,7 @@ VARIANT #4890: ANKRD26 chr10:27100268 T>C
   Genotype:           1/1 (DP=874, GQ=481)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 260472).
 
 VARIANT #4891: ANKRD26 chr10:27100555 T>G
@@ -39834,7 +39834,7 @@ VARIANT #4979: RET chr10:43126920 T>A
   Genotype:           0/1 (DP=1112, GQ=641)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1230253).
 
 VARIANT #4980: RET chr10:43127485 T>C
@@ -41378,7 +41378,7 @@ VARIANT #5172: BMPR1A chr10:86876022 C>A
   Genotype:           0/1 (DP=1245, GQ=559)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 41782).
 
 VARIANT #5173: BMPR1A chr10:86876147 T>C
@@ -41738,7 +41738,7 @@ VARIANT #5217: BMPR1A chr10:86924483 T>C
   Genotype:           0/1 (DP=1216, GQ=453)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 301364).
 
 VARIANT #5218: BMPR1A chr10:86924605 C>T
@@ -41746,7 +41746,7 @@ VARIANT #5218: BMPR1A chr10:86924605 C>T
   Genotype:           0/1 (DP=1329, GQ=458)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 301365).
 
 VARIANT #5219: BMPR1A chr10:86925216 T>C
@@ -41786,7 +41786,7 @@ VARIANT #5223: PTEN chr10:87863959 G>A
   Genotype:           0/1 (DP=1145, GQ=401)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 810888).
 
 VARIANT #5224: PTEN chr10:87864103 CT>C
@@ -44426,7 +44426,7 @@ VARIANT #5553: WT1 chr11:32388223 T>C
   Genotype:           0/1 (DP=1247, GQ=646)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 304389).
 
 VARIANT #5554: WT1 chr11:32388456 T>C
@@ -49130,7 +49130,7 @@ VARIANT #6141: CEP57 chr11:95831095 A>G
   Genotype:           0/1 (DP=1873, GQ=562)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 802713).
 
 VARIANT #6142: CEP57 chr11:95832124 A>G
@@ -53922,7 +53922,7 @@ VARIANT #6740: ETV6 chr12:11839234 G>A
   Genotype:           0/1 (DP=2192, GQ=753)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1272565).
 
 VARIANT #6741: ETV6 chr12:11839710 A>T
@@ -54442,7 +54442,7 @@ VARIANT #6805: ETV6 chr12:11869533 G>T
   Genotype:           0/1 (DP=3345, GQ=748)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 750137).
 
 VARIANT #6806: ETV6 chr12:11870089 C>G
@@ -55010,7 +55010,7 @@ VARIANT #6876: CDKN1B chr12:12717002 C>A
   Genotype:           0/1 (DP=945, GQ=452)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 695291).
 
 VARIANT #6877: CDKN1B chr12:12717038 G>T
@@ -55018,7 +55018,7 @@ VARIANT #6877: CDKN1B chr12:12717038 G>T
   Genotype:           1/1 (DP=1021, GQ=475)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 1266363).
 
 VARIANT #6878: CDKN1B chr12:12717761 T>C
@@ -58882,7 +58882,7 @@ VARIANT #7360: ERCC5 chr13:102852167 T>C
   Genotype:           0/1 (DP=1645, GQ=644)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 129009).
 
 VARIANT #7361: ERCC5 chr13:102854012 AT>A
@@ -59354,7 +59354,7 @@ VARIANT #7419: TINF2 chr14:24239917 G>A
   Genotype:           0/1 (DP=2965, GQ=724)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 238288).
 
 VARIANT #7420: TINF2 chr14:24241613 CA>C
@@ -59410,7 +59410,7 @@ VARIANT #7426: FANCM chr14:45137084 C>T
   Genotype:           0/1 (DP=2289, GQ=739)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 261389).
 
 VARIANT #7427: FANCM chr14:45137959 TA>T
@@ -59730,7 +59730,7 @@ VARIANT #7466: FANCM chr14:45175386 G>T
   Genotype:           0/1 (DP=2414, GQ=647)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 261383).
 
 VARIANT #7467: FANCM chr14:45178928 A>G
@@ -66002,7 +66002,7 @@ VARIANT #8250: MLH3 chr14:75013934 T>C
   Genotype:           0/1 (DP=1179, GQ=550)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 314345).
 
 VARIANT #8251: MLH3 chr14:75014665 C>T
@@ -66498,7 +66498,7 @@ VARIANT #8312: MLH3 chr14:75047125 G>A
   Genotype:           0/1 (DP=2480, GQ=649)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257252).
 
 VARIANT #8313: MLH3 chr14:75047180 T>C
@@ -66506,7 +66506,7 @@ VARIANT #8313: MLH3 chr14:75047180 T>C
   Genotype:           1/1 (DP=1999, GQ=697)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257251).
 
 VARIANT #8314: MLH3 chr14:75051028 C>G
@@ -66634,7 +66634,7 @@ VARIANT #8329: DICER1 chr14:95117758 A>C
   Genotype:           0/1 (DP=1751, GQ=620)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 220838).
 
 VARIANT #8330: DICER1 chr14:95119799 T>C
@@ -70906,7 +70906,7 @@ VARIANT #8863: BUB1B chr15:40196650 G>A
   Genotype:           0/1 (DP=2684, GQ=631)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257632).
 
 VARIANT #8864: BUB1B chr15:40198510 A>G
@@ -71138,7 +71138,7 @@ VARIANT #8892: FANCI chr15:89260719 C>T
   Genotype:           0/1 (DP=2323, GQ=650)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 257480).
 
 VARIANT #8893: FANCI chr15:89266994 C>T
@@ -71666,7 +71666,7 @@ VARIANT #8958: BLM chr15:90769593 T>C
   Genotype:           0/1 (DP=4195, GQ=736)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 92392).
 
 VARIANT #8959: BLM chr15:90769994 A>G
@@ -72242,7 +72242,7 @@ VARIANT #9030: BLM chr15:90794249 G>A
   Genotype:           0/1 (DP=3057, GQ=566)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 92394).
 
 VARIANT #9031: BLM chr15:90794393 AT>A
@@ -72698,7 +72698,7 @@ VARIANT #9087: BLM chr15:90803693 C>A
   Genotype:           0/1 (DP=1753, GQ=660)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 92395).
 
 VARIANT #9088: BLM chr15:90803905 C>A
@@ -72866,7 +72866,7 @@ VARIANT #9108: BLM chr15:90811275 C>T
   Genotype:           0/1 (DP=3127, GQ=759)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 92396).
 
 VARIANT #9109: BLM chr15:90812192 A>G
@@ -73002,7 +73002,7 @@ VARIANT #9125: TSC2 chr16:2057144 G>A
   Genotype:           0/1 (DP=1759, GQ=651)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 238093).
 
 VARIANT #9126: TSC2 chr16:2059952 C>T
@@ -73058,7 +73058,7 @@ VARIANT #9132: SLX4 chr16:3589138 A>G
   Genotype:           0/1 (DP=3080, GQ=647)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 262053).
 
 VARIANT #9133: ERCC4 chr16:13917882 G>A
@@ -73186,7 +73186,7 @@ VARIANT #9148: ERCC4 chr16:13932150 G>A
   Genotype:           1/1 (DP=1193, GQ=588)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 259686).
 
 VARIANT #9149: ERCC4 chr16:13932504 G>A
@@ -74650,7 +74650,7 @@ VARIANT #9331: PALB2 chr16:23607914 A>C
   Genotype:           0/1 (DP=1876, GQ=653)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 126730).
 
 VARIANT #9332: PALB2 chr16:23608217 GTTC>G
@@ -75042,7 +75042,7 @@ VARIANT #9380: PALB2 chr16:23622972 C>T
   Genotype:           0/1 (DP=1385, GQ=654)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 126699).
 
 VARIANT #9381: PALB2 chr16:23623200 CTTTT>C
@@ -75194,7 +75194,7 @@ VARIANT #9399: PALB2 chr16:23634870 T>C
   Genotype:           0/1 (DP=3681, GQ=604)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 126613).
 
 VARIANT #9400: PALB2 chr16:23636392 T>G
@@ -75202,7 +75202,7 @@ VARIANT #9400: PALB2 chr16:23636392 T>G
   Genotype:           0/1 (DP=1239, GQ=460)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 126635).
 
 VARIANT #9401: PALB2 chr16:23636517 A>C
@@ -75314,7 +75314,7 @@ VARIANT #9414: ACD chr16:67660013 G>A
   Genotype:           0/1 (DP=1648, GQ=609)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 434068).
 
 VARIANT #9415: CDH1 chr16:68720618 CT>C
@@ -78906,7 +78906,7 @@ VARIANT #9863: FANCA chr16:89769915 C>T
   Genotype:           0/1 (DP=2669, GQ=745)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 134254).
 
 VARIANT #9864: FANCA chr16:89770099 T>C
@@ -84098,7 +84098,7 @@ VARIANT #10512: RAD51D chr17:35106468 C>T
   Genotype:           0/1 (DP=1938, GQ=754)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 142159).
 
 VARIANT #10513: RAD51D chr17:35106801 A>G
@@ -84218,7 +84218,7 @@ VARIANT #10527: RAD51D chr17:35118530 G>A
   Genotype:           0/1 (DP=2012, GQ=752)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183785).
 
 VARIANT #10528: RAD51D chr17:35121799 T>C
@@ -85002,7 +85002,7 @@ VARIANT #10625: BRIP1 chr17:61686104 T>C
   Genotype:           0/1 (DP=1883, GQ=762)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 183703).
 
 VARIANT #10626: BRIP1 chr17:61688494 C>A
@@ -86858,7 +86858,7 @@ VARIANT #10857: AXIN2 chr17:65537650 G>A
   Genotype:           1/1 (DP=2254, GQ=481)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 259510).
 
 VARIANT #10858: AXIN2 chr17:65537671 T>C
@@ -86866,7 +86866,7 @@ VARIANT #10858: AXIN2 chr17:65537671 T>C
   Genotype:           1/1 (DP=2265, GQ=592)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 259509).
 
 VARIANT #10859: AXIN2 chr17:65538036 C>T
@@ -87378,7 +87378,7 @@ VARIANT #10922: PRKAR1A chr17:68531319 G>A
   Genotype:           0/1 (DP=1284, GQ=558)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 324800).
 
 VARIANT #10923: PRKAR1A chr17:68533638 G>A
@@ -89226,7 +89226,7 @@ VARIANT #11153: CEBPA chr19:33301725 C>A
   Genotype:           0/1 (DP=953, GQ=445)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 21402).
 
 VARIANT #11154: CEBPA chr19:33303584 G>C
@@ -89282,7 +89282,7 @@ VARIANT #11160: ERCC2 chr19:45351661 T>G
   Genotype:           0/1 (DP=3220, GQ=759)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 134105).
 
 VARIANT #11161: ERCC2 chr19:45351802 C>G
@@ -89306,7 +89306,7 @@ VARIANT #11163: ERCC2 chr19:45352266 G>A
   Genotype:           0/1 (DP=4617, GQ=569)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 256018).
 
 VARIANT #11164: ERCC2 chr19:45352886 G>A
@@ -89434,7 +89434,7 @@ VARIANT #11179: ERCC2 chr19:45364001 C>T
   Genotype:           0/1 (DP=1243, GQ=639)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 134117).
 
 VARIANT #11180: ERCC2 chr19:45364748 A>T
@@ -89458,7 +89458,7 @@ VARIANT #11182: ERCC2 chr19:45365051 T>G
   Genotype:           0/1 (DP=3743, GQ=641)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 256021).
 
 VARIANT #11183: ERCC2 chr19:45365220 T>A
@@ -89874,7 +89874,7 @@ VARIANT #11234: POLD1 chr19:50406939 A>G
   Genotype:           0/1 (DP=614, GQ=548)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 676510).
 
 VARIANT #11235: POLD1 chr19:50407833 A>G
@@ -90466,7 +90466,7 @@ VARIANT #11308: RTEL1 chr20:63689615 T>C
   Genotype:           0/1 (DP=1512, GQ=731)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 403398).
 
 VARIANT #11309: RTEL1 chr20:63690302 G>A
@@ -90474,7 +90474,7 @@ VARIANT #11309: RTEL1 chr20:63690302 G>A
   Genotype:           0/1 (DP=2197, GQ=730)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 403400).
 
 VARIANT #11310: RTEL1 chr20:63690935 T>C
@@ -90482,7 +90482,7 @@ VARIANT #11310: RTEL1 chr20:63690935 T>C
   Genotype:           0/1 (DP=1572, GQ=629)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 403401).
 
 VARIANT #11311: RTEL1 chr20:63691346 A>G
@@ -96098,7 +96098,7 @@ VARIANT #12012: NF2 chr22:29683224 T>C
   Genotype:           0/1 (DP=983, GQ=657)
   VERDICT TIER:       [LIKELY BENIGN]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.0500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 676991).
 
 VARIANT #12013: NF2 chr22:29684528 G>A

@@ -78,7 +78,7 @@ The pipeline processes input VCF files through eight sequential, reproducible st
 
 ### Stage 2: Quality & Biallelic Parsing
 - **Filters**:
-  - `FILTER == 'PASS'` or `'.'`. Flags like `LowQual`, `Artifact`, or `LowDepth` are excluded.
+  - `FILTER == 'PASS'`. Flags like `.`, `LowQual`, `Artifact`, or `LowDepth` are excluded by default (`filter_pass_only=True`).
   - `DP >= 10`: Minimum 10 reads covering the locus.
   - `GQ >= 20`: Phred-scaled Genotype Quality $\ge 20$ (corresponding to $\le 1\%$ error probability in genotype assignment).
   - Multi-allelic records (e.g. `REF=A, ALT=C,T`) are decomposed into distinct biallelic records.
@@ -143,13 +143,13 @@ ESM-2 Features                                         │    (LayerNorm -> GELU
                                                             [Linear(256 -> 1)]
                                                                     │
                                                                     ▼
-                                                            Raw Logit z
+                                                           Raw Logit z
                                                                     │
                                                                     ▼
-                                                   Temperature Scaling: z / T
+                                                   Platt Scaling: a*z + b
                                                                     │
                                                                     ▼
-                                                   Calibrated P(pathogenic) = σ(z / T)
+                                                   Calibrated P(pathogenic) = σ(a*z + b)
 ```
 
 ### Key Architectural Specifications:
@@ -157,10 +157,10 @@ ESM-2 Features                                         │    (LayerNorm -> GELU
 2. **Residual Highway**: Two residual blocks with LayerNorm, GELU activations, and 20% Dropout prevent vanishing gradients and regularize representations across multi-seed training.
 3. **Loss Function**: Weighted Binary Cross-Entropy with `pos_weight` set dynamically on training data:
    $$\text{pos\_weight} = \frac{N_{\text{benign}}}{N_{\text{pathogenic}}} \approx \frac{128{,}000}{20{,}700} \approx 6.18$$
-4. **Post-Hoc Temperature Scaling Calibration**:
-   Raw logits $z$ are calibrated via a learned temperature parameter $T > 0$ fitted on held-out validation data:
-   $$\hat{P} = \sigma\left(\frac{z}{T}\right) = \frac{1}{1 + e^{-z / T}}$$
-   On our trained checkpoint, $T = 0.9357$, reducing Expected Calibration Error (ECE) from $0.0276$ to $0.0249$ ($< 2.5\%$).
+4. **Post-Hoc Platt Logit Calibration**:
+   Raw logits $z$ are calibrated via two-parameter Platt scaling $(a, b)$ fitted on held-out validation logits to cancel class-weight bias:
+   $$\hat{P} = \sigma(a \cdot z + b) = \frac{1}{1 + e^{-(a \cdot z + b)}}$$
+   On the checked-in checkpoint, $a = 1.0559$ and $b = -1.5561$ (alongside validation temperature $T = 0.9471$), reducing Expected Calibration Error (ECE) from $0.0279$ to $0.0009$ ($< 0.1\%$).
 
 ---
 
@@ -365,16 +365,13 @@ Unlike standard ReLU (which has a hard non-differentiable corner at 0), GELU wei
 In genomic datasets, harmless benign variants outnumber pathogenic cancer mutations by roughly $6:1$ to $7:1$. Standard Binary Cross-Entropy would cause the model to achieve $86\%$ accuracy simply by predicting zero for every sample. We employ Weighted Binary Cross-Entropy with positive weight $w$:
 $$\mathcal{L} = -\frac{1}{N} \sum_{i=1}^N \left[ w \cdot y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p}_i) \right]$$
 
-#### Post-Hoc Temperature Scaling
-A simple, effective method for calibrating neural network probabilities without altering classification accuracy. Given unnormalized logit $z$, temperature $T > 0$ rescales the confidence:
-$$\hat{p} = \sigma\left(\frac{z}{T}\right)$$
-- If $T > 1$: Softens overconfident probabilities toward $0.5$.
-- If $T < 1$: Sharpens underconfident probabilities toward $0.0$ or $1.0$.
+#### Post-Hoc Calibration (Temperature & Platt Logit Scaling)
+Methods for calibrating neural network probabilities without altering rank-ordering. Given unnormalized logit $z$, Temperature Scaling rescales confidence via $z / T$, while Platt scaling learns an affine logit transform $a \cdot z + b$ to also remove systematic log-odds offsets from class-weighted training.
 
 #### ECE (Expected Calibration Error)
 Measures the difference between predicted confidence and true empirical accuracy by partitioning predictions into $M$ bins (typically 10 or 15):
 $$\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|$$
-An $\text{ECE} = 0.0249$ means that across all risk bins, predicted probabilities deviate from empirical truth by only $2.49\%$.
+After Platt calibration on the checked-in model, $\text{ECE} = 0.0009$ (down from $0.0279$), meaning predicted probabilities closely track empirical truth across all risk bins.
 
 #### ROC-AUC (Receiver Operating Characteristic - Area Under Curve)
 The integral area under the curve plotting True Positive Rate vs False Positive Rate across all classification thresholds. Statistically equivalent to the Mann-Whitney $U$ statistic: the probability that a randomly chosen pathogenic variant will be assigned a higher risk score than a randomly chosen benign variant.
@@ -522,7 +519,7 @@ d:/Dl_project/
 │   └── hg002_cancer_panel.vcf.gz      # Sliced 11,890 panel variants from NIST HG002 benchmark genome
 ├── models/
 │   ├── genome_dl_fusion_v3.pth        # Trained Multimodal Fusion ResNet checkpoint (5-seed weights)
-│   └── genome_dl_fusion_v3_meta.json  # Checkpoint metadata (temperature T=0.9357, validation metrics)
+│   └── genome_dl_fusion_v3_meta.json  # Checkpoint metadata (Platt calibration scale=1.0559, bias=-1.5561, ECE=0.0009, test_auc=0.9929)
 ├── reports/
 │   ├── eval.md                        # Master evaluation benchmark report across 3 splits
 │   ├── vcf_report.txt                 # Human-readable text clinical report

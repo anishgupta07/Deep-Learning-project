@@ -202,3 +202,170 @@ def test_spliceai_synonymous_splice_disruptor(pipeline):
     verdict = pipeline.evaluate_variant(synonymous_splice)
     assert verdict.tier == "VUS"
     assert "SpliceAI" in verdict.evidence_source
+
+
+def test_missing_quality_or_genotype_rejected(pipeline, tmp_path):
+    """Records missing GT, DP, or GQ (or having 0/0 / ./.) must not silently pass default filters."""
+    vcf_content = """##fileformat=VCFv4.2
+##reference=GRCh38
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE
+17\t43106487\trs1\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654
+17\t43106487\trs2\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654\tGT\t0/1
+17\t43106487\trs3\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654\tGT:DP:GQ\t./.:50:99
+17\t43106487\trs4\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654\tGT:DP:GQ\t0/0:50:99
+17\t43106487\trs5\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654\tGT:DP:GQ\t0/1:.:99
+"""
+    vcf_file = tmp_path / "missing_fields.vcf"
+    vcf_file.write_text(vcf_content, encoding="utf-8")
+
+    variants = pipeline.parse_vcf(vcf_file)
+    assert variants == []
+
+
+def test_filter_dot_rejected_by_default(pipeline, tmp_path):
+    """FILTER='.' must be rejected when filter_pass_only=True and accepted only when filter_pass_only=False."""
+    vcf_content = """##fileformat=VCFv4.2
+##reference=GRCh38
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE
+17\t43106487\trs1\tA\tC\t100\t.\tCSQ=C|missense_variant|MODERATE|BRCA1|||ENST00000357654\tGT:DP:GQ\t0/1:50:99
+"""
+    vcf_file = tmp_path / "dot_filter.vcf"
+    vcf_file.write_text(vcf_content, encoding="utf-8")
+
+    assert pipeline.parse_vcf(vcf_file, filter_pass_only=True) == []
+    unfiltered = pipeline.parse_vcf(vcf_file, filter_pass_only=False)
+    assert len(unfiltered) == 1
+    assert unfiltered[0].af is None
+
+
+def test_unknown_reference_assembly_rejected(pipeline, tmp_path):
+    """A VCF without positive GRCh38/hg38 header identification must raise ValueError."""
+    vcf_content = """##fileformat=VCFv4.2
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE
+17\t43106487\trs1\tA\tC\t100\tPASS\tCSQ=C|missense_variant|MODERATE|BRCA1\tGT:DP:GQ\t0/1:50:99
+"""
+    vcf_file = tmp_path / "unknown_ref.vcf"
+    vcf_file.write_text(vcf_content, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="GRCh38 / hg38"):
+        pipeline.parse_vcf(vcf_file)
+
+
+def test_multiallelic_gt_hom_and_spliceai_matching(pipeline, tmp_path):
+    """Multiallelic rows must emit only called ALTs, bind homozygosity and SpliceAI per ALT, and preserve missing AF."""
+    vcf_content = """##fileformat=VCFv4.2
+##reference=GRCh38
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE
+17\t43080000\t.\tG\tA,T\t100\tPASS\tCSQ=A|intron_variant|MODIFIER|BRCA1,T|intron_variant|MODIFIER|BRCA1;SpliceAI=A|BRCA1|0.01|0.01|0.01|0.01,T|BRCA1|0.88|0.00|0.00|0.00;AF=.,0.0002\tGT:DP:GQ\t2/2:40:99
+17\t43080010\t.\tC\tG,T\t100\tPASS\tCSQ=G|intron_variant|MODIFIER|BRCA1,T|intron_variant|MODIFIER|BRCA1;SpliceAI=G|BRCA1|0.02|0.00|0.00|0.00,T|BRCA1|0.91|0.00|0.00|0.00\tGT:DP:GQ\t1/2:45:99
+"""
+    vcf_file = tmp_path / "multiallelic.vcf"
+    vcf_file.write_text(vcf_content, encoding="utf-8")
+
+    variants = pipeline.parse_vcf(vcf_file)
+    assert len(variants) == 3
+
+    # First row (GT=2/2): only T (allele 2) is emitted, hom=True, SpliceAI=0.88, AF=0.0002
+    assert variants[0].alt == "T"
+    assert variants[0].is_biallelic is True
+    assert variants[0].spliceai_max == pytest.approx(0.88)
+    assert variants[0].af == pytest.approx(0.0002)
+
+    # Second row (GT=1/2): both G and T emitted with is_biallelic=False and distinct SpliceAI scores; missing AF stays None
+    g_var, t_var = variants[1], variants[2]
+    assert g_var.alt == "G" and not g_var.is_biallelic
+    assert g_var.spliceai_max == pytest.approx(0.02)
+    assert g_var.af is None
+    assert t_var.alt == "T" and not t_var.is_biallelic
+    assert t_var.spliceai_max == pytest.approx(0.91)
+
+
+def test_clinvar_conflicting_significance_maps_to_vus(pipeline):
+    """Conflicting or mixed pathogenic+benign ClinVar labels must resolve to VUS, never Benign."""
+    assert pipeline._classify_clinvar_significance("Conflicting classifications of pathogenicity")[0] == "VUS"
+    assert pipeline._classify_clinvar_significance("Pathogenic; Benign")[0] == "VUS"
+    assert pipeline._classify_clinvar_significance("Uncertain significance")[0] == "VUS"
+    assert pipeline._classify_clinvar_significance("Pathogenic")[0] == "Pathogenic"
+
+
+def test_overlapping_coordinate_fallback_is_not_guessed(pipeline, tmp_path):
+    """An unannotated variant inside overlapping NTHL1/TSC2 intervals must not blindly pick the first gene."""
+    vcf_content = """##fileformat=VCFv4.2
+##reference=GRCh38
+#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE
+chr16\t2047000\t.\tA\tG\t100\tPASS\t.\tGT:DP:GQ\t0/1:40:99
+"""
+    vcf_file = tmp_path / "overlap_nthl1_tsc2.vcf"
+    vcf_file.write_text(vcf_content, encoding="utf-8")
+
+    variants = pipeline.parse_vcf(vcf_file)
+    assert variants == []
+
+
+def test_compound_het_resolution_trans_cis_and_unphased(pipeline):
+    """Multiple distinct heterozygous pathogenic calls in a recessive gene must resolve trans/unphased vs cis."""
+    v1_trans = VariantRecord(
+        chrom="1", pos=45332803, id="v1", ref="T", alt="C", qual=100.0, filter_status="PASS",
+        gene="MUTYH", consequence="missense_variant", genotype="0|1", dp=40, gq=99,
+        is_biallelic=False, phase_set="100",
+    )
+    v2_trans = VariantRecord(
+        chrom="1", pos=45331833, id="v2", ref="C", alt="T", qual=100.0, filter_status="PASS",
+        gene="MUTYH", consequence="frameshift_variant", genotype="1|0", dp=40, gq=99,
+        is_biallelic=False, phase_set="100",
+    )
+    verdicts_trans = pipeline.evaluate_variants([v1_trans, v2_trans])
+    assert all(v.tier in ("Pathogenic", "Likely Pathogenic") for v in verdicts_trans)
+    assert all(len(v.cancer_risks) > 0 for v in verdicts_trans)
+    assert "trans" in verdicts_trans[0].clinical_notes.lower()
+
+    # Cis configuration (same haplotype slot in same PS block) stays Carrier (Recessive)
+    v2_cis = VariantRecord(
+        chrom="1", pos=45331833, id="v2", ref="C", alt="T", qual=100.0, filter_status="PASS",
+        gene="MUTYH", consequence="frameshift_variant", genotype="0|1", dp=40, gq=99,
+        is_biallelic=False, phase_set="100",
+    )
+    verdicts_cis = pipeline.evaluate_variants([v1_trans, v2_cis])
+    assert all(v.tier == "Carrier (Recessive)" for v in verdicts_cis)
+    assert all(v.cancer_risks == [] for v in verdicts_cis)
+    assert "in cis" in verdicts_cis[0].clinical_notes.lower()
+
+    # Unphased double het also flags putative compound heterozygosity with biallelic risk
+    v1_unphased = VariantRecord(
+        chrom="1", pos=45332803, id="v1u", ref="T", alt="C", qual=100.0, filter_status="PASS",
+        gene="MUTYH", consequence="missense_variant", genotype="0/1", dp=40, gq=99, is_biallelic=False,
+    )
+    v2_unphased = VariantRecord(
+        chrom="1", pos=45331833, id="v2u", ref="C", alt="T", qual=100.0, filter_status="PASS",
+        gene="MUTYH", consequence="frameshift_variant", genotype="0/1", dp=40, gq=99, is_biallelic=False,
+    )
+    verdicts_unphased = pipeline.evaluate_variants([v1_unphased, v2_unphased])
+    assert all(v.tier in ("Pathogenic", "Likely Pathogenic") for v in verdicts_unphased)
+    assert all(len(v.cancer_risks) > 0 for v in verdicts_unphased)
+    assert "compound heterozygous" in verdicts_unphased[0].clinical_notes.lower()
+
+
+def test_risk_range_aggregation_does_not_mix_genes(pipeline, tmp_path):
+    """Aggregating shared cancer outcomes must preserve a single gene's range rather than mixing bounds."""
+    from src.v3.vcf_pipeline import VariantVerdict
+
+    v_a = VariantVerdict(
+        variant=VariantRecord(chrom="17", pos=1, id="a", ref="A", alt="C", qual=100.0, filter_status="PASS", gene="BRCA1"),
+        tier="Pathogenic",
+        evidence_source="test",
+        cancer_risks=[{"outcome": "Breast cancer", "risk_low_pct": 40.0, "risk_high_pct": 75.0, "up_to_age": 80, "source": "StudyA", "evidence_level": "high"}],
+    )
+    v_b = VariantVerdict(
+        variant=VariantRecord(chrom="13", pos=2, id="b", ref="G", alt="T", qual=100.0, filter_status="PASS", gene="BRCA2"),
+        tier="Pathogenic",
+        evidence_source="test",
+        cancer_risks=[{"outcome": "Breast cancer", "risk_low_pct": 55.0, "risk_high_pct": 65.0, "up_to_age": 70, "source": "StudyB", "evidence_level": "high"}],
+    )
+    out_json = tmp_path / "risk_summary.json"
+    pipeline.generate_report([v_a, v_b], output_json=out_json)
+
+    import json
+    payload = json.loads(out_json.read_text(encoding="utf-8"))
+    summary = payload["cancer_risk_summary"][0]
+    assert summary["lifetime_risk_range"] == "40% - 75%"
+    assert summary["up_to_age"] == 80

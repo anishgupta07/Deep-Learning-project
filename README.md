@@ -154,16 +154,17 @@ To enable rapid experimentation and portable deployment without shipping 140+ MB
 The core predictive neural network combines continuous tabular features, categorical entity embeddings, and 480-D ESM-2 representations:
 
 ```
-[Tabular Feats (26D)] ──▶ Linear(26, 64) ──┐
-[Variant Class ID]    ──▶ Embed(12, 16)   ──┼──▶ Concat ──▶ Linear(208, 256) ──▶ [ResNet Blocks x 2] ──▶ Raw Logit
-[Syndrome Group ID]   ──▶ Embed(15, 16)   ──┤                      ▲
-[ESM Residue Emb]     ──▶ Linear(480, 64) ──┤                      │ (Skip Connection)
-[ESM Scalar LLR]      ──▶ Gated Linear    ──┘                      └──────────────────────────────────┘
+[Tabular Feats (26D)] ──▶ Linear(26, 64)  ──┐
+[Variant Class ID]    ──▶ Embed(12, 8)    ──┼──▶ Concat(144D) ──▶ Linear(144, 256) ──▶ [ResNet Blocks x 2] ──▶ Raw Logit
+[Syndrome Group ID]   ──▶ Embed(15, 8)    ──┤                           ▲
+[ESM Residue Emb]     ──▶ Linear(480, 64) ──┼──▶ ESM MLP (66D ──▶ 64D) ─┘    (Residual Skip Connection inside each block)
+[ESM LLR + Avail (2D)]──────────────────────┘
 ```
 
 ### 5.1 Architecture Details
-* **Entity Embeddings:** 16-dimensional learned representation spaces for both variant consequence classes and clinical syndrome groups.
-* **Residual Skip Blocks:** 2-layer residual MLP blocks with `Linear(256, 256)`, `LayerNorm`, `ReLU`, and `Dropout(0.2)`.
+* **Entity Embeddings:** 8-dimensional learned representation spaces each for variant consequence classes (`Embed(12, 8)`) and clinical syndrome groups (`Embed(15, 8)`), totaling `16-d` combined.
+* **ESM Fusion Branch:** 480-d residue embeddings are projected to `64-d`, concatenated with `esm_llr` and `esm_available` (`66-d`), and passed through a 2-layer MLP (`66 -> 64 -> 64`) with `LayerNorm` and `GELU`.
+* **Residual Skip Blocks:** 2-layer residual MLP blocks (`ResBlock`) with `Linear(256, 256)`, `LayerNorm`, `GELU`, and `Dropout(0.2)`.
 * **Optimization:** AdamW optimizer with weight decay $10^{-4}$ and `CosineAnnealingLR` schedule across 5 random seeds.
 
 ### 5.2 The Class Imbalance Problem & Calibration Failure

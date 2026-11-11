@@ -84,11 +84,12 @@ class VariantRecord:
     aa_pos: int = -1
     hgvs_c: str = ""
     hgvs_p: str = ""
-    af: float = 0.0
+    af: Optional[float] = None
     genotype: str = "0/1"
-    dp: int = 30
-    gq: int = 99
+    dp: Optional[int] = None
+    gq: Optional[int] = None
     is_biallelic: bool = False
+    phase_set: Optional[str] = None
     spliceai_max: float = 0.0
 
 
@@ -227,6 +228,56 @@ class VCFPipeline:
 
         logger.info(f"Model ready (T={self.temperature:.4f}, scale={self.calibration_scale:.4f}, bias={self.calibration_bias:.4f}). Pipeline fully initialized.")
 
+    @staticmethod
+    def _validate_vcf_reference(header_lines: List[str], vcf_path: Path) -> None:
+        """Validates that the VCF header positively identifies GRCh38 / hg38."""
+        is_grch38 = False
+        is_hg19 = False
+        for line in header_lines:
+            lower_line = line.lower()
+            if (
+                "grch38" in lower_line
+                or "hg38" in lower_line
+                or "hs38" in lower_line
+                or "gca_000001405.15" in lower_line
+                or re.search(r"contig=<[^>]*id=(?:chr)?1\b[^>]*length=248956422\b", lower_line)
+            ):
+                is_grch38 = True
+            elif (
+                "hg19" in lower_line
+                or "grch37" in lower_line
+                or "b37" in lower_line
+                or "hs37" in lower_line
+                or re.search(r"contig=<[^>]*id=(?:chr)?1\b[^>]*length=249250621\b", lower_line)
+            ):
+                is_hg19 = True
+
+        if is_hg19 and not is_grch38:
+            raise ValueError(
+                f"VCF header indicates reference assembly hg19 / GRCh37 ({vcf_path}). "
+                "GenomeDL v3 requires GRCh38 coordinates. Please lift over your VCF to GRCh38 "
+                "using UCSC liftOver or Picard LiftoverVcf before running inference."
+            )
+        if not is_grch38:
+            raise ValueError(
+                f"VCF header does not positively identify GRCh38 / hg38 ({vcf_path}). "
+                "GenomeDL v3 requires an explicit GRCh38/hg38 reference or contig header."
+            )
+
+    @staticmethod
+    def _parse_gt_alleles(gt: Optional[str]) -> Optional[List[Optional[int]]]:
+        """Parses a VCF GT field into integer allele indices (or None for missing)."""
+        if gt is None:
+            return None
+        cleaned = gt.strip()
+        if not cleaned or cleaned in (".", "./.", ".|."):
+            return None
+        tokens = re.split(r"[/|]", cleaned)
+        alleles: List[Optional[int]] = []
+        for tok in tokens:
+            alleles.append(int(tok) if tok.isdigit() else None)
+        return alleles
+
     def parse_vcf(
         self,
         vcf_path: Path,
@@ -241,8 +292,7 @@ class VCFPipeline:
         opener = gzip.open if is_gz else open
 
         header_lines = []
-        is_grch38 = False
-        is_hg19 = False
+        header_validated = False
 
         with opener(vcf_path, "rt", encoding="utf-8", errors="replace") as f:
             for line in f:
@@ -251,22 +301,16 @@ class VCFPipeline:
                     continue
                 if line.startswith("##"):
                     header_lines.append(line)
-                    lower_line = line.lower()
-                    if "grch38" in lower_line or "hg38" in lower_line:
-                        is_grch38 = True
-                    elif "hg19" in lower_line or "grch37" in lower_line or "b37" in lower_line:
-                        is_hg19 = True
                     continue
 
                 if line.startswith("#CHROM"):
-                    # Check reference assembly
-                    if is_hg19 and not is_grch38:
-                        raise ValueError(
-                            f"VCF header indicates reference assembly hg19 / GRCh37 ({vcf_path}). "
-                            "GenomeDL v3 requires GRCh38 coordinates. Please lift over your VCF to GRCh38 "
-                            "using UCSC liftOver or Picard LiftoverVcf before running inference."
-                        )
+                    self._validate_vcf_reference(header_lines, vcf_path)
+                    header_validated = True
                     continue
+
+                if not header_validated:
+                    self._validate_vcf_reference(header_lines, vcf_path)
+                    header_validated = True
 
                 fields = line.split("\t")
                 if len(fields) < 5:
@@ -277,35 +321,54 @@ class VCFPipeline:
                 var_id = fields[2]
                 ref = fields[3].upper()
                 alts = [a.upper() for a in fields[4].split(",")]
-                qual = float(fields[5]) if fields[5] != "." else 100.0
-                flt = fields[6]
+                qual = float(fields[5]) if len(fields) > 5 and fields[5] not in (".", "") else 100.0
+                flt = fields[6] if len(fields) > 6 else "."
                 info_str = fields[7] if len(fields) > 7 else ""
                 fmt = fields[8] if len(fields) > 8 else ""
                 sample_data = fields[9] if len(fields) > 9 else ""
 
-                if filter_pass_only and flt not in ["PASS", "."]:
+                if filter_pass_only and flt != "PASS":
                     continue
 
-                # Parse genotype, DP, GQ
-                gt = "0/1"
-                dp = 30
-                gq = 99
+                # Parse genotype, depth, quality, and phase set without inventing missing quality values
+                gt: Optional[str] = None
+                dp: Optional[int] = None
+                gq: Optional[int] = None
+                phase_set: Optional[str] = None
                 if fmt and sample_data:
-                    fmt_keys = fmt.split(":")
-                    sample_vals = sample_data.split(":")
-                    fmt_dict = dict(zip(fmt_keys, sample_vals))
-                    gt = fmt_dict.get("GT", "0/1")
-                    dp = int(fmt_dict.get("DP", 30)) if fmt_dict.get("DP", ".").isdigit() else 30
-                    gq = int(fmt_dict.get("GQ", 99)) if fmt_dict.get("GQ", ".").isdigit() else 99
+                    fmt_dict = dict(zip(fmt.split(":"), sample_data.split(":")))
+                    raw_gt = fmt_dict.get("GT", "").strip()
+                    if raw_gt and raw_gt != ".":
+                        gt = raw_gt
+                    raw_dp = fmt_dict.get("DP", "").strip()
+                    if raw_dp.isdigit():
+                        dp = int(raw_dp)
+                    raw_gq = fmt_dict.get("GQ", "").strip()
+                    if raw_gq.isdigit():
+                        gq = int(raw_gq)
+                    raw_ps = fmt_dict.get("PS", "").strip()
+                    if raw_ps and raw_ps != ".":
+                        phase_set = raw_ps
 
-                if dp < min_dp or gq < min_gq:
+                if min_dp > 0 and (dp is None or dp < min_dp):
+                    continue
+                if min_gq > 0 and (gq is None or gq < min_gq):
                     continue
 
-                is_hom_alt = gt in ["1/1", "1|1", "2/2", "2|2"]
+                gt_alleles = self._parse_gt_alleles(gt)
+                if gt is None or gt_alleles is None or not any(a is not None and a > 0 for a in gt_alleles):
+                    continue
 
-                # Parse annotations (CSQ or ANN or local panel coordinate match)
+                # Parse annotations per called ALT allele
                 for alt_idx, alt in enumerate(alts):
-                    parsed_ann = self._parse_annotations(info_str, chrom, pos, ref, alt, alt_idx=alt_idx)
+                    target_allele = alt_idx + 1
+                    if target_allele not in gt_alleles:
+                        continue
+
+                    is_hom_alt = len(gt_alleles) >= 2 and all(a == target_allele for a in gt_alleles)
+                    parsed_ann = self._parse_annotations(
+                        info_str, chrom, pos, ref, alt, alt_idx=alt_idx, num_alts=len(alts)
+                    )
                     gene = parsed_ann.get("gene", "")
                     if gene not in self.panel:
                         # Skip variants not in our 130 panel genes
@@ -327,14 +390,20 @@ class VCFPipeline:
                         aa_pos=parsed_ann.get("aa_pos", -1),
                         hgvs_c=parsed_ann.get("hgvs_c", ""),
                         hgvs_p=parsed_ann.get("hgvs_p", ""),
-                        af=parsed_ann.get("af", 0.0),
+                        af=parsed_ann.get("af"),
                         genotype=gt,
                         dp=dp,
                         gq=gq,
                         is_biallelic=is_hom_alt,
+                        phase_set=phase_set,
                         spliceai_max=float(parsed_ann.get("spliceai_max", 0.0)),
                     )
                     records.append(vr)
+
+        if not header_validated and header_lines:
+            self._validate_vcf_reference(header_lines, vcf_path)
+        elif not header_validated:
+            self._validate_vcf_reference([], vcf_path)
 
         gene_variants: Dict[str, List[VariantRecord]] = {}
         for r in records:
@@ -351,54 +420,86 @@ class VCFPipeline:
         ref: str,
         alt: str,
         alt_idx: int = 0,
-    ) -> Dict[str, Union[str, int, float]]:
-        """Extracts gene, consequence, protein change, and AF from INFO string."""
-        ann = {
-            "gene": "", "transcript": "", "consequence": "",
-            "ref_aa": "", "alt_aa": "", "aa_pos": -1,
-            "hgvs_c": "", "hgvs_p": "", "af": 0.0,
+        num_alts: int = 1,
+    ) -> Dict[str, Optional[Union[str, int, float]]]:
+        """Extracts allele-specific gene, consequence, protein change, SpliceAI, and AF from INFO."""
+        ann: Dict[str, Optional[Union[str, int, float]]] = {
+            "gene": "",
+            "transcript": "",
+            "consequence": "",
+            "ref_aa": "",
+            "alt_aa": "",
+            "aa_pos": -1,
+            "hgvs_c": "",
+            "hgvs_p": "",
+            "af": None,
             "spliceai_max": 0.0,
         }
 
-        # Check gnomAD / AF in INFO (handling multi-allelic comma-separated values)
-        m_af = re.search(r"(?:AF|gnomAD_AF|AF_raw)=([0-9.eE,-]+)", info_str)
+        # Check gnomAD / AF in INFO (per-ALT allele, keeping missing distinct from 0.0)
+        m_af = re.search(r"(?:^|;)(?:AF|gnomAD_AF|AF_raw)=([^;]+)", info_str)
         if m_af:
-            try:
-                af_vals = m_af.group(1).split(",")
-                if alt_idx < len(af_vals):
-                    ann["af"] = float(af_vals[alt_idx])
-                else:
-                    ann["af"] = float(af_vals[0])
-            except ValueError:
-                pass
+            af_vals = m_af.group(1).split(",")
+            raw_af = None
+            if alt_idx < len(af_vals):
+                raw_af = af_vals[alt_idx].strip()
+            elif num_alts == 1 and len(af_vals) == 1:
+                raw_af = af_vals[0].strip()
+            if raw_af and raw_af != ".":
+                try:
+                    ann["af"] = float(raw_af)
+                except ValueError:
+                    pass
 
-        # Check SpliceAI delta scores in INFO (Standard: SpliceAI=ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|...)
-        m_sp = re.search(r"SpliceAI=([^;]+)", info_str)
+        # Check SpliceAI delta scores in INFO matched to the evaluated ALT allele
+        m_sp = re.search(r"(?:^|;)SpliceAI=([^;]+)", info_str)
         if m_sp:
             for entry in m_sp.group(1).split(","):
                 sp_parts = entry.split("|")
                 if len(sp_parts) >= 6:
+                    sp_allele = sp_parts[0].strip().upper()
+                    if sp_allele and sp_allele != ".":
+                        if sp_allele != alt:
+                            continue
+                    elif num_alts > 1:
+                        continue
                     try:
-                        scores = [float(sp_parts[2]), float(sp_parts[3]), float(sp_parts[4]), float(sp_parts[5])]
-                        ann["spliceai_max"] = max(ann["spliceai_max"], max(scores))
+                        scores = [float(s) for s in sp_parts[2:6] if s not in ("", ".")]
+                        if scores:
+                            ann["spliceai_max"] = max(float(ann["spliceai_max"]), max(scores))
                     except (ValueError, IndexError):
                         pass
 
-        # Standalone SpliceAI tags (e.g. DS_MAX=0.85, SpliceAI_max=0.85)
-        m_sp_max = re.search(r"(?:DS_MAX|SpliceAI_DS_max|SpliceAI_max)=([0-9.]+)", info_str, re.IGNORECASE)
-        if m_sp_max:
-            try:
-                ann["spliceai_max"] = max(ann["spliceai_max"], float(m_sp_max.group(1)))
-            except ValueError:
-                pass
+        # Standalone SpliceAI tags (single-ALT lines only to avoid cross-allele leakage)
+        if num_alts == 1:
+            m_sp_max = re.search(r"(?:^|;)(?:DS_MAX|SpliceAI_DS_max|SpliceAI_max)=([0-9.]+)", info_str, re.IGNORECASE)
+            if m_sp_max:
+                try:
+                    ann["spliceai_max"] = max(float(ann["spliceai_max"]), float(m_sp_max.group(1)))
+                except ValueError:
+                    pass
 
-        # Check VEP CSQ tag
-        m_csq = re.search(r"CSQ=([^;]+)", info_str)
+        # Check VEP CSQ tag matching the evaluated ALT allele
+        def _allele_matches(entry_allele: str) -> bool:
+            ea = entry_allele.strip().upper()
+            if not ea or ea == ".":
+                return num_alts == 1
+            if ea == alt:
+                return True
+            # VEP minimal representation trims common anchor base for indels
+            if len(ref) != len(alt):
+                if ea == "-" and len(alt) == 1:
+                    return True
+                if len(alt) > 1 and ea == alt[1:]:
+                    return True
+            return False
+
+        m_csq = re.search(r"(?:^|;)CSQ=([^;]+)", info_str)
         if m_csq:
             # CSQ fields typically: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|...
             for entry in m_csq.group(1).split(","):
                 csq_parts = entry.split("|")
-                if len(csq_parts) >= 4:
+                if len(csq_parts) >= 4 and _allele_matches(csq_parts[0]):
                     symbol = csq_parts[3].upper()
                     if symbol in self.panel:
                         ann["gene"] = symbol
@@ -406,15 +507,29 @@ class VCFPipeline:
                         ann["transcript"] = csq_parts[6] if len(csq_parts) > 6 else ""
                         ann["hgvs_c"] = csq_parts[10] if len(csq_parts) > 10 else ""
                         ann["hgvs_p"] = csq_parts[11] if len(csq_parts) > 11 else ""
-                        # Amino acids (e.g. C/G)
                         if len(csq_parts) > 15 and "/" in csq_parts[15]:
                             aa_pair = csq_parts[15].split("/")
                             ann["ref_aa"] = aa_pair[0]
                             ann["alt_aa"] = aa_pair[1]
-                        # Protein position
                         if len(csq_parts) > 14 and csq_parts[14].isdigit():
                             ann["aa_pos"] = int(csq_parts[14])
                         break
+
+        # Check SnpEff ANN tag matching the evaluated ALT allele
+        if not ann["gene"]:
+            m_ann = re.search(r"(?:^|;)ANN=([^;]+)", info_str)
+            if m_ann:
+                for entry in m_ann.group(1).split(","):
+                    ann_parts = entry.split("|")
+                    if len(ann_parts) >= 4 and _allele_matches(ann_parts[0]):
+                        symbol = ann_parts[3].upper()
+                        if symbol in self.panel:
+                            ann["gene"] = symbol
+                            ann["consequence"] = ann_parts[1] if len(ann_parts) > 1 else ""
+                            ann["transcript"] = ann_parts[6] if len(ann_parts) > 6 else ""
+                            ann["hgvs_c"] = ann_parts[9] if len(ann_parts) > 9 else ""
+                            ann["hgvs_p"] = ann_parts[10] if len(ann_parts) > 10 else ""
+                            break
 
         # Fallback 1: check ClinVar lookup table for this exact (chrom, pos, ref, alt)
         key = (chrom, pos, ref, alt)
@@ -423,27 +538,61 @@ class VCFPipeline:
             ann["gene"] = c_info["gene"]
             ann["consequence"] = c_info["variant_class"]
 
-        # Fallback 2: genomic coordinate interval match against 130 panel genes
+        # Fallback 2: unambiguous genomic coordinate interval match against 130 panel genes
         if not ann["gene"] and self.panel_coords:
             chrom_clean = chrom.replace("chr", "")
-            for g_sym, coord in self.panel_coords.items():
-                if str(coord.get("chrom", "")).replace("chr", "") == chrom_clean:
-                    if coord.get("start", 0) <= pos <= coord.get("end", 0):
-                        ann["gene"] = g_sym
-                        ann["consequence"] = "intronic"
-                        break
+            matching_genes = [
+                g_sym
+                for g_sym, coord in self.panel_coords.items()
+                if str(coord.get("chrom", "")).replace("chr", "") == chrom_clean
+                and coord.get("start", 0) <= pos <= coord.get("end", 0)
+            ]
+            if len(matching_genes) == 1:
+                ann["gene"] = matching_genes[0]
+                ann["consequence"] = "intronic"
+            elif len(matching_genes) > 1:
+                logger.warning(
+                    f"Ambiguous coordinate fallback at chr{chrom_clean}:{pos} "
+                    f"matches multiple panel genes {sorted(matching_genes)}; skipping unannotated assignment."
+                )
 
         return ann
 
     def evaluate_variant(self, var: VariantRecord) -> VariantVerdict:
         """Evaluates a single variant through the 8-stage decision tree."""
+        return self._evaluate_variant_core(var, resolve_recessive=True)
+
+    @staticmethod
+    def _classify_clinvar_significance(sig_raw: str) -> tuple[str, float]:
+        """Maps a ClinVar clinical_significance string cleanly to (tier, score)."""
+        sig = sig_raw.lower()
+        has_conflict = "conflicting" in sig or "uncertain" in sig or "vus" in sig
+        has_path = bool(re.search(r"\bpathogenic\b", sig))
+        has_ben = bool(re.search(r"\bbenign\b", sig))
+
+        if has_conflict or (has_path and has_ben):
+            return "VUS", 0.5
+        if has_path:
+            if "likely pathogenic" in sig:
+                return "Likely Pathogenic", 0.95
+            return "Pathogenic", 0.999
+        if has_ben:
+            if "likely benign" in sig:
+                return "Likely Benign", 0.05
+            return "Benign", 0.001
+        return "VUS", 0.5
+
+    def _evaluate_variant_core(self, var: VariantRecord, resolve_recessive: bool = True) -> VariantVerdict:
+        """Core 8-stage evaluation, optionally deferring recessive zygosity resolution."""
         # Validate gene symbol
         if var.gene not in self.panel:
             raise ValueError(f"Gene '{var.gene}' not in 130-gene panel. Known panel genes: {sorted(list(self.panel.keys()))[:5]}...")
 
+        verdict: Optional[VariantVerdict] = None
+
         # 1. Common variant filter
-        if var.af > 0.01:
-            return VariantVerdict(
+        if var.af is not None and var.af > 0.01:
+            verdict = VariantVerdict(
                 variant=var,
                 tier="Benign",
                 evidence_source=f"Common polymorphism (gnomAD AF = {var.af * 100:.2f}% > 1.0%)",
@@ -452,35 +601,26 @@ class VCFPipeline:
             )
 
         # 2. ClinVar lookup with stars >= 2
-        key = (var.chrom, var.pos, var.ref, var.alt)
-        if key in self.clinvar_index:
-            c_entry = self.clinvar_index[key]
-            stars = c_entry["stars"]
-            sig = c_entry["clinical_significance"].lower()
-            if stars >= 2:
-                tier = "Pathogenic" if "pathogenic" in sig and "benign" not in sig else "Benign"
-                if "likely pathogenic" in sig:
-                    tier = "Likely Pathogenic"
-                elif "likely benign" in sig:
-                    tier = "Likely Benign"
-                elif "uncertain" in sig or "vus" in sig:
-                    tier = "VUS"
-
-                verdict = VariantVerdict(
-                    variant=var,
-                    tier=tier,
-                    evidence_source=f"ClinVar lookup ({stars} stars: {c_entry['review_status']})",
-                    calibrated_score=0.999 if tier == "Pathogenic" else (0.001 if tier == "Benign" else 0.5),
-                    clinical_notes=f"Curated clinical consensus from ClinVar submission (Variation ID {c_entry['variation_id']}).",
-                )
-                self._attach_risk_estimates(verdict)
-                return verdict
+        if verdict is None:
+            key = (var.chrom, var.pos, var.ref, var.alt)
+            if key in self.clinvar_index:
+                c_entry = self.clinvar_index[key]
+                stars = c_entry["stars"]
+                if stars >= 2:
+                    tier, score = self._classify_clinvar_significance(c_entry["clinical_significance"])
+                    verdict = VariantVerdict(
+                        variant=var,
+                        tier=tier,
+                        evidence_source=f"ClinVar lookup ({stars} stars: {c_entry['review_status']})",
+                        calibrated_score=score,
+                        clinical_notes=f"Curated clinical consensus from ClinVar submission (Variation ID {c_entry['variation_id']}).",
+                    )
 
         # 3. Rule-based Loss-of-Function & Splicing Safeguards
         csq = var.consequence.lower()
 
         # 3A. Canonical Loss-of-Function (Frameshift, canonical splice donor/acceptor +/-1,2)
-        if any(term in csq for term in ["frameshift", "splice_acceptor", "splice_donor", "splice_canonical"]):
+        if verdict is None and any(term in csq for term in ["frameshift", "splice_acceptor", "splice_donor", "splice_canonical"]):
             verdict = VariantVerdict(
                 variant=var,
                 tier="Likely Pathogenic",
@@ -488,12 +628,9 @@ class VCFPipeline:
                 calibrated_score=0.950,
                 clinical_notes="Canonical splice-site disruption or frameshift truncation in established tumor suppressor.",
             )
-            self._attach_risk_estimates(verdict)
-            return verdict
 
         # 3B. SpliceAI Deep Splicing Safeguard (Novel deep-intronic / synonymous splice disruptors)
-        # Bypasses protein ResNet model to avoid false-negative classification of RNA-altering variants
-        if var.spliceai_max >= 0.50:
+        if verdict is None and var.spliceai_max >= 0.50:
             verdict = VariantVerdict(
                 variant=var,
                 tier="Likely Pathogenic",
@@ -504,9 +641,7 @@ class VCFPipeline:
                     "Bypasses protein-folding model to prevent false-negative misclassification of non-coding/synonymous splice disruptor."
                 ),
             )
-            self._attach_risk_estimates(verdict)
-            return verdict
-        elif var.spliceai_max >= 0.20:
+        elif verdict is None and var.spliceai_max >= 0.20:
             verdict = VariantVerdict(
                 variant=var,
                 tier="VUS",
@@ -517,11 +652,9 @@ class VCFPipeline:
                     "Functional RNA assay or RT-PCR transcript analysis recommended to confirm aberrant splicing."
                 ),
             )
-            self._attach_risk_estimates(verdict)
-            return verdict
 
         # 3C. Extended Splice Region Boundary Warning (Unclassified non-canonical splice variant without SpliceAI)
-        if "splice_region" in csq and not var.ref_aa and not var.alt_aa:
+        if verdict is None and "splice_region" in csq and not var.ref_aa and not var.alt_aa:
             verdict = VariantVerdict(
                 variant=var,
                 tier="VUS",
@@ -529,31 +662,130 @@ class VCFPipeline:
                 calibrated_score=0.400,
                 clinical_notes="Located in non-canonical splice region (-3 to +8 bp / polypyrimidine tract). Requires RNA sequencing or SpliceAI annotation to confirm splicing impact.",
             )
-            self._attach_risk_estimates(verdict)
-            return verdict
 
         # 4. Deep Multimodal Model Inference for SNVs
-        score = self._run_model_inference(var)
-        if score >= 0.90:
-            tier = "Pathogenic"
-        elif score >= 0.70:
-            tier = "Likely Pathogenic"
-        elif score >= 0.30:
-            tier = "VUS"
-        elif score >= 0.10:
-            tier = "Likely Benign"
-        else:
-            tier = "Benign"
+        if verdict is None:
+            score = self._run_model_inference(var)
+            if score >= 0.90:
+                tier = "Pathogenic"
+            elif score >= 0.70:
+                tier = "Likely Pathogenic"
+            elif score >= 0.30:
+                tier = "VUS"
+            elif score >= 0.10:
+                tier = "Likely Benign"
+            else:
+                tier = "Benign"
 
-        verdict = VariantVerdict(
-            variant=var,
-            tier=tier,
-            evidence_source="GenomeDL v3 ESM-Augmented Fusion ResNet",
-            calibrated_score=score,
-            clinical_notes=f"Calibrated probability P(pathogenic) = {score:.4f}.",
-        )
-        self._attach_risk_estimates(verdict)
+            verdict = VariantVerdict(
+                variant=var,
+                tier=tier,
+                evidence_source="GenomeDL v3 ESM-Augmented Fusion ResNet",
+                calibrated_score=score,
+                clinical_notes=f"Calibrated probability P(pathogenic) = {score:.4f}.",
+            )
+
+        if resolve_recessive:
+            self._attach_risk_estimates(verdict)
         return verdict
+
+    @staticmethod
+    def _extract_phased_hap_slot(genotype: str) -> Optional[int]:
+        """Returns the single phased alt haplotype index (0 or 1) if phased het, else None."""
+        if "|" not in genotype:
+            return None
+        tokens = genotype.split("|")
+        alt_slots = [idx for idx, tok in enumerate(tokens) if tok.isdigit() and int(tok) > 0]
+        return alt_slots[0] if len(alt_slots) == 1 else None
+
+    @classmethod
+    def _resolve_compound_het_state(cls, het_vars: List[VariantRecord]) -> str:
+        """Determines compound-het status ('single', 'trans', 'cis', or 'unphased') in a recessive gene."""
+        unique_vars: Dict[tuple, VariantRecord] = {}
+        for v in het_vars:
+            unique_vars[(v.chrom, v.pos, v.ref, v.alt)] = v
+        distinct = list(unique_vars.values())
+        if len(distinct) < 2:
+            return "single"
+
+        has_unphased = False
+        has_cis = False
+        for i in range(len(distinct)):
+            for j in range(i + 1, len(distinct)):
+                va, vb = distinct[i], distinct[j]
+                if va.chrom == vb.chrom and va.pos == vb.pos and va.alt != vb.alt:
+                    # Two distinct alt alleles called at the same diploid locus (e.g. 1/2) are in trans
+                    if any(len([t for t in re.split(r"[/|]", g) if t.isdigit() and int(t) > 0]) >= 2 for g in (va.genotype, vb.genotype)):
+                        return "trans"
+                ha = cls._extract_phased_hap_slot(va.genotype)
+                hb = cls._extract_phased_hap_slot(vb.genotype)
+                same_block = (
+                    ha is not None
+                    and hb is not None
+                    and (
+                        (va.phase_set is not None and va.phase_set == vb.phase_set)
+                        or (va.phase_set is None and vb.phase_set is None)
+                    )
+                )
+                if same_block:
+                    if ha != hb:
+                        return "trans"
+                    has_cis = True
+                else:
+                    has_unphased = True
+
+        if has_unphased:
+            return "unphased"
+        return "cis" if has_cis else "unphased"
+
+    def evaluate_variants(self, variants: List[VariantRecord]) -> List[VariantVerdict]:
+        """Evaluates a batch of variants from one sample, resolving recessive compound heterozygosity."""
+        verdicts = [self._evaluate_variant_core(v, resolve_recessive=False) for v in variants]
+
+        recessive_candidates: Dict[str, List[int]] = {}
+        for idx, verdict in enumerate(verdicts):
+            gene = verdict.variant.gene
+            if (
+                gene in RECESSIVE_GENES
+                and verdict.tier in ("Pathogenic", "Likely Pathogenic")
+                and not verdict.variant.is_biallelic
+            ):
+                recessive_candidates.setdefault(gene, []).append(idx)
+
+        gene_comp_het_state: Dict[str, str] = {}
+        for gene, idxs in recessive_candidates.items():
+            gene_comp_het_state[gene] = self._resolve_compound_het_state(
+                [verdicts[i].variant for i in idxs]
+            )
+
+        for idx, verdict in enumerate(verdicts):
+            gene = verdict.variant.gene
+            if gene in RECESSIVE_GENES and not verdict.variant.is_biallelic and verdict.tier in ("Pathogenic", "Likely Pathogenic"):
+                state = gene_comp_het_state.get(gene, "single")
+                if state == "trans":
+                    verdict.clinical_notes += (
+                        f" Compound heterozygous (phased in trans) in autosomal recessive gene {gene}; "
+                        "biallelic criteria satisfied."
+                    )
+                    self._attach_risk_estimates(verdict, biallelic_confirmed=True)
+                elif state == "unphased":
+                    verdict.clinical_notes += (
+                        f" Putative compound heterozygous in autosomal recessive gene {gene} "
+                        "(two distinct heterozygous pathogenic/likely pathogenic variants detected without phasing; "
+                        "parental or long-read phasing confirmation recommended to confirm trans configuration)."
+                    )
+                    self._attach_risk_estimates(verdict, biallelic_confirmed=True)
+                elif state == "cis":
+                    verdict.clinical_notes += (
+                        f" Phased on the same haplotype (in cis) in {gene}; does not establish biallelic inactivation."
+                    )
+                    self._attach_risk_estimates(verdict, biallelic_confirmed=False)
+                else:
+                    self._attach_risk_estimates(verdict, biallelic_confirmed=False)
+            else:
+                self._attach_risk_estimates(verdict)
+
+        return verdicts
 
     def _run_model_inference(self, var: VariantRecord) -> float:
         """Extracts features, runs FusionResNet, and returns calibrated probability."""
@@ -691,7 +923,7 @@ class VCFPipeline:
 
         return calibrated_prob
 
-    def _attach_risk_estimates(self, verdict: VariantVerdict):
+    def _attach_risk_estimates(self, verdict: VariantVerdict, biallelic_confirmed: bool = False):
         """Attaches published penetrance ranges and handles recessive zygosity."""
         gene = verdict.variant.gene
 
@@ -701,12 +933,13 @@ class VCFPipeline:
 
         # Handle recessive zygosity (MUTYH, NTHL1)
         if gene in RECESSIVE_GENES:
-            if not verdict.variant.is_biallelic:
+            if not verdict.variant.is_biallelic and not biallelic_confirmed:
                 verdict.tier = "Carrier (Recessive)"
-                verdict.clinical_notes += (
-                    f" Single heterozygous allele in autosomal recessive gene {gene}. "
-                    "Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
-                )
+                if "in cis" not in verdict.clinical_notes:
+                    verdict.clinical_notes += (
+                        f" Single heterozygous allele in autosomal recessive gene {gene}. "
+                        "Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier."
+                    )
                 return
 
         # Lookup in curated penetrance table
@@ -740,7 +973,7 @@ class VCFPipeline:
         lines.append(f"ACTIONABLE (PATHOGENIC / LIKELY PATHOGENIC): {len(actionable_verdicts)}")
         lines.append("-" * 80)
 
-        # Aggregate cumulative cancer risks by organ / cancer type
+        # Aggregate cumulative cancer risks by organ / cancer type, keeping each source range coupled to its gene
         cancer_risk_map = {}
         for v in actionable_verdicts:
             gene = v.variant.gene
@@ -749,16 +982,16 @@ class VCFPipeline:
                 if outcome not in cancer_risk_map:
                     cancer_risk_map[outcome] = {
                         "genes": set(),
-                        "lows": [],
-                        "highs": [],
-                        "ages": [],
-                        "sources": [],
+                        "entries": [],
                     }
                 cancer_risk_map[outcome]["genes"].add(gene)
-                cancer_risk_map[outcome]["lows"].append(r["risk_low_pct"])
-                cancer_risk_map[outcome]["highs"].append(r["risk_high_pct"])
-                cancer_risk_map[outcome]["ages"].append(r["up_to_age"])
-                cancer_risk_map[outcome]["sources"].append(f"{r['source']} ({gene})")
+                cancer_risk_map[outcome]["entries"].append({
+                    "gene": gene,
+                    "low": float(r["risk_low_pct"]),
+                    "high": float(r["risk_high_pct"]),
+                    "up_to_age": int(r["up_to_age"]),
+                    "source": str(r["source"]),
+                })
 
         # Top-level executive risk table
         cancer_summary_list = []
@@ -770,19 +1003,27 @@ class VCFPipeline:
             lines.append(f"{'CANCER TYPE':<32} | {'ESTIMATED LIFETIME RISK':<23} | {'GENE(S) INVOLVED':<16} | {'HORIZON'}")
             lines.append("-" * 80)
             
-            # Sort by highest upper bound risk descending
-            sorted_outcomes = sorted(cancer_risk_map.items(), key=lambda x: max(x[1]["highs"]), reverse=True)
+            # Sort by dominant estimate's upper bound risk descending
+            def _dominant_entry(entries):
+                return max(entries, key=lambda e: (e["high"], e["low"]))
+
+            sorted_outcomes = sorted(
+                cancer_risk_map.items(),
+                key=lambda x: (_dominant_entry(x[1]["entries"])["high"], _dominant_entry(x[1]["entries"])["low"]),
+                reverse=True,
+            )
             for outcome, data in sorted_outcomes:
                 genes_str = ", ".join(sorted(data["genes"]))
-                # Primary carrier risk range from dominant driver gene
-                risk_str = f"{max(data['lows']):.0f}% - {max(data['highs']):.0f}%"
-                age_str = f"Up to age {max(data['ages'])}"
+                dominant = _dominant_entry(data["entries"])
+                risk_str = f"{dominant['low']:.0f}% - {dominant['high']:.0f}%"
+                age_val = dominant["up_to_age"]
+                age_str = f"Up to age {age_val}"
                 lines.append(f"{outcome:<32} | {risk_str:<23} | {genes_str:<16} | {age_str}")
                 cancer_summary_list.append({
                     "cancer_type": outcome,
                     "lifetime_risk_range": risk_str,
                     "genes": sorted(list(data["genes"])),
-                    "up_to_age": max(data["ages"]),
+                    "up_to_age": age_val,
                 })
             lines.append("-" * 80)
             lines.append("")
@@ -791,7 +1032,9 @@ class VCFPipeline:
             var = v.variant
             lines.append(f"\nVARIANT #{i}: {var.gene} chr{var.chrom}:{var.pos} {var.ref}>{var.alt}")
             lines.append(f"  HGVS / Consequence: {var.hgvs_p or var.hgvs_c or var.consequence}")
-            lines.append(f"  Genotype:           {var.genotype} (DP={var.dp}, GQ={var.gq})")
+            dp_str = str(var.dp) if var.dp is not None else "N/A"
+            gq_str = str(var.gq) if var.gq is not None else "N/A"
+            lines.append(f"  Genotype:           {var.genotype} (DP={dp_str}, GQ={gq_str})")
             lines.append(f"  VERDICT TIER:       [{v.tier.upper()}]")
             lines.append(f"  Evidence Source:    {v.evidence_source}")
             if v.calibrated_score is not None:
@@ -867,9 +1110,9 @@ class VCFPipeline:
 def parse_args():
     parser = argparse.ArgumentParser(description="GenomeDL v3 Clinical VCF Pipeline")
     parser.add_argument("vcf_path", type=Path, help="Path to input VCF (.vcf or .vcf.gz)")
-    parser.add_argument("--out_report", type=Path, default=Path("reports/vcf_report.txt"))
-    parser.add_argument("--out_json", type=Path, default=Path("reports/vcf_report.json"))
-    parser.add_argument("--out_pdf", type=Path, default=Path("reports/vcf_report.pdf"))
+    parser.add_argument("--out_report", type=Path, default=PROJECT_ROOT / "reports" / "vcf_report.txt")
+    parser.add_argument("--out_json", type=Path, default=PROJECT_ROOT / "reports" / "vcf_report.json")
+    parser.add_argument("--out_pdf", type=Path, default=PROJECT_ROOT / "reports" / "vcf_report.pdf")
     parser.add_argument("--no_pdf", action="store_true", help="Disable automatic PDF generation")
     parser.add_argument("--min_dp", type=int, default=10)
     parser.add_argument("--min_gq", type=int, default=20)
@@ -881,7 +1124,7 @@ if __name__ == "__main__":
     args = parse_args()
     pipeline = VCFPipeline(device=args.device)
     variants = pipeline.parse_vcf(args.vcf_path, min_dp=args.min_dp, min_gq=args.min_gq)
-    verdicts = [pipeline.evaluate_variant(v) for v in variants]
+    verdicts = pipeline.evaluate_variants(variants)
     rep = pipeline.generate_report(verdicts, output_json=args.out_json)
     args.out_report.parent.mkdir(parents=True, exist_ok=True)
     with open(args.out_report, "w", encoding="utf-8") as f:

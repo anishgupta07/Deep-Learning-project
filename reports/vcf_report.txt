@@ -53,7 +53,7 @@ VARIANT #4: MUTYH chr1:45332803 T>C
   Genotype:           0/1 (DP=40, GQ=99)
   VERDICT TIER:       [CARRIER (RECESSIVE)]
   Evidence Source:    ClinVar lookup (2 stars: criteria provided, multiple submitters, no conflicts)
-  Calibrated Model P: 0.5000
+  Calibrated Model P: 0.9500
   Clinical Notes:     Curated clinical consensus from ClinVar submission (Variation ID 5293). Single heterozygous allele in autosomal recessive gene MUTYH. Biallelic mutation is required for elevated cancer risk. Not considered high penetrance carrier.
 
 VARIANT #5: PALB2 chr16:23635338 C>T

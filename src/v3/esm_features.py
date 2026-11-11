@@ -262,11 +262,11 @@ def build_or_load_esm_cache(
 
 
 def generate_v3_esm_features(
-    input_csv: Path = Path("data/clinvar_labelled_v3.csv"),
-    featured_csv: Path = Path("data/v3_featured_snv.csv"),
-    protein_fasta: Path = Path("data/panel_proteins.fasta"),
-    cache_path: Path = Path("data/esm_cache.parquet"),
-    embeddings_out: Path = Path("data/esm_embeddings.pt"),
+    input_csv: Path = PROJECT_ROOT / "data" / "clinvar_labelled_v3.csv",
+    featured_csv: Path = PROJECT_ROOT / "data" / "v3_featured_snv.csv",
+    protein_fasta: Path = PROJECT_ROOT / "data" / "panel_proteins.fasta",
+    cache_path: Path = PROJECT_ROOT / "data" / "esm_cache.parquet",
+    embeddings_out: Path = PROJECT_ROOT / "data" / "esm_embeddings.pt",
     model_name: str = "facebook/esm2_t12_35M_UR50D",
     device: Optional[str] = None,
     batch_size: int = 16,
@@ -383,11 +383,11 @@ def generate_v3_esm_features(
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Extract ESM features for GenomeDL v3")
-    parser.add_argument("--input_csv", type=Path, default=Path("data/clinvar_labelled_v3.csv"))
-    parser.add_argument("--featured_csv", type=Path, default=Path("data/v3_featured_snv.csv"))
-    parser.add_argument("--protein_fasta", type=Path, default=Path("data/panel_proteins.fasta"))
-    parser.add_argument("--cache_path", type=Path, default=Path("data/esm_cache.parquet"))
-    parser.add_argument("--embeddings_out", type=Path, default=Path("data/esm_embeddings.pt"))
+    parser.add_argument("--input_csv", type=Path, default=PROJECT_ROOT / "data" / "clinvar_labelled_v3.csv")
+    parser.add_argument("--featured_csv", type=Path, default=PROJECT_ROOT / "data" / "v3_featured_snv.csv")
+    parser.add_argument("--protein_fasta", type=Path, default=PROJECT_ROOT / "data" / "panel_proteins.fasta")
+    parser.add_argument("--cache_path", type=Path, default=PROJECT_ROOT / "data" / "esm_cache.parquet")
+    parser.add_argument("--embeddings_out", type=Path, default=PROJECT_ROOT / "data" / "esm_embeddings.pt")
     parser.add_argument("--t30", action="store_true", help="Use 150M parameter esm2_t30 model instead of t12_35M")
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--recompute", action="store_true", help="Recompute cache from scratch")
