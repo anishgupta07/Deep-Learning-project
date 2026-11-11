@@ -215,11 +215,11 @@ The production clinical genomics pipeline implements an 8-stage hierarchical dec
    * For autosomal recessive cancer genes (*MUTYH*, *NTHL1*), a single heterozygous mutation (`0/1`) does not confer high-penetrance disease. The pipeline assigns **Carrier (Recessive)**, noting that biallelic mutation is required for elevated cancer risk.
    * Benign polymorphisms in recessive genes remain classified as Benign and are never mislabeled as carriers.
 8. **Curated Lifetime Penetrance Projections:**
-   * Actionable pathogenic variants link to published epidemiologic penetrance tables (`data/penetrance.csv`), providing organ-specific lifetime risk ranges with literature citations (JAMA, NEJM, Lancet Oncology).
+   * Actionable pathogenic variants link to published epidemiologic penetrance tables (`data/reference/penetrance.csv`), providing organ-specific lifetime risk ranges with literature citations (JAMA, NEJM, Lancet Oncology).
 
 ---
 
-## 7. Hospital-Grade Clinical PDF Report Generator (`generate_pdf_report.py`)
+## 7. Hospital-Grade Clinical PDF Report Generator (`pdf_report.py`)
 
 GenomeDL automatically transforms structured JSON verdicts into a publication-ready, 2-page hospital PDF report:
 
@@ -294,51 +294,66 @@ On novel genes never seen during training, predicting missense pathogenicity eva
 ## 9. Repository Structure
 
 ```
-├── data/                               # Master genomic assets & reference files
-│   ├── clinvar_labelled_v3.csv         # 148,747 ClinVar variants across 130 genes
-│   ├── esm_cache.parquet               # Precomputed ESM-2 35M residue marginals & embeddings
-│   ├── gene_strand.json                # Sense (+) vs antisense (-) strand orientation
-│   ├── panel.json                      # 130-gene panel metadata & syndrome annotations
-│   ├── panel_coordinates.json          # GRCh38 genomic coordinate intervals per gene
-│   ├── panel_proteins.fasta            # RefSeq/MANE canonical protein sequences
-│   ├── penetrance.csv                  # Curated published lifetime penetrance tables
-│   ├── protein_lengths.json            # Exact canonical residue lengths
-│   ├── sample_demo.vcf                 # Clinical demonstration test VCF
-│   └── v3_featured_snv.csv             # Featurized dataset with 49 continuous/categorical columns
+├── configs/                            # Centralized training & inference hyperparameters
+│   └── fusion_v3.yaml
+├── data/                               # Genomic assets, reference files & provenance guide
+│   ├── README.md
+│   ├── reference/                      # Static biological references (130 genes, GRCh38)
+│   │   ├── gene_strand.json
+│   │   ├── panel.json
+│   │   ├── panel_coordinates.json
+│   │   ├── panel_proteins.fasta
+│   │   ├── penetrance.csv
+│   │   └── protein_lengths.json
+│   ├── processed/                      # Labelled & featurized ClinVar SNVs
+│   │   ├── clinvar_labelled_v3.csv
+│   │   └── v3_featured_snv.csv
+│   ├── cache/                          # Precomputed ESM-2 35M marginals & embeddings
+│   │   └── esm_cache.parquet
+│   └── demo/
+│       └── sample_demo.vcf
 │
-├── models/                             # Trained model checkpoints & metadata
-│   ├── genome_dl_fusion_v3.pth         # 5-seed Fusion ResNet checkpoint with Platt calibration
-│   └── genome_dl_fusion_v3_meta.json   # Checkpoint hyperparameters, ECE, and class orders
+├── models/fusion_v3/                   # Trained 5-seed Fusion ResNet & Platt metadata
+│   ├── model.pth
+│   └── meta.json
 │
-├── reports/                            # Generated clinical reports & evaluation summaries
-│   ├── eval.md                         # Full 5-fold cross-validation evaluation report
-│   ├── vcf_report.txt                  # Terminal-formatted clinical inference report
-│   ├── vcf_report.json                 # Machine-readable structured JSON verdict report
-│   └── vcf_report.pdf                  # 2-page publication-grade clinical hospital PDF
+├── reports/                            # Generated benchmarks & clinical reports
+│   ├── benchmarks/eval.md
+│   ├── demo_vcf/vcf_report.{txt,json,pdf}
+│   └── giab_hg002/hg002_report.{txt,json,pdf}
 │
-├── src/v3/                             # Active production source tree
-│   ├── stage0/                         # Feature engineering & sequence alignment
-│   │   ├── apply_stage0_fixes.py       # Data integrity validation utilities
-│   │   ├── build_v3_features.py        # 26-D RDKit & biophysical featurizer
-│   │   ├── extract_v3.py               # ClinVar archive parser
-│   │   └── make_panel_json.py          # Panel metadata generator
-│   ├── esm_features.py                 # ESM-2 feature extraction & tensor reconstruction
-│   ├── evaluate.py                     # 5-fold GroupKFold evaluation framework
-│   ├── generate_pdf_report.py          # 2-page ReportLab clinical PDF generator
-│   ├── train_fusion.py                 # 5-seed ensemble Fusion ResNet trainer with Platt scaling
-│   └── vcf_pipeline.py                 # Production end-to-end clinical VCF inference CLI
+├── src/genomedl/                       # Installable v3 package (`pip install -e .`)
+│   ├── __init__.py
+│   ├── paths.py
+│   ├── data/                           # ClinVar extraction, panel metadata & UniProt FASTA
+│   │   ├── apply_fixes.py
+│   │   ├── extract_variants.py
+│   │   ├── fetch_proteins.py
+│   │   └── make_panel_json.py
+│   ├── features/                       # Biophysical & ESM-2 feature engineering
+│   │   ├── build_features.py
+│   │   └── esm_features.py
+│   ├── training/train_fusion.py        # 5-seed Fusion ResNet + Platt scaling trainer
+│   ├── evaluation/evaluate.py          # 5-fold GroupKFold out-of-gene evaluation
+│   ├── inference/vcf_pipeline.py       # Production end-to-end clinical VCF pipeline
+│   └── reporting/pdf_report.py         # 2-page hospital clinical PDF generator
 │
-├── tests/                              # Pytest automated test suite
-│   ├── test_stage0.py                  # Tests for feature extraction & coordinate intervals
-│   ├── test_esm.py                     # Tests for ESM-2 tokenization, LLR & tensor reconstruction
-│   ├── test_eval.py                    # Tests for evaluation report metrics & sanity bounds
-│   ├── test_vcf_pipeline.py            # Tests for end-to-end VCF decision cascade
-│   └── test_pdf_report.py              # Tests for 2-page PDF structure & text flow
+├── tests/                              # Mirrors src/genomedl/ layout
+│   ├── data/test_stage0.py
+│   ├── features/test_esm.py
+│   ├── evaluation/test_eval.py
+│   ├── inference/test_vcf_pipeline.py
+│   └── reporting/test_pdf_report.py
 │
-├── others/                             # Archived legacy experiments (v1/v2 prototypes)
-├── requirements.txt                    # Exact production dependencies
-├── LICENSE                             # Open-source MIT License
-└── README.md                           # Master architectural documentation
+├── docs/
+│   ├── architecture.md
+│   └── project_explainer.md
+├── scripts/
+│   └── run_pipeline.sh
+├── archive/                            # Legacy v1/v2 experiments kept for reference only
+├── pyproject.toml
+├── requirements.txt
+└── LICENSE
 ```
 
 ---
@@ -346,7 +361,13 @@ On novel genes never seen during training, predicting missense pathogenicity eva
 ## 10. Quickstart & CLI Usage
 
 ### 10.1 Environment Setup
-Install the verified dependencies in Python 3.11–3.13:
+Install the package in editable mode (Python 3.10–3.13):
+
+```bash
+pip install -e ".[dev]"
+```
+
+Or install runtime dependencies from `requirements.txt` alongside `PYTHONPATH=src`:
 
 ```bash
 pip install -r requirements.txt
@@ -356,41 +377,41 @@ pip install -r requirements.txt
 Analyze a patient's VCF file (blood or saliva germline sequencing) across the 130-gene panel:
 
 ```bash
-python src/v3/vcf_pipeline.py data/sample_demo.vcf \
-    --out_report reports/vcf_report.txt \
-    --out_json reports/vcf_report.json \
-    --out_pdf reports/vcf_report.pdf
+python -m genomedl.inference.vcf_pipeline data/demo/sample_demo.vcf \
+    --out_report reports/demo_vcf/vcf_report.txt \
+    --out_json reports/demo_vcf/vcf_report.json \
+    --out_pdf reports/demo_vcf/vcf_report.pdf
 ```
 
 ### 10.3 Generate Hospital-Grade Clinical PDF Report
 Render a custom 2-page hospital report from an existing JSON verdict file:
 
 ```bash
-python src/v3/generate_pdf_report.py \
-    --json reports/vcf_report.json \
-    --out reports/vcf_report.pdf \
+python -m genomedl.reporting.pdf_report \
+    --json reports/demo_vcf/vcf_report.json \
+    --out reports/demo_vcf/vcf_report.pdf \
     --sample_id "PATIENT-DEMO-001"
 ```
 
 ### 10.4 Train the Multimodal Fusion ResNet Ensemble
-Train the 5-seed ensemble with cosine annealing and Platt scaling calibration:
+Train the 5-seed ensemble using `configs/fusion_v3.yaml` with Platt scaling calibration:
 
 ```bash
-python src/v3/train_fusion.py --device cuda --epochs 15
+python -m genomedl.training.train_fusion --config configs/fusion_v3.yaml --device cuda
 ```
 
 ### 10.5 Run the 5-Fold Cross-Validation Evaluation
-Execute the complete out-of-gene evaluation protocol and regenerate `reports/eval.md`:
+Execute the complete out-of-gene evaluation protocol and regenerate `reports/benchmarks/eval.md`:
 
 ```bash
-python src/v3/evaluate.py --device cuda
+python -m genomedl.evaluation.evaluate --device cuda
 ```
 
 ### 10.6 Run the Automated Test Suite
 Execute all verification tests across feature extraction, ESM caching, calibration, VCF inference, and PDF reporting:
 
 ```bash
-python -m pytest tests/ -v
+python -m pytest -v
 ```
 
 ---

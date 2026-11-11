@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genomedl"
+version = "3.0.0"
+description = "GenomeDL v3: Multimodal ESM-2 Fusion ResNet and clinical VCF interpretation pipeline for hereditary cancer predisposition"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.4.0",
+    "transformers>=4.40.0",
+    "rdkit>=2024.03.1",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "pyarrow>=14.0.0",
+    "scikit-learn>=1.3.0",
+    "pyyaml>=6.0",
+    "reportlab>=4.0.0",
+    "pypdf>=4.0.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+app = [
+    "streamlit>=1.32.0",
+]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+genomedl-vcf = "genomedl.inference.vcf_pipeline:main"
+genomedl-pdf = "genomedl.reporting.pdf_report:main"
+genomedl-train = "genomedl.training.train_fusion:main"
+genomedl-eval = "genomedl.evaluation.evaluate:main"
+genomedl-esm = "genomedl.features.esm_features:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["genomedl*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

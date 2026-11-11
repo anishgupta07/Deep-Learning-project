@@ -1,0 +1,32 @@
+# Git & environment artifacts
+.git/
+.gitignore
+.github/
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+*.egg-info/
+*.tmp
+*.log
+
+# Non-runtime repository directories
+archive/
+docs/
+tests/
+scripts/
+
+# Heavy raw/intermediate datasets not required for VCF inference
+data/raw/
+data/processed/v3_featured_snv.csv
+data/cache/esm_embeddings.pt
+
+# Pre-generated sample output folders (keep reports/benchmarks/eval.md for the UI)
+reports/demo_vcf/
+reports/giab_hg002/

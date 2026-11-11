@@ -1,7 +1,10 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / packaging artifacts
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+build/
+dist/
 
 # Virtual environments
 .venv/
@@ -14,7 +17,7 @@ venv/
 *.sam
 *.mmi.tmp
 
-# Raw SRA FASTA/FASTQ downloads (pipeline streams and deletes these)
+# Raw SRA FASTA/FASTQ downloads
 SRR*.fasta
 SRR*.fastq
 SRR*.fastq.gz
@@ -29,24 +32,26 @@ class_*/*.fastq.gz
 *.tbi
 *.txt.gz
 raw_data/
+data/raw/
 data/patient_vcf_test/
 variant_summary.txt.gz
 HG002*.vcf.gz
 !reference.vcf
 !*reference*.vcf
-!data/sample_demo.vcf
+!data/demo/sample_demo.vcf
 !sample_demo.vcf
 
-# Local archived files (>100MB cannot be pushed to standard GitHub)
-others/data/*.gz
-others/data/*.vcf.gz
-others/data/*.txt.gz
+# Local archived large data (>100MB cannot be pushed to standard GitHub)
+archive/data/*.gz
+archive/data/*.vcf.gz
+archive/data/*.txt.gz
 
 # Cache files
+reports/**/fontlist*.json
 reports/fontlist*.json
 .pytest_cache/
 
 # Large binary embeddings (>100MB cannot be pushed to standard GitHub)
+data/**/*.pt
 data/*.pt
-data/esm_embeddings.pt
-
+data/cache/esm_embeddings.pt

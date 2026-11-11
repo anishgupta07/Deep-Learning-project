@@ -1,0 +1,68 @@
+# GenomeDL v3 Configuration
+# Centralized paths and hyperparameters for training, evaluation, and inference.
+
+paths:
+  panel_json: data/reference/panel.json
+  panel_coordinates: data/reference/panel_coordinates.json
+  gene_strand: data/reference/gene_strand.json
+  protein_lengths: data/reference/protein_lengths.json
+  panel_fasta: data/reference/panel_proteins.fasta
+  penetrance_csv: data/reference/penetrance.csv
+  clinvar_labelled_csv: data/processed/clinvar_labelled_v3.csv
+  featured_snv_csv: data/processed/v3_featured_snv.csv
+  esm_cache_parquet: data/cache/esm_cache.parquet
+  esm_embeddings_pt: data/cache/esm_embeddings.pt
+  model_checkpoint: models/fusion_v3/model.pth
+  model_metadata: models/fusion_v3/meta.json
+  eval_report: reports/benchmarks/eval.md
+
+esm:
+  model_name: facebook/esm2_t12_35M_UR50D
+  max_context: 1022
+  emb_dim: 480
+  batch_size: 16
+
+model:
+  num_variant_classes: 12
+  num_syndromes: 15
+  use_gene_embedding: false
+  esm_emb_dim: 480
+  esm_proj_dim: 64
+  hidden_dim: 256
+  dropout: 0.2
+
+training:
+  num_seeds: 5
+  seeds: [42, 101, 2024, 7, 999]
+  epochs: 25
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 7
+  grad_clip_norm: 1.0
+  val_split_fraction: 0.30
+  test_split_within_val_test: 0.50
+  random_state: 42
+  split_protocol: "70/15/15 stratified random split by label"
+
+calibration:
+  method: platt_scaling
+  init_scale: 0.8
+  init_bias: 0.0
+  lbfgs_lr: 0.05
+  lbfgs_max_iter: 200
+  ece_bins: 10
+
+inference:
+  min_dp: 10
+  min_gq: 20
+  filter_pass_only: true
+  common_af_threshold: 0.01
+  min_clinvar_stars: 2
+  spliceai_likely_pathogenic_threshold: 0.50
+  spliceai_vus_threshold: 0.20
+  tier_thresholds:
+    pathogenic: 0.90
+    likely_pathogenic: 0.70
+    vus: 0.30
+    likely_benign: 0.10
