@@ -1,3 +1,14 @@
+---
+title: GenomeDL v3 Hereditary Cancer AI
+emoji: 🧬
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # GenomeDL v3: Deep Multimodal Hereditary Cancer Interpretation Engine
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)

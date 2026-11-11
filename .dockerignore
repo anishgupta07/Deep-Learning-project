@@ -1,0 +1,14 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+.venv_deploy/
+others/
+tests/
+tmp/
+*.log
+data/v3_featured_snv.csv
