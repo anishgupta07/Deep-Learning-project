@@ -2,8 +2,10 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.6%2B%20CUDA-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-UI%20App-FF4B4B?logo=streamlit&logoColor=white)](app.py)
 [![ESM-2](https://img.shields.io/badge/ESM--2-35M%20UR50D-green)](https://github.com/facebookresearch/esm)
 [![RDKit](https://img.shields.io/badge/RDKit-Cheminformatics-2D9CDB)](https://www.rdkit.org/)
+[![Tests](https://img.shields.io/badge/Tests-46%20Passed-success)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An end-to-end computational genomics and deep multimodal learning engine engineered to analyze constitutional germline DNA across **130 high-penetrance hereditary cancer genes**, predict the clinical pathogenicity of genetic mutations with calibrated uncertainty, and project **actionable, organ-specific lifetime cancer risk estimates** alongside hospital-ready clinical reports.
@@ -294,6 +296,8 @@ On novel genes never seen during training, predicting missense pathogenicity eva
 ## 9. Repository Structure
 
 ```
+├── .streamlit/                         # Streamlit Community Cloud UI configuration
+│   └── config.toml
 ├── configs/                            # Centralized training & inference hyperparameters
 │   └── fusion_v3.yaml
 ├── data/                               # Genomic assets, reference files & provenance guide
@@ -317,8 +321,11 @@ On novel genes never seen during training, predicting missense pathogenicity eva
 │   ├── model.pth
 │   └── meta.json
 │
-├── reports/                            # Generated benchmarks & clinical reports
-│   ├── benchmarks/eval.md
+├── reports/                            # Generated benchmarks, figures & clinical reports
+│   ├── benchmarks/
+│   │   ├── eval.md                     # Out-of-gene 5-fold cross-validation metrics
+│   │   ├── comparisons.md              # Empirical v2 vs. v3 deep dive
+│   │   └── figures/                    # High-resolution benchmark charts & confusion matrices
 │   ├── demo_vcf/vcf_report.{txt,json,pdf}
 │   └── giab_hg002/hg002_report.{txt,json,pdf}
 │
@@ -335,22 +342,32 @@ On novel genes never seen during training, predicting missense pathogenicity eva
 │   │   └── esm_features.py
 │   ├── training/train_fusion.py        # 5-seed Fusion ResNet + Platt scaling trainer
 │   ├── evaluation/evaluate.py          # 5-fold GroupKFold out-of-gene evaluation
-│   ├── inference/vcf_pipeline.py       # Production end-to-end clinical VCF pipeline
+│   ├── inference/
+│   │   ├── vcf_pipeline.py             # Production end-to-end clinical VCF pipeline
+│   │   └── service.py                  # High-level service layer for web & API inference
 │   └── reporting/pdf_report.py         # 2-page hospital clinical PDF generator
 │
-├── tests/                              # Mirrors src/genomedl/ layout
+├── tests/                              # Mirrors src/genomedl/ layout (46 automated tests)
 │   ├── data/test_stage0.py
 │   ├── features/test_esm.py
 │   ├── evaluation/test_eval.py
-│   ├── inference/test_vcf_pipeline.py
+│   ├── inference/
+│   │   ├── test_vcf_pipeline.py
+│   │   └── test_frontend_service.py
 │   └── reporting/test_pdf_report.py
 │
-├── docs/
+├── docs/                               # Architecture, deployment guides & writeups
 │   ├── architecture.md
-│   └── project_explainer.md
+│   ├── project_explainer.md
+│   ├── streamlit_cloud_deploy.md       # Zero-cost Streamlit Community Cloud deploy guide
+│   └── huggingface_deploy.md
 ├── scripts/
 │   └── run_pipeline.sh
 ├── archive/                            # Legacy v1/v2 experiments kept for reference only
+├── app.py                              # Interactive Streamlit Web Dashboard
+├── Dockerfile                          # Production container specification (UID 1000)
+├── .dockerignore
+├── packages.txt                        # Debian headless rendering libraries (RDKit / Cairo)
 ├── pyproject.toml
 ├── requirements.txt
 └── LICENSE
@@ -373,8 +390,22 @@ Or install runtime dependencies from `requirements.txt` alongside `PYTHONPATH=sr
 pip install -r requirements.txt
 ```
 
-### 10.2 Run Clinical VCF Inference
-Analyze a patient's VCF file (blood or saliva germline sequencing) across the 130-gene panel:
+### 10.2 Launch the Interactive Streamlit Web Application
+Launch the local clinical genomics dashboard in your browser:
+
+```bash
+python -m streamlit run app.py
+```
+
+Features included in the web dashboard:
+* **Interactive VCF Analysis:** Preloads the bundled demo VCF ([sample_demo.vcf](data/demo/sample_demo.vcf)) or accepts custom `.vcf` / `.vcf.gz` patient file uploads.
+* **Dynamic Quality Control:** Real-time sliders for Read Depth ($\text{DP} \ge 10$), Genotype Quality ($\text{GQ} \ge 20$), and `FILTER == PASS` gating.
+* **Lifetime Cancer Risk Visualizations:** Dynamic horizontal bar charts comparing patient carrier risk against general population baselines.
+* **Clinical Report Downloads:** One-click downloads for structured JSON, plaintext summaries, and publication-ready clinical PDF reports.
+* **Panel Reference & Benchmark Explorer:** Searchable table of the 130 canonical genes and honest out-of-gene evaluation metrics.
+
+### 10.3 Run Clinical VCF Inference (CLI)
+Analyze a patient's VCF file (blood or saliva germline sequencing) across the 130-gene panel via the command line:
 
 ```bash
 python -m genomedl.inference.vcf_pipeline data/demo/sample_demo.vcf \
@@ -383,7 +414,7 @@ python -m genomedl.inference.vcf_pipeline data/demo/sample_demo.vcf \
     --out_pdf reports/demo_vcf/vcf_report.pdf
 ```
 
-### 10.3 Generate Hospital-Grade Clinical PDF Report
+### 10.4 Generate Hospital-Grade Clinical PDF Report
 Render a custom 2-page hospital report from an existing JSON verdict file:
 
 ```bash
@@ -393,26 +424,31 @@ python -m genomedl.reporting.pdf_report \
     --sample_id "PATIENT-DEMO-001"
 ```
 
-### 10.4 Train the Multimodal Fusion ResNet Ensemble
+### 10.5 Train the Multimodal Fusion ResNet Ensemble
 Train the 5-seed ensemble using `configs/fusion_v3.yaml` with Platt scaling calibration:
 
 ```bash
 python -m genomedl.training.train_fusion --config configs/fusion_v3.yaml --device cuda
 ```
 
-### 10.5 Run the 5-Fold Cross-Validation Evaluation
+### 10.6 Run the 5-Fold Cross-Validation Evaluation
 Execute the complete out-of-gene evaluation protocol and regenerate `reports/benchmarks/eval.md`:
 
 ```bash
 python -m genomedl.evaluation.evaluate --device cuda
 ```
 
-### 10.6 Run the Automated Test Suite
-Execute all verification tests across feature extraction, ESM caching, calibration, VCF inference, and PDF reporting:
+### 10.7 Run the Automated Test Suite
+Execute all 46 automated verification tests across feature extraction, ESM caching, calibration, VCF inference, frontend service layer, and PDF reporting:
 
 ```bash
 python -m pytest -v
 ```
+
+### 10.8 Version Comparison & Cloud Deployment
+* **v2 vs. v3 Empirical Comparison:** See [reports/benchmarks/comparisons.md](reports/benchmarks/comparisons.md) for side-by-side confusion matrices, ROC/PR curves, and out-of-gene benchmarks.
+* **Streamlit Community Cloud Deployment:** See [docs/streamlit_cloud_deploy.md](docs/streamlit_cloud_deploy.md) for step-by-step instructions to deploy directly from GitHub.
+* **Hugging Face Deployment Reference:** See [docs/huggingface_deploy.md](docs/huggingface_deploy.md).
 
 ---
 
