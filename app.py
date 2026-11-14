@@ -67,7 +67,7 @@ def _render_sidebar(meta: Dict[str, Any]) -> Dict[str, Any]:
     with st.sidebar:
         st.header("Analysis Inputs")
         input_mode = st.radio(
-            "VCF Source",
+            "VCF Input Mode",
             options=["Demo VCF (sample_demo.vcf)", "Upload Custom VCF (.vcf / .vcf.gz)"],
             index=0,
         )
@@ -154,9 +154,7 @@ def _render_overview_tab(result: Dict[str, Any]) -> None:
                     "Cancer Type / Organ": outcome,
                     "Estimated Lifetime Risk": item["lifetime_risk_range"],
                     "Gene": ", ".join(item.get("genes", [])),
-                    "Age Horizon": f"Up to age {item['up_to_age']}",
                     "General Population Baseline": f"~{pop_base:.1f}%" if pop_base is not None else "Unavailable",
-                    "Source": item.get("source", ""),
                 }
             )
         st.dataframe(pd.DataFrame(risk_rows), use_container_width=True, hide_index=True)
@@ -208,7 +206,7 @@ def _render_verdicts_tab(result: Dict[str, Any]) -> None:
                 "gnomAD AF": f"{af:.5f}" if af is not None else "Missing",
                 "Tier": v.get("tier", ""),
                 "Calibrated P": round(float(score), 4) if score is not None else None,
-                "Evidence Source": v.get("evidence_source", ""),
+                "Evidence": v.get("evidence_source", ""),
             }
         )
 
@@ -224,7 +222,7 @@ def _render_verdicts_tab(result: Dict[str, Any]) -> None:
         )
         expanded = v.get("tier") in ("Pathogenic", "Likely Pathogenic", "Carrier (Recessive)")
         with st.expander(label, expanded=expanded):
-            st.markdown(f"**Evidence Source:** {v.get('evidence_source', '')}")
+            st.markdown(f"**Evidence:** {v.get('evidence_source', '')}")
             if v.get("calibrated_score") is not None:
                 st.markdown(f"**Calibrated P(pathogenic):** `{v['calibrated_score']:.4f}`")
             st.markdown(f"**Clinical Notes:** {v.get('notes', '')}")
@@ -233,14 +231,13 @@ def _render_verdicts_tab(result: Dict[str, Any]) -> None:
                 for risk in v["cancer_risks"]:
                     st.markdown(
                         f"- {risk['outcome']}: **{risk['risk_low_pct']:.0f}%–{risk['risk_high_pct']:.0f}%** "
-                        f"(up to age {risk['up_to_age']}) — *{risk['source']}* (Evidence: {risk['evidence_level']})"
+                        f"(Evidence: {risk['evidence_level']})"
                     )
             if v.get("other_syndrome_features"):
                 st.markdown("**Other Syndromic Features (Non-Cancer):**")
                 for feat in v["other_syndrome_features"]:
                     st.markdown(
-                        f"- {feat['outcome']}: {feat['risk_low_pct']:.0f}%–{feat['risk_high_pct']:.0f}% "
-                        f"(up to age {feat['up_to_age']}) — *{feat['source']}*"
+                        f"- {feat['outcome']}: {feat['risk_low_pct']:.0f}%–{feat['risk_high_pct']:.0f}%"
                     )
     if len(filtered) > max_cards:
         st.caption(f"Showing detail cards for the first {max_cards} matching variants; download JSON/TXT for all records.")
@@ -359,7 +356,7 @@ def main() -> None:
         if result:
             _render_overview_tab(result)
         else:
-            st.info("Select a VCF source in the sidebar and click **Run Analysis**.")
+            st.info("Select a VCF input mode in the sidebar and click **Run Analysis**.")
 
     with tab_verdicts:
         if result:
