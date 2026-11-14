@@ -85,12 +85,6 @@ def _render_sidebar(meta: Dict[str, Any]) -> Dict[str, Any]:
                 default_sample_id = stem.upper() or "UPLOADED-SAMPLE"
 
         sample_id = st.text_input("Sample Identifier", value=default_sample_id)
-
-        st.subheader("Quality Control Filters")
-        min_dp = st.slider("Minimum Read Depth (DP)", min_value=0, max_value=100, value=10, step=1)
-        min_gq = st.slider("Minimum Genotype Quality (GQ)", min_value=0, max_value=99, value=20, step=1)
-        filter_pass_only = st.checkbox("Require FILTER == PASS", value=True)
-
         run_clicked = st.button("Run Analysis", type="primary", use_container_width=True)
 
         if meta:
@@ -108,9 +102,9 @@ def _render_sidebar(meta: Dict[str, Any]) -> Dict[str, Any]:
         "input_mode": input_mode,
         "uploaded_file": uploaded_file,
         "sample_id": sample_id.strip() or "SAMPLE-001",
-        "min_dp": min_dp,
-        "min_gq": min_gq,
-        "filter_pass_only": filter_pass_only,
+        "min_dp": 10,
+        "min_gq": 20,
+        "filter_pass_only": True,
         "run_clicked": run_clicked,
     }
 
